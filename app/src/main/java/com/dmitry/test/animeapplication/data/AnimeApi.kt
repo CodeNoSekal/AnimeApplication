@@ -6,11 +6,13 @@ import retrofit2.http.Query
 
 interface AnimeApi {
 
-    @GET("/mobile/anime")
+    @GET("/anime")
     suspend fun getAnimeCatalog(
         @Query("page")
         page: Int,
-        @Query("limit")
-        limit: Int = 50
+        @Query("per_page")
+        perPage: Int = 50,
+        @Query("sort")
+        sort: String = "rating"
     ): AnimeResponse
 }

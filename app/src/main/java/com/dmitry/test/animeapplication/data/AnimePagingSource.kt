@@ -23,7 +23,7 @@ class AnimePagingSource (
             LoadResult.Page(
                 data = anime,
                 prevKey = if (currentPage == 1) null else currentPage - 1,
-                nextKey = if (anime.isEmpty()) null else currentPage + 1
+                nextKey = if (currentPage == response.totalPages) null else currentPage + 1
             )
         } catch (e: Exception){
             LoadResult.Error(e)
