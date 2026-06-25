@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<!--
+  Yume theme (dark-only) for the View system / XML.
+  For Jetpack Compose use YumeTheme { } from ui/theme/Theme.kt instead.
+  Parent uses Material3 (Theme.Material3.Dark). Adjust parent if you use MDC or AppCompat.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.AnimeApplication" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Yume" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/yu_accent</item>
+        <item name="colorOnPrimary">@color/yu_on_accent</item>
+        <item name="colorPrimaryContainer">@color/yu_accent_press</item>
+        <item name="colorSecondary">@color/yu_violet</item>
+        <item name="android:colorBackground">@color/yu_ink_850</item>
+        <item name="colorSurface">@color/yu_ink_800</item>
+        <item name="colorSurfaceVariant">@color/yu_ink_700</item>
+        <item name="colorOnSurface">@color/yu_fg_1</item>
+        <item name="colorOnSurfaceVariant">@color/yu_fg_2</item>
+        <item name="colorOutline">@color/yu_line_strong</item>
+        <item name="colorError">@color/yu_danger</item>
+
+        <item name="android:statusBarColor">@color/yu_ink_850</item>
+        <item name="android:navigationBarColor">@color/yu_ink_850</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="fontFamily">@font/nunito</item>
+    </style>
+
 </resources>

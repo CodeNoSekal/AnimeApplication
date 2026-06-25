@@ -1,15 +1,10 @@
-package com.dmitry.test.animeapplication.domain
+package com.dmitry.test.animeapplication.domain.usecase
 
 import androidx.paging.PagingData
-import com.dmitry.test.animeapplication.data.AnimeApi
+import com.dmitry.test.animeapplication.domain.Anime
+import com.dmitry.test.animeapplication.domain.repository.AnimeRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
-
-
-interface AnimeRepository {
-    fun getAnime(): Flow<PagingData<Anime>>
-}
-
 
 class GetAnimeCatalogUseCase @Inject constructor(
     private val repository: AnimeRepository

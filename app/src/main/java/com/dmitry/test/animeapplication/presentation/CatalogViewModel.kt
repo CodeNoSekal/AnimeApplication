@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.dmitry.test.animeapplication.domain.Anime
-import com.dmitry.test.animeapplication.domain.GetAnimeCatalogUseCase
+import com.dmitry.test.animeapplication.domain.usecase.GetAnimeCatalogUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

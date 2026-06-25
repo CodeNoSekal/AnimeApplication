@@ -1,12 +1,15 @@
-package com.dmitry.test.animeapplication.data
+package com.dmitry.test.animeapplication.data.repository
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.dmitry.test.animeapplication.data.TestApi
+import com.dmitry.test.animeapplication.data.response.toDomain
 import com.dmitry.test.animeapplication.domain.Anime
-import com.dmitry.test.animeapplication.domain.toDomain
+import retrofit2.HttpException
+import java.io.IOException
 
 class AnimePagingSource (
-    private val api: AnimeApi
+    private val api: TestApi
 ) : PagingSource<Int, Anime>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Anime> {
         return try {
@@ -23,9 +26,11 @@ class AnimePagingSource (
             LoadResult.Page(
                 data = anime,
                 prevKey = if (currentPage == 1) null else currentPage - 1,
-                nextKey = if (currentPage == response.totalPages) null else currentPage + 1
+                nextKey = if (currentPage >= response.meta.totalPages) null else currentPage + 1
             )
-        } catch (e: Exception){
+        } catch (e: IOException) {
+            LoadResult.Error(e)
+        } catch (e: HttpException) {
             LoadResult.Error(e)
         }
     }

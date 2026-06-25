@@ -1,3 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Yume — Russian UI strings. Fixed watch-status vocabulary + common microcopy. -->
 <resources>
-    <string name="app_name">Aniyume</string>
+    <string name="app_name">Yume</string>
+
+    <!-- Watch statuses (fixed vocabulary) -->
+    <string name="status_watching">Смотрю</string>
+    <string name="status_planned">В планах</string>
+    <string name="status_completed">Просмотрено</string>
+    <string name="status_onhold">Отложено</string>
+    <string name="status_dropped">Брошено</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_home">Главная</string>
+    <string name="nav_search">Поиск</string>
+    <string name="nav_lists">Списки</string>
+    <string name="nav_profile">Профиль</string>
+    <string name="nav_catalog">Каталог</string>
+
+    <!-- Common -->
+    <string name="action_watch">Смотреть</string>
+    <string name="action_add_to_list">В список</string>
+    <string name="section_airing">Сейчас выходят</string>
+    <string name="section_popular">Популярное сейчас</string>
+    <string name="section_continue">Продолжить просмотр</string>
+    <string name="label_voiceover">Озвучка</string>
+    <string name="label_quality">Качество</string>
+    <string name="label_next">Далее</string>
+    <string name="auth_sign_in">Войти</string>
+    <string name="auth_create_account">Создать аккаунт</string>
+    <string name="action_logout">Выйти из аккаунта</string>
+    <string name="search_placeholder">Название, студия, жанр…</string>
 </resources>

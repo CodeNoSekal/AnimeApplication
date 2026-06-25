@@ -31,9 +31,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.dmitry.test.animeapplication.domain.Anime
-import com.dmitry.test.animeapplication.presentation.ui.theme.TextPrimary
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -97,16 +96,18 @@ fun DetailsScreen(
                             .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop,
                     )
-                    Text(
-                        text = item.title,
-                        modifier = Modifier
-                            .padding(horizontal = 30.dp, vertical = 12.dp)
-                            .fillMaxWidth(),
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center,
-                        color = TextPrimary,
-                    )
+                    item.title?.let {
+                        Text(
+                            text = it,
+                            modifier = Modifier
+                                .padding(horizontal = 30.dp, vertical = 12.dp)
+                                .fillMaxWidth(),
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.titleLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
                 }
             }
         }

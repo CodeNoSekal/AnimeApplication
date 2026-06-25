@@ -1,57 +1,60 @@
 package com.dmitry.test.animeapplication.presentation.ui.theme
 
-import android.app.Activity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 
-private val DarkColorScheme = darkColorScheme(
-    primary = AccentPrimary,                // акцентные кнопки, активные элементы
-    onPrimary = Color(0xFF15131A),          // тёмный текст/иконки на акценте
-    primaryContainer = AccentDark,          // насыщенная акцентная подложка
-    onPrimaryContainer = TextPrimary,
-
-    secondary = AccentLight,                // вторичный акцент (ховер/выделение)
-    onSecondary = Color(0xFF15131A),
-
-    tertiary = AccentLight,
-
-    background = BackgroundMain,             // общий фон
-    onBackground = TextPrimary,
-
-    surface = SurfaceCard,                  // карточки, нижняя панель
-    onSurface = TextPrimary,
-    surfaceVariant = SurfaceInput,          // поля ввода, чипы
-    onSurfaceVariant = TextSecondary,
-
-    outline = Divider,                      // разделители, обводки
-    outlineVariant = Divider,
-
-    error = Danger,
-    onError = Color(0xFF2A0A0A),
+/**
+ * Yume is a dark-only design system. This is the single colour source of truth
+ * for Material3 components; the extras (status colors, gold, hairlines) live in
+ * [YumeColors] and [YumeDimens], exposed via CompositionLocals.
+ */
+private val YumeDarkColorScheme = darkColorScheme(
+    primary = YuAccent,
+    onPrimary = YuOnAccent,
+    primaryContainer = YuAccentPress,
+    onPrimaryContainer = YuFg1,
+    secondary = YuViolet,
+    onSecondary = YuOnAccent,
+    background = YuInk850,
+    onBackground = YuFg1,
+    surface = YuInk800,
+    onSurface = YuFg1,
+    surfaceVariant = YuInk700,
+    onSurfaceVariant = YuFg2,
+    outline = YuLineStrong,
+    outlineVariant = YuLine,
+    error = YuDanger,
+    onError = YuOnAccent,
+    scrim = YuScrim,
 )
 
+val LocalYumeColors = staticCompositionLocalOf { YumeColors() }
+val LocalYumeDimens = staticCompositionLocalOf { YumeDimens() }
 
+/** Wrap your app in this. `YumeTheme { ... }` */
 @Composable
-fun AnimeApplicationTheme(
-    content: @Composable () -> Unit
-) {
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            val controller = WindowCompat.getInsetsController(window, view)
-            controller.isAppearanceLightStatusBars = false   // белые иконки статус-бара
-            controller.isAppearanceLightNavigationBars = false // белые иконки навбара
-        }
+fun YumeTheme(content: @Composable () -> Unit) {
+    CompositionLocalProvider(
+        LocalYumeColors provides YumeColors(),
+        LocalYumeDimens provides YumeDimens(),
+    ) {
+        MaterialTheme(
+            colorScheme = YumeDarkColorScheme,
+            typography = YumeTypography,
+            shapes = YumeShapes,
+            content = content,
+        )
     }
-    MaterialTheme(
-        colorScheme = DarkColorScheme,
-        typography = Typography,
-        content = content
-    )
+}
+
+/** Convenience accessors: `YumeTheme.colors.statusWatching`, `YumeTheme.dimens.sp4`. */
+object YumeTheme {
+    val colors: YumeColors
+        @Composable @ReadOnlyComposable get() = LocalYumeColors.current
+    val dimens: YumeDimens
+        @Composable @ReadOnlyComposable get() = LocalYumeDimens.current
 }

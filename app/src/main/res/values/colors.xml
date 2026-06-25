@@ -1,10 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Yume color tokens — Soft Dark, blue-violet.
+  Mirrors tokens/colors.css from the Yume design system.
+-->
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Base neutrals (deep blue-violet near-black) -->
+    <color name="yu_ink_900">#06070E</color>
+    <color name="yu_ink_850">#0A0B16</color>
+    <color name="yu_ink_800">#11121F</color>
+    <color name="yu_ink_750">#171A2A</color>
+    <color name="yu_ink_700">#1E2236</color>
+    <color name="yu_ink_600">#2A2F49</color>
+    <color name="yu_ink_500">#383E5E</color>
+
+    <!-- Text ramp -->
+    <color name="yu_fg_1">#F3F4FB</color>
+    <color name="yu_fg_2">#A2A5C2</color>
+    <color name="yu_fg_3">#71748F</color>
+    <color name="yu_fg_4">#4B4F6E</color>
+
+    <!-- Accent (blue-violet / periwinkle) -->
+    <color name="yu_accent">#6E6CFF</color>
+    <color name="yu_accent_hover">#8A88FF</color>
+    <color name="yu_accent_press">#5755E6</color>
+    <color name="yu_accent_soft">#296E6CFF</color>   <!-- 16% -->
+    <color name="yu_accent_line">#576E6CFF</color>   <!-- 34% -->
+    <color name="yu_on_accent">#FFFFFF</color>
+
+    <!-- Secondary violet -->
+    <color name="yu_violet">#A78BFA</color>
+    <color name="yu_violet_soft">#29A78BFA</color>
+
+    <!-- Rating gold -->
+    <color name="yu_gold">#F5C45E</color>
+    <color name="yu_gold_soft">#29F5C45E</color>
+
+    <!-- Semantic -->
+    <color name="yu_success">#3FC9A0</color>
+    <color name="yu_warning">#F5B53D</color>
+    <color name="yu_danger">#F4615E</color>
+    <color name="yu_info">#5C9DFF</color>
+
+    <!-- Watch-list status -->
+    <color name="yu_status_watching">#3FC9A0</color>
+    <color name="yu_status_planned">#5C9DFF</color>
+    <color name="yu_status_completed">#A78BFA</color>
+    <color name="yu_status_onhold">#F5B53D</color>
+    <color name="yu_status_dropped">#F4615E</color>
+
+    <!-- Hairlines & overlays -->
+    <color name="yu_line">#12FFFFFF</color>          <!-- 7% white -->
+    <color name="yu_line_strong">#21FFFFFF</color>   <!-- 13% white -->
+    <color name="yu_scrim">#BD06070E</color>         <!-- 74% ink-900 -->
 </resources>

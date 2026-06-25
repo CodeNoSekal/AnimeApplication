@@ -7,6 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.dmitry.test.animeapplication.R
 
 @Composable
 fun ProfileScreen(){
@@ -17,7 +19,7 @@ fun ProfileScreen(){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Profile"
+            stringResource(R.string.nav_profile)
         )
     }
 }

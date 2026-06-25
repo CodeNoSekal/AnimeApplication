@@ -1,5 +1,7 @@
 package com.dmitry.test.animeapplication
 
+import com.dmitry.test.animeapplication.domain.validation.AuthValidation
+import com.dmitry.test.animeapplication.domain.validation.FieldResult
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -11,7 +13,7 @@ import org.junit.Assert.*
  */
 class ExampleUnitTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun `пустая почта невалидна`() {
+        assertTrue(AuthValidation.email("") is FieldResult.Invalid)
     }
 }

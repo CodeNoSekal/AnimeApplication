@@ -12,7 +12,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.dmitry.test.animeapplication.R
 
 @Composable
 fun HomeScreen(
@@ -29,7 +31,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Home screen"
+                stringResource(R.string.nav_home)
             )
         }
     }
@@ -41,10 +43,10 @@ fun HomeTopBar() {
     TopAppBar(
         title = {
             Text(
-                text = "Home screen"
+                stringResource(R.string.nav_home)
             )
         },
         modifier = Modifier
-            .height(85.dp)
+            .height(90.dp)
     )
 }
