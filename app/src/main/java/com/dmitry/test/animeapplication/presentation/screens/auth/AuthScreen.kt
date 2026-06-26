@@ -1,4 +1,4 @@
-package com.dmitry.test.animeapplication.presentation.auth
+package com.dmitry.test.animeapplication.presentation.screens.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -36,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.dmitry.test.animeapplication.R
-import com.dmitry.test.animeapplication.presentation.auth.components.YumeTextField
+import com.dmitry.test.animeapplication.presentation.screens.auth.components.YumeTextField
 
 @Composable
 fun AuthScreen(
@@ -82,6 +83,7 @@ fun AuthScreen(
             Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .imePadding()
                 .padding(horizontal = 26.dp)
                 .padding(top = 64.dp, bottom = 28.dp)
         ) {
@@ -103,9 +105,9 @@ fun AuthScreen(
 
             if (!login) {
                 YumeTextField(
-                    value = state.username, onValueChange = viewModel::onUsernameChange,
-                    placeholder = "Имя пользователя", leadingIcon = R.drawable.user_24,
-                    isError = state.usernameError != null, errorText = state.usernameError
+                    value = state.displayName, onValueChange = viewModel::onDisplayNameChange,
+                    placeholder = "Имя", leadingIcon = R.drawable.user_24,
+                    isError = state.displayNameError != null, errorText = state.displayNameError
                 )
                 Spacer(Modifier.height(12.dp))
             }
@@ -154,9 +156,11 @@ fun AuthScreen(
 
             Spacer(Modifier.height(28.dp))
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(horizontal = 0.dp)
+                modifier = Modifier
+                    .padding(horizontal = 0.dp)
+                    .fillMaxSize()
             ) {
                 Text(
                     if (login) "Нет аккаунта? " else "Уже есть аккаунт? ",

@@ -1,5 +1,6 @@
 package com.dmitry.test.animeapplication.data.response
 
+import com.dmitry.test.animeapplication.domain.User
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -23,9 +24,23 @@ data class UserDTO(
     val email: String,
     @param:Json(name = "email_verified")
     val emailVerified: Boolean,
-    val username: String?,
+    val username: String,
+    @param:Json(name = "display_name")
+    val displayName: String,
     @param:Json(name = "avatar_url")
     val avatarUrl: String?,
     @param:Json(name = "is_admin")
     val isAdmin: Boolean
 )
+
+fun UserDTO.toDomain(): User {
+    return User(
+        id,
+        email,
+        emailVerified,
+        username,
+        displayName,
+        avatarUrl,
+        isAdmin
+    )
+}

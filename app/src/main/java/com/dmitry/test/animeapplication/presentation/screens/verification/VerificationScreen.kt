@@ -1,4 +1,4 @@
-package com.dmitry.test.animeapplication.presentation.verification
+package com.dmitry.test.animeapplication.presentation.screens.verification
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.dmitry.test.animeapplication.R
-import com.dmitry.test.animeapplication.presentation.auth.components.YumeTextField
+import com.dmitry.test.animeapplication.presentation.screens.auth.components.YumeTextField
 
 @Composable
 fun VerificationScreen(

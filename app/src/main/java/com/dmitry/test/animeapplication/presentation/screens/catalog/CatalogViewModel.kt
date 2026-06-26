@@ -1,4 +1,4 @@
-package com.dmitry.test.animeapplication.presentation
+package com.dmitry.test.animeapplication.presentation.screens.catalog
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,4 +1,4 @@
-package com.dmitry.test.animeapplication.presentation.auth.components
+package com.dmitry.test.animeapplication.presentation.screens.auth.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

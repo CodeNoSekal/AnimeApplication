@@ -1,4 +1,4 @@
-package com.dmitry.test.animeapplication.presentation.verification
+package com.dmitry.test.animeapplication.presentation.screens.verification
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,9 +7,6 @@ import com.dmitry.test.animeapplication.domain.usecase.SendCodeUseCase
 import com.dmitry.test.animeapplication.domain.usecase.VerifyCodeUseCase
 import com.dmitry.test.animeapplication.domain.validation.AuthValidation
 import com.dmitry.test.animeapplication.domain.validation.FieldResult
-import com.dmitry.test.animeapplication.presentation.auth.AuthEvent
-import com.dmitry.test.animeapplication.presentation.auth.AuthMode
-import com.dmitry.test.animeapplication.presentation.auth.AuthUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

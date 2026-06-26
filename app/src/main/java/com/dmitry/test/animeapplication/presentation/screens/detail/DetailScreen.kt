@@ -1,4 +1,4 @@
-package com.dmitry.test.animeapplication.presentation.screens
+package com.dmitry.test.animeapplication.presentation.screens.detail
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -31,22 +31,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.dmitry.test.animeapplication.domain.Anime
+import com.dmitry.test.animeapplication.domain.AnimeDetailed
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun DetailsScreen(
-    onBackClick: () -> Unit
+fun DetailScreen(
+    onBackClick: () -> Unit,
+    animeData: AnimeDetailed
 ){
-    val item = Anime(
-        1,
-        "Ателье колдовских колпаков",
-        "",
-        "https://shikimori.io/uploads/poster/animes/51553/main-4ddd3f9f30574335271a4960c6d29947.webp",
-        2026,
-        rating = 9.5,
-    )
 
     Scaffold(
         topBar = { DetailsTopBar(onBackClick) }
@@ -61,7 +56,7 @@ fun DetailsScreen(
                     .fillMaxWidth()
             ) {
                 AsyncImage(
-                    model = item.posterUrl,
+                    model = animeData.posterUrl,
                     contentDescription = null,
                     modifier = Modifier
                         .matchParentSize()
@@ -86,8 +81,8 @@ fun DetailsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AsyncImage(
-                        model = item.posterUrl,
-                        contentDescription = item.title,
+                        model = animeData.posterUrl,
+                        contentDescription = animeData.title,
                         modifier = Modifier
                             .padding(horizontal = 80.dp)
                             .padding(top = 100.dp)
@@ -96,7 +91,7 @@ fun DetailsScreen(
                             .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop,
                     )
-                    item.title?.let {
+                    animeData.title?.let {
                         Text(
                             text = it,
                             modifier = Modifier

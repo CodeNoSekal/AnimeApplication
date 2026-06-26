@@ -1,4 +1,4 @@
-package com.dmitry.test.animeapplication.presentation.verification
+package com.dmitry.test.animeapplication.presentation.screens.verification
 
 
 data class VerificationUiState(

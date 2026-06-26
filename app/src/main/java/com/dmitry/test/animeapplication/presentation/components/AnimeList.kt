@@ -1,4 +1,4 @@
-package com.dmitry.test.animeapplication.presentation.screens
+package com.dmitry.test.animeapplication.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,22 +9,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,85 +29,34 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
 import com.dmitry.test.animeapplication.domain.Anime
-import com.dmitry.test.animeapplication.presentation.CatalogViewModel
 import com.dmitry.test.animeapplication.presentation.ui.theme.YumeTheme
 import com.dmitry.test.animeapplication.presentation.ui.theme.YumeType
 
 @Composable
-fun CatalogScreen(
-    onItemClicked: (Int) -> Unit,
-    catalogViewModel: CatalogViewModel = hiltViewModel()
-) {
-    val pullToRefreshState = rememberPullToRefreshState()
-    val animeItems = catalogViewModel.anime.collectAsLazyPagingItems()
-    val isRefreshing = animeItems.loadState.refresh is LoadState.Loading
-
-
-    Scaffold(
-        topBar = { CatalogTopBar() },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
-    ) { innerPadding ->
-        CatalogContent(
-            pullToRefreshState = pullToRefreshState,
-            animeItems = animeItems,
-            onItemClicked = onItemClicked,
-            isRefreshing = isRefreshing,
-            modifier = Modifier.padding(innerPadding)
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CatalogTopBar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = "Catalog screen"
-            )
-        },
-        modifier = Modifier
-            .height(90.dp)
-    )
-}
-
-@Composable
-fun CatalogContent(
+fun AnimeList(
     animeItems: LazyPagingItems<Anime>,
     onItemClicked: (Int) -> Unit,
-    pullToRefreshState: PullToRefreshState,
-    isRefreshing: Boolean,
-    modifier: Modifier
+    contentPadding: PaddingValues
 ) {
-    PullToRefreshBox(
-        state = pullToRefreshState,
-        isRefreshing = isRefreshing,
-        onRefresh = { animeItems.refresh() },
-        modifier = modifier
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentPadding = contentPadding + PaddingValues(horizontal = 8.dp, vertical = 8.dp),
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
-        ) {
-            items(
-                count = animeItems.itemCount
-            ) { index ->
+        items(
+            count = animeItems.itemCount
+        ) { index ->
 
-                val anime = animeItems[index]
+            val anime = animeItems[index]
 
-                if (anime != null) {
-                    ListItemCard(
-                        anime,
-                        onItemClicked
-                    )
-                }
+            if (anime != null) {
+                ListItemCard(
+                    anime,
+                    onItemClicked
+                )
             }
         }
     }
@@ -167,7 +111,7 @@ fun ListItemCard(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
-                        .clip(RoundedCornerShape(999.dp))
+                        .clip(RoundedCornerShape(10.dp))
                         .background(Color(0xFF06070E).copy(alpha = 0.6f))
                         .padding(horizontal = 5.dp, vertical = 2.dp),
                 ) {

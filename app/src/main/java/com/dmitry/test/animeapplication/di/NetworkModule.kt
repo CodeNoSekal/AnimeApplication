@@ -3,7 +3,7 @@ package com.dmitry.test.animeapplication.di
 import com.dmitry.test.animeapplication.BuildConfig
 import com.dmitry.test.animeapplication.data.AuthApi
 import com.dmitry.test.animeapplication.data.RefreshApi
-import com.dmitry.test.animeapplication.data.TestApi
+import com.dmitry.test.animeapplication.data.AnimeApi
 import com.dmitry.test.animeapplication.data.VerificationApi
 import com.dmitry.test.animeapplication.data.authorization.AuthInterceptor
 import com.dmitry.test.animeapplication.data.authorization.TokenAuthenticator
@@ -95,8 +95,8 @@ object NetworkModule {
     @Singleton
     fun provideTestApi(
         @MainClient retrofit: Retrofit
-    ): TestApi {
-        return retrofit.create(TestApi::class.java)
+    ): AnimeApi {
+        return retrofit.create(AnimeApi::class.java)
     }
 
     @Provides

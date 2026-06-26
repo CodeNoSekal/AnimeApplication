@@ -1,6 +1,7 @@
 package com.dmitry.test.animeapplication.data.response
 
 import com.dmitry.test.animeapplication.domain.Anime
+import com.dmitry.test.animeapplication.domain.AnimeDetailed
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -35,8 +36,34 @@ data class AnimeShort(
     val kind: String,
 )
 
+@JsonClass(generateAdapter = true)
+data class AnimeDetailResponse(
+    @param:Json(name = "shikimori_id")
+    val id: Int,
+    val title: String?,
+    @param:Json(name = "title_en")
+    val titleEn: String?,
+    @param:Json(name = "poster_full")
+    val posterUrl: String?,
+    val year: Int?,
+    @param:Json(name = "shikimori_rating")
+    val rating: Double?,
+    val kind: String,
+)
+
 fun AnimeShort.toDomain(): Anime {
     return Anime(
+        id = id,
+        title = title,
+        titleEn = titleEn,
+        posterUrl = posterUrl,
+        year = year,
+        rating = rating
+    )
+}
+
+fun AnimeDetailResponse.toDomain(): AnimeDetailed{
+    return AnimeDetailed(
         id = id,
         title = title,
         titleEn = titleEn,

@@ -2,8 +2,23 @@ package com.dmitry.test.animeapplication.domain.repository
 
 import androidx.paging.PagingData
 import com.dmitry.test.animeapplication.domain.Anime
+import com.dmitry.test.animeapplication.domain.AnimeDetailed
+import com.dmitry.test.animeapplication.domain.User
 import kotlinx.coroutines.flow.Flow
 
 interface AnimeRepository {
     fun getAnime(): Flow<PagingData<Anime>>
+    fun searchAnime(q: String): Flow<PagingData<Anime>>
+    suspend fun getAnimeById(id: Int): AnimeDetailResult
+}
+
+
+
+sealed interface AnimeDetailResult {
+    data class Success(
+        val anime: AnimeDetailed
+    ) : AnimeDetailResult
+    data class Error(
+        val message: String?
+    ) : AnimeDetailResult
 }

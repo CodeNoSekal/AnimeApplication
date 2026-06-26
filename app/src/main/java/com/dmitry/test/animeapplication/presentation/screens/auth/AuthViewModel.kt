@@ -1,12 +1,10 @@
-package com.dmitry.test.animeapplication.presentation.auth
+package com.dmitry.test.animeapplication.presentation.screens.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitry.test.animeapplication.domain.repository.AuthResult
 import com.dmitry.test.animeapplication.domain.usecase.LoginUseCase
 import com.dmitry.test.animeapplication.domain.usecase.RegisterUseCase
-import com.dmitry.test.animeapplication.domain.usecase.SendCodeUseCase
-import com.dmitry.test.animeapplication.domain.usecase.VerifyCodeUseCase
 import com.dmitry.test.animeapplication.domain.validation.AuthValidation
 import com.dmitry.test.animeapplication.domain.validation.FieldResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,10 +45,10 @@ class AuthViewModel @Inject constructor(
         )
     }
 
-    fun onUsernameChange(v: String) = _state.update {
+    fun onDisplayNameChange(v: String) = _state.update {
         it.copy(
-            username = v,
-            usernameError = null,
+            displayName = v,
+            displayNameError = null,
             formError = null
         )
     }
@@ -83,12 +81,12 @@ class AuthViewModel @Inject constructor(
             AuthMode.Register -> {
                 val emailRes = AuthValidation.email(s.email)
                 val passRes = AuthValidation.password(s.password)
-                val userRes = AuthValidation.username(s.username)
+                val userRes = AuthValidation.displayName(s.displayName)
                 if (emailRes is FieldResult.Invalid || passRes is FieldResult.Invalid || userRes is FieldResult.Invalid) {
                     _state.update { it.copy(
                         emailError = (emailRes as? FieldResult.Invalid)?.message,
                         passwordError = (passRes as? FieldResult.Invalid)?.message,
-                        usernameError = (userRes as? FieldResult.Invalid)?.message
+                        displayNameError = (userRes as? FieldResult.Invalid)?.message
                     ) }
                     return
                 }
@@ -100,7 +98,7 @@ class AuthViewModel @Inject constructor(
 
             val result = when (s.mode) {
                 AuthMode.Login -> login(s.email, s.password)
-                AuthMode.Register -> register(s.email, s.password, s.username)
+                AuthMode.Register -> register(s.email, s.password, s.displayName)
             }
 
             when (result) {

@@ -22,9 +22,8 @@ object AuthValidation {
         else -> FieldResult.Valid
     }
 
-    fun username(value: String): FieldResult = when {
+    fun displayName(value: String): FieldResult = when {
         value.isBlank() -> FieldResult.Invalid("Введите имя пользователя")
-        value.length < 4 -> FieldResult.Invalid("Слишком короткое имя")
         else -> FieldResult.Valid
     }
 

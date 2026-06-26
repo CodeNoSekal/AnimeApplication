@@ -29,19 +29,19 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
-import com.dmitry.test.animeapplication.presentation.auth.AuthScreen
-import com.dmitry.test.animeapplication.presentation.verification.VerificationScreen
-import com.dmitry.test.animeapplication.presentation.screens.CatalogScreen
-import com.dmitry.test.animeapplication.presentation.screens.CollectionsScreen
-import com.dmitry.test.animeapplication.presentation.screens.HomeScreen
-import com.dmitry.test.animeapplication.presentation.screens.ProfileScreen
-import com.dmitry.test.animeapplication.presentation.screens.SearchScreen
+import com.dmitry.test.animeapplication.presentation.navigation.Destinations
+import com.dmitry.test.animeapplication.presentation.navigation.TopLevelDestination
+import com.dmitry.test.animeapplication.presentation.navigation.graphs.authGraph
+import com.dmitry.test.animeapplication.presentation.navigation.graphs.catalogGraph
+import com.dmitry.test.animeapplication.presentation.navigation.graphs.collectionsGraph
+import com.dmitry.test.animeapplication.presentation.navigation.graphs.homeGraph
+import com.dmitry.test.animeapplication.presentation.navigation.graphs.profileGraph
+import com.dmitry.test.animeapplication.presentation.navigation.graphs.searchGraph
+import com.dmitry.test.animeapplication.presentation.navigation.graphs.verifyGraph
+import com.dmitry.test.animeapplication.presentation.navigation.navigateToTab
 import com.dmitry.test.animeapplication.presentation.screens.SplashScreen
 import com.dmitry.test.animeapplication.presentation.ui.theme.YumeTheme
 import com.dmitry.test.animeapplication.presentation.ui.theme.YumeType
@@ -113,95 +113,20 @@ fun AnimeApp(rootViewModel: RootViewModel = hiltViewModel()){
 
                     verifyGraph(navController)
 
-                    navigation(route = Destinations.HOME_GRAPH, startDestination = Destinations.HOME) {
-                        composable(Destinations.HOME) {
-                            HomeScreen(
-                                onItemClicked = { id ->
-                                    navController.navigate(Details.build(Destinations.HOME, id))
-                                }
-                            )
-                        }
-                        detailsComposable(Destinations.HOME, navController)
-                    }
+                    homeGraph(navController)
 
-                    navigation(route = Destinations.CATALOG_GRAPH, startDestination = Destinations.CATALOG) {
-                        composable(Destinations.CATALOG) {
-                            CatalogScreen(
-                                onItemClicked = { id ->
-                                    navController.navigate(Details.build(Destinations.CATALOG, id))
-                                }
-                            )
-                        }
-                        detailsComposable(Destinations.CATALOG, navController)
-                    }
+                    catalogGraph(navController)
 
-                    navigation(route = Destinations.COLLECTIONS_GRAPH, startDestination = Destinations.COLLECTIONS) {
-                        composable(Destinations.COLLECTIONS) {
-                            CollectionsScreen(
-                                onItemClicked = { id ->
-                                    navController.navigate(Details.build(Destinations.COLLECTIONS, id))
-                                }
-                            )
-                        }
-                        detailsComposable(Destinations.COLLECTIONS, navController)
-                    }
+                    collectionsGraph(navController)
 
-                    navigation(route = Destinations.SEARCH_GRAPH, startDestination = Destinations.SEARCH) {
-                        composable(Destinations.SEARCH) {
-                            SearchScreen(
-                                onItemClicked = { id ->
-                                    navController.navigate(Details.build(Destinations.SEARCH, id))
-                                }
-                            )
-                        }
-                        detailsComposable(Destinations.SEARCH, navController)
-                    }
+                    searchGraph(navController)
 
-                    navigation(route = Destinations.PROFILE_GRAPH, startDestination = Destinations.PROFILE) {
-                        composable(route = Destinations.PROFILE) { ProfileScreen() }
-                    }
+                    profileGraph(navController)
                 }
             }
         }
     }
 }
-
-private fun NavGraphBuilder.authGraph(navController: NavController) {
-    navigation(route = Destinations.AUTH_GRAPH, startDestination = Destinations.AUTH) {
-        composable(Destinations.AUTH) {
-            AuthScreen(
-                onAuthorized = {
-                    navController.navigate(Destinations.HOME_GRAPH) {
-                        popUpTo(Destinations.AUTH_GRAPH) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-                onCreated = {
-                    navController.navigate(Destinations.VERIFICATION_GRAPH) {
-                        popUpTo(Destinations.VERIFICATION_GRAPH) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-            )
-        }
-    }
-}
-
-private fun NavGraphBuilder.verifyGraph(navController: NavController) {
-    navigation(route = Destinations.VERIFICATION_GRAPH, startDestination = Destinations.VERIFICATION) {
-        composable(Destinations.VERIFICATION) {
-            VerificationScreen(
-                onVerified = {
-                    navController.navigate(Destinations.HOME_GRAPH) {
-                        popUpTo(Destinations.VERIFICATION_GRAPH) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-            )
-        }
-    }
-}
-
 
 @Composable
 fun BottomBar(
@@ -219,7 +144,12 @@ fun BottomBar(
             val selected = currentDestination?.hierarchy?.any { it.route == item.graph } == true
             NavigationBarItem(
                 selected = selected,
-                onClick = { navController.navigateToTab(item.graph) },
+                onClick = {
+                    if (selected) {
+                        navController.popBackStack(item.start, inclusive = false)
+                    } else {
+                        navController.navigateToTab(item.graph)
+                    } },
                 icon = { Icon(
                     painter = painterResource(item.iconRes),
                     contentDescription = stringResource(item.labelRes),
