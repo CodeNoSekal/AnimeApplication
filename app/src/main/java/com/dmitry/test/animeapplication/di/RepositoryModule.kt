@@ -2,9 +2,11 @@ package com.dmitry.test.animeapplication.di
 
 import com.dmitry.test.animeapplication.data.repository.AnimeRepositoryImpl
 import com.dmitry.test.animeapplication.data.repository.AuthRepositoryImpl
+import com.dmitry.test.animeapplication.data.repository.PlayerRepositoryImpl
 import com.dmitry.test.animeapplication.data.repository.ProfileRepositoryImpl
 import com.dmitry.test.animeapplication.domain.repository.AnimeRepository
 import com.dmitry.test.animeapplication.domain.repository.AuthRepository
+import com.dmitry.test.animeapplication.domain.repository.PlayerRepository
 import com.dmitry.test.animeapplication.domain.repository.ProfileRepository
 import dagger.Binds
 import dagger.Module
@@ -33,4 +35,11 @@ abstract class RepositoryModule {
     abstract fun bindProfileRepository(
         impl: ProfileRepositoryImpl
     ): ProfileRepository
+
+
+    @Binds
+    @Singleton
+    abstract fun bindPlayerRepository(
+        impl: PlayerRepositoryImpl
+    ): PlayerRepository
 }

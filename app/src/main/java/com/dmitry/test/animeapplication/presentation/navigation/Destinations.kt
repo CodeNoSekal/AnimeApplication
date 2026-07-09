@@ -45,6 +45,20 @@ object Details {
     fun build(parent: String, animeId: Int) = "$parent/$DETAILS/$animeId"
 }
 
+object Player {
+    const val PLAYER_GRAPH = "player_graph"
+    const val PLAYER = "player"
+    const val EPISODES = "episodes"
+    const val ANIME_ID = "animeId"
+
+    fun routePattern() = "$PLAYER_GRAPH/{$ANIME_ID}"
+
+    fun build(animeId: Int) = "$PLAYER_GRAPH/$animeId"
+
+    const val playerRoute = PLAYER
+    const val episodesRoute = EPISODES
+}
+
 object Search {
     const val SEARCH = "search"
 

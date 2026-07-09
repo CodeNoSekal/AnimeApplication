@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,14 +26,24 @@ import com.dmitry.test.animeapplication.presentation.ui.theme.YumeType
 fun BaseButton(
     onClick: () -> Unit,
     modifier: Modifier,
-    text: String,
-    icon: Int
+    text: String? = null,
+    icon: Int? = null,
+    disabled: Boolean = false
 ) {
+
+    val mainColor =
+        if (disabled) colors.surfaceCard.copy(alpha = 0.5f)
+        else colors.surfaceCard
+
+    val contentColor =
+        if (disabled) MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+        else MaterialTheme.colorScheme.onBackground
 
     Surface(
         onClick = onClick,
+        enabled = !disabled,
         shape = RoundedCornerShape(14.dp),
-        color = colors.surfaceCard,
+        color = mainColor,
         border = BorderStroke(1.dp, colors.lineStrong),
         modifier = modifier.fillMaxWidth().height(46.dp)
     ) {
@@ -42,12 +53,25 @@ fun BaseButton(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painterResource(icon),
-                contentDescription = null,
-                Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(text, style = YumeType.bodyMedium)
+            if (text != null && icon != null) {
+                Icon(
+                    painterResource(icon),
+                    contentDescription = null,
+                    Modifier.size(18.dp),
+                    tint = contentColor
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(text, style = YumeType.bodyMedium, color = contentColor)
+            } else if (text != null) {
+                Text(text, style = YumeType.bodyMedium, color = contentColor)
+            } else if (icon != null) {
+                Icon(
+                    painterResource(icon),
+                    contentDescription = null,
+                    Modifier.size(18.dp),
+                    tint = contentColor
+                )
+            }
         }
     }
 }

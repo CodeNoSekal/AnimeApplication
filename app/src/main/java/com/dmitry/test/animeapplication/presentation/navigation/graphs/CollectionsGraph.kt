@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.dmitry.test.animeapplication.presentation.navigation.Destinations
 import com.dmitry.test.animeapplication.presentation.navigation.Details
-import com.dmitry.test.animeapplication.presentation.navigation.detailsComposable
+import com.dmitry.test.animeapplication.presentation.navigation.screens.detailsComposable
 import com.dmitry.test.animeapplication.presentation.screens.CollectionsScreen
 
 fun NavGraphBuilder.collectionsGraph(navController: NavController) {

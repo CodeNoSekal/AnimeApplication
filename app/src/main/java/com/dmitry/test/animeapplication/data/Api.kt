@@ -7,6 +7,7 @@ import com.dmitry.test.animeapplication.data.request.VerifyRequest
 import com.dmitry.test.animeapplication.data.response.AnimeDetailResponse
 import com.dmitry.test.animeapplication.data.response.AnimeResponse
 import com.dmitry.test.animeapplication.data.response.AuthResponse
+import com.dmitry.test.animeapplication.data.response.PlayerResponse
 import com.dmitry.test.animeapplication.data.response.UserDTO
 import com.dmitry.test.animeapplication.data.response.VerificationResponse
 import retrofit2.http.Body
@@ -38,6 +39,13 @@ interface AnimeApi {
     suspend fun getAnimeById(
         @Path("id") id: Int
     ): AnimeDetailResponse
+}
+
+interface PlayerApi {
+    @GET("player/{id}")
+    suspend fun getPlayerById(
+        @Path("id") id: Int
+    ): PlayerResponse
 }
 
 interface AuthApi {

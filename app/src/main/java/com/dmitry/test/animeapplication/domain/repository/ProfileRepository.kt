@@ -1,6 +1,6 @@
 package com.dmitry.test.animeapplication.domain.repository
 
-import com.dmitry.test.animeapplication.domain.User
+import com.dmitry.test.animeapplication.domain.models.User
 
 interface ProfileRepository{
     suspend fun getUser(): ProfileResult

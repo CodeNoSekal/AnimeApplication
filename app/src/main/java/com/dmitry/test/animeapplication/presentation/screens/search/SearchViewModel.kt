@@ -29,6 +29,10 @@ class SearchViewModel @Inject constructor(
         _queryState.value = newQuery
     }
 
+    fun clearQuery() {
+        _queryState.value = ""
+    }
+
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val searchResult =
         _queryState

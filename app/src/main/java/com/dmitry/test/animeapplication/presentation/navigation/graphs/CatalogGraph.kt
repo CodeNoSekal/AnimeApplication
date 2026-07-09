@@ -7,8 +7,8 @@ import androidx.navigation.navigation
 import com.dmitry.test.animeapplication.presentation.navigation.Destinations
 import com.dmitry.test.animeapplication.presentation.navigation.Details
 import com.dmitry.test.animeapplication.presentation.navigation.Search
-import com.dmitry.test.animeapplication.presentation.navigation.detailsComposable
-import com.dmitry.test.animeapplication.presentation.navigation.searchComposable
+import com.dmitry.test.animeapplication.presentation.navigation.screens.detailsComposable
+import com.dmitry.test.animeapplication.presentation.navigation.screens.searchComposable
 import com.dmitry.test.animeapplication.presentation.screens.catalog.CatalogScreen
 
 fun NavGraphBuilder.catalogGraph(navController: NavController) {

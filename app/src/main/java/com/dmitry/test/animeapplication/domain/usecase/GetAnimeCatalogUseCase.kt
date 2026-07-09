@@ -1,7 +1,7 @@
 package com.dmitry.test.animeapplication.domain.usecase
 
 import androidx.paging.PagingData
-import com.dmitry.test.animeapplication.domain.Anime
+import com.dmitry.test.animeapplication.domain.models.Anime
 import com.dmitry.test.animeapplication.domain.repository.AnimeRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

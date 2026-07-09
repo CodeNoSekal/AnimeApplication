@@ -41,9 +41,7 @@ fun CatalogScreen(
     onSearchClicked: () -> Unit,
     catalogViewModel: CatalogViewModel = hiltViewModel()
 ) {
-    val pullToRefreshState = rememberPullToRefreshState()
     val animeItems = catalogViewModel.anime.collectAsLazyPagingItems()
-    val isRefreshing = animeItems.loadState.refresh is LoadState.Loading
 
     val density = LocalDensity.current
     var barHeightPx by remember { mutableStateOf(0) }
@@ -61,7 +59,9 @@ fun CatalogScreen(
 
 
     Box(
-        modifier = Modifier.fillMaxSize().nestedScroll(connection)
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize().nestedScroll(connection)
     ) {
         AnimeList(
             animeItems = animeItems,

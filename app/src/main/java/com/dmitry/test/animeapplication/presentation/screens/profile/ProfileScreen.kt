@@ -38,7 +38,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.dmitry.test.animeapplication.R
-import com.dmitry.test.animeapplication.domain.User
+import com.dmitry.test.animeapplication.domain.models.User
 import com.dmitry.test.animeapplication.presentation.ui.theme.YumeTheme
 import com.dmitry.test.animeapplication.presentation.ui.theme.YumeType
 

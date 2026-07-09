@@ -4,7 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.dmitry.test.animeapplication.data.AnimeApi
 import com.dmitry.test.animeapplication.data.response.toDomain
-import com.dmitry.test.animeapplication.domain.Anime
+import com.dmitry.test.animeapplication.domain.models.Anime
 import retrofit2.HttpException
 import java.io.IOException
 

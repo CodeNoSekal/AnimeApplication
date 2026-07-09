@@ -38,6 +38,7 @@ import com.dmitry.test.animeapplication.presentation.navigation.graphs.authGraph
 import com.dmitry.test.animeapplication.presentation.navigation.graphs.catalogGraph
 import com.dmitry.test.animeapplication.presentation.navigation.graphs.collectionsGraph
 import com.dmitry.test.animeapplication.presentation.navigation.graphs.homeGraph
+import com.dmitry.test.animeapplication.presentation.navigation.graphs.playerGraph
 import com.dmitry.test.animeapplication.presentation.navigation.graphs.profileGraph
 import com.dmitry.test.animeapplication.presentation.navigation.graphs.searchGraph
 import com.dmitry.test.animeapplication.presentation.navigation.graphs.verifyGraph
@@ -89,14 +90,13 @@ fun AnimeApp(rootViewModel: RootViewModel = hiltViewModel()){
             }
 
             val backStackEntry by navController.currentBackStackEntryAsState()
-            val inAuthFlow = backStackEntry?.destination?.hierarchy?.any {
-                it.route == Destinations.AUTH_GRAPH ||
-                it.route == Destinations.VERIFICATION_GRAPH
+            val inTopLevelDestination = backStackEntry?.destination?.hierarchy?.any { dest ->
+                TopLevelDestination.entries.any { it.graph == dest.route }
             } == true
 
             Scaffold(
                 bottomBar = {
-                    if (gate == AuthGate.Authenticated && !inAuthFlow) BottomBar(navController)
+                    if (gate == AuthGate.Authenticated && inTopLevelDestination) BottomBar(navController)
                 }
             ) { innerPadding ->
                 NavHost(
@@ -122,6 +122,8 @@ fun AnimeApp(rootViewModel: RootViewModel = hiltViewModel()){
                     searchGraph(navController)
 
                     profileGraph(navController)
+
+                    playerGraph(navController)
                 }
             }
         }

@@ -1,7 +1,7 @@
 package com.dmitry.test.animeapplication.data.response
 
-import com.dmitry.test.animeapplication.domain.Anime
-import com.dmitry.test.animeapplication.domain.AnimeDetailed
+import com.dmitry.test.animeapplication.domain.models.Anime
+import com.dmitry.test.animeapplication.domain.models.AnimeDetailed
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -49,6 +49,10 @@ data class AnimeDetailResponse(
     @param:Json(name = "shikimori_rating")
     val rating: Double?,
     val kind: String,
+    @param:Json(name = "has_kodik")
+    val hasKodik: Boolean,
+    @param:Json(name = "has_anilibria")
+    val hasAnilibria: Boolean,
 )
 
 fun AnimeShort.toDomain(): Anime {

@@ -5,8 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.dmitry.test.animeapplication.data.AnimeApi
 import com.dmitry.test.animeapplication.data.response.toDomain
-import com.dmitry.test.animeapplication.domain.Anime
-import com.dmitry.test.animeapplication.domain.AnimeDetailed
+import com.dmitry.test.animeapplication.domain.models.Anime
 import com.dmitry.test.animeapplication.domain.repository.AnimeDetailResult
 import com.dmitry.test.animeapplication.domain.repository.AnimeRepository
 import kotlinx.coroutines.flow.Flow

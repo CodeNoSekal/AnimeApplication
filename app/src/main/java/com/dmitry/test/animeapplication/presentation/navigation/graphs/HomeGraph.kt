@@ -6,9 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.dmitry.test.animeapplication.presentation.navigation.Destinations
 import com.dmitry.test.animeapplication.presentation.navigation.Details
-import com.dmitry.test.animeapplication.presentation.navigation.detailsComposable
+import com.dmitry.test.animeapplication.presentation.navigation.screens.detailsComposable
 import com.dmitry.test.animeapplication.presentation.screens.HomeScreen
-import com.dmitry.test.animeapplication.presentation.screens.auth.AuthScreen
 
 fun NavGraphBuilder.homeGraph(navController: NavController) {
     navigation(route = Destinations.HOME_GRAPH, startDestination = Destinations.HOME) {

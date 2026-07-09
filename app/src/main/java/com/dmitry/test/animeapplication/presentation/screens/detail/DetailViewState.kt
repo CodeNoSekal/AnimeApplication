@@ -1,6 +1,6 @@
 package com.dmitry.test.animeapplication.presentation.screens.detail
 
-import com.dmitry.test.animeapplication.domain.AnimeDetailed
+import com.dmitry.test.animeapplication.domain.models.AnimeDetailed
 
 sealed class DetailViewState {
     data object Loading : DetailViewState()

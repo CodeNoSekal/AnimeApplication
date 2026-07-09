@@ -2,7 +2,6 @@ package com.dmitry.test.animeapplication.data.repository
 
 import com.dmitry.test.animeapplication.data.AuthApi
 import com.dmitry.test.animeapplication.data.response.toDomain
-import com.dmitry.test.animeapplication.domain.User
 import com.dmitry.test.animeapplication.domain.repository.ProfileRepository
 import com.dmitry.test.animeapplication.domain.repository.ProfileResult
 import retrofit2.HttpException

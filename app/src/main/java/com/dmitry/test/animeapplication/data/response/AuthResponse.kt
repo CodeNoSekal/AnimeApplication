@@ -1,6 +1,6 @@
 package com.dmitry.test.animeapplication.data.response
 
-import com.dmitry.test.animeapplication.domain.User
+import com.dmitry.test.animeapplication.domain.models.User
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
