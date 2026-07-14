@@ -3,7 +3,7 @@ package com.dmitry.test.animeapplication.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.dmitry.test.animeapplication.data.AnimeApi
+import com.dmitry.test.animeapplication.data.api.AnimeApi
 import com.dmitry.test.animeapplication.data.response.toDomain
 import com.dmitry.test.animeapplication.domain.models.Anime
 import com.dmitry.test.animeapplication.domain.repository.AnimeDetailResult

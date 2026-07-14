@@ -2,12 +2,14 @@ package com.dmitry.test.animeapplication.presentation.navigation.graphs
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.dmitry.test.animeapplication.presentation.navigation.Player
@@ -38,7 +40,7 @@ fun NavGraphBuilder.playerGraph(navController: NavController) {
                 }
                 is PlayerViewState.Success -> {
                     PlayerScreen(
-                        playerData = (state as PlayerViewState.Success).player,
+                        playerData = (state as PlayerViewState.Success).playerData,
                         playerState = playerState,
                         onSavePosition = viewModel::savePosition,
                         onPrevEpisodeClick = viewModel::prevEpisode,
@@ -52,8 +54,11 @@ fun NavGraphBuilder.playerGraph(navController: NavController) {
             }
         }
 
-        composable(
-           route = Player.EPISODES
+        dialog(
+           route = Player.EPISODES,
+           dialogProperties = DialogProperties(
+               usePlatformDefaultWidth = false
+           )
         ) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(Player.routePattern())
@@ -70,7 +75,7 @@ fun NavGraphBuilder.playerGraph(navController: NavController) {
                 }
                 is PlayerViewState.Success -> {
                     EpisodesPicker(
-                        playerData = (state as PlayerViewState.Success).player,
+                        playerData = (state as PlayerViewState.Success).playerData,
                         playerState = playerState,
                         episodeSelected = {
                             viewModel.selectEpisode(it)

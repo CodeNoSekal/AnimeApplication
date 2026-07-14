@@ -1,7 +1,7 @@
 package com.dmitry.test.animeapplication.data.response
 
 import com.dmitry.test.animeapplication.domain.models.Episode
-import com.dmitry.test.animeapplication.domain.models.Player
+import com.dmitry.test.animeapplication.domain.models.PlayerData
 import com.dmitry.test.animeapplication.domain.models.Provider
 import com.dmitry.test.animeapplication.domain.models.Quality
 import com.dmitry.test.animeapplication.domain.models.Source
@@ -57,8 +57,8 @@ data class VoiceoverResponse(
     val hls1080: String? = null
 )
 
-fun PlayerResponse.toDomain(): Player {
-    return Player(
+fun PlayerResponse.toDomain(): PlayerData {
+    return PlayerData(
         id = id,
         title = title,
         episodesTotal = episodesTotal,

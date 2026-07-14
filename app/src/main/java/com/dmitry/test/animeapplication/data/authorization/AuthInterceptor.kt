@@ -1,6 +1,6 @@
 package com.dmitry.test.animeapplication.data.authorization
 
-import com.dmitry.test.animeapplication.data.NoAuth
+import com.dmitry.test.animeapplication.data.api.NoAuth
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response

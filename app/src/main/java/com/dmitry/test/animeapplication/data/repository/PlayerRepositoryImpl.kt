@@ -1,8 +1,7 @@
 package com.dmitry.test.animeapplication.data.repository
 
-import com.dmitry.test.animeapplication.data.PlayerApi
+import com.dmitry.test.animeapplication.data.api.PlayerApi
 import com.dmitry.test.animeapplication.data.response.toDomain
-import com.dmitry.test.animeapplication.domain.repository.AnimeDetailResult
 import com.dmitry.test.animeapplication.domain.repository.PlayerRepository
 import com.dmitry.test.animeapplication.domain.repository.PlayerResult
 import okio.IOException

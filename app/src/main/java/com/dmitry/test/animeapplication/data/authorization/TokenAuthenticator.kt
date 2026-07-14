@@ -1,7 +1,6 @@
 package com.dmitry.test.animeapplication.data.authorization
 
-import com.dmitry.test.animeapplication.data.AuthApi
-import com.dmitry.test.animeapplication.data.RefreshApi
+import com.dmitry.test.animeapplication.data.api.RefreshApi
 import com.dmitry.test.animeapplication.data.request.RefreshRequest
 import javax.inject.Provider
 import kotlinx.coroutines.runBlocking

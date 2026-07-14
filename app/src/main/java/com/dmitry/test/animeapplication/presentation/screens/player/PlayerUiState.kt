@@ -1,6 +1,6 @@
 package com.dmitry.test.animeapplication.presentation.screens.player
 
-import com.dmitry.test.animeapplication.domain.models.Player
+import com.dmitry.test.animeapplication.domain.models.PlayerData
 import com.dmitry.test.animeapplication.domain.models.Provider
 import com.dmitry.test.animeapplication.domain.models.Quality
 import com.dmitry.test.animeapplication.domain.models.getEpisode
@@ -18,7 +18,7 @@ data class PlayerUiState(
 )
 
 fun updateState(
-    data: Player,
+    data: PlayerData,
     target: PlayerUiState
 ): PlayerUiState {
     val targetEpisode = data.getEpisode(target.selectedEpisodeNumber)

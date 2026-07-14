@@ -1,11 +1,11 @@
 package com.dmitry.test.animeapplication.di
 
 import com.dmitry.test.animeapplication.BuildConfig
-import com.dmitry.test.animeapplication.data.AuthApi
-import com.dmitry.test.animeapplication.data.RefreshApi
-import com.dmitry.test.animeapplication.data.AnimeApi
-import com.dmitry.test.animeapplication.data.PlayerApi
-import com.dmitry.test.animeapplication.data.VerificationApi
+import com.dmitry.test.animeapplication.data.api.AnimeApi
+import com.dmitry.test.animeapplication.data.api.AuthApi
+import com.dmitry.test.animeapplication.data.api.PlayerApi
+import com.dmitry.test.animeapplication.data.api.RefreshApi
+import com.dmitry.test.animeapplication.data.api.VerificationApi
 import com.dmitry.test.animeapplication.data.authorization.AuthInterceptor
 import com.dmitry.test.animeapplication.data.authorization.TokenAuthenticator
 import com.squareup.moshi.Moshi

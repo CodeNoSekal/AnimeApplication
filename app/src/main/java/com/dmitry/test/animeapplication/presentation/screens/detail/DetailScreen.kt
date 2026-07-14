@@ -2,6 +2,7 @@ package com.dmitry.test.animeapplication.presentation.screens.detail
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dmitry.test.animeapplication.domain.models.AnimeDetailed
+import com.dmitry.test.animeapplication.presentation.ui.theme.YumeTheme.colors
+import com.dmitry.test.animeapplication.presentation.ui.theme.YumeType
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -92,24 +95,46 @@ fun DetailScreen(
                             .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop,
                     )
-                    animeData.title?.let {
-                        Text(
-                            text = it,
-                            modifier = Modifier
-                                .padding(horizontal = 30.dp, vertical = 12.dp)
-                                .fillMaxWidth(),
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.titleLarge,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        animeData.title?.let {
+                            Text(
+                                text = it,
+                                modifier = Modifier
+                                    .padding(horizontal = 30.dp)
+                                    .fillMaxWidth(),
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.titleLarge,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                        }
+
+                        animeData.titleEn?.let {
+                            Text(
+                                text = it,
+                                style = YumeType.bodyMedium,
+                                color = colors.textMuted,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
                     }
+
                     Button(
                         onClick = { onPlayClick(animeData.id) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 30.dp, vertical = 12.dp)
                             .height(54.dp)
+                            .clip(RoundedCornerShape(1.dp))
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically

@@ -1,7 +1,10 @@
 package com.dmitry.test.animeapplication.presentation.screens.player
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.view.OrientationEventListener
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,12 +35,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import com.dmitry.test.animeapplication.R
-import com.dmitry.test.animeapplication.domain.models.Player
+import com.dmitry.test.animeapplication.domain.models.PlayerData
 import com.dmitry.test.animeapplication.presentation.components.BaseButton
 
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun PlayerScreen(
-    playerData: Player,
+    playerData: PlayerData,
     playerState: PlayerUiState,
     onSavePosition: (Long) -> Unit,
     onPrevEpisodeClick: () -> Unit,
@@ -73,7 +77,7 @@ fun PlayerScreen(
         val observer = LifecycleEventObserver {_, event ->
             if (event == Lifecycle.Event.ON_STOP) {
                 onSavePosition(exoPlayer.currentPosition)
-                exoPlayer.stop()
+                exoPlayer.pause()
             }
         }
 
@@ -107,13 +111,19 @@ fun PlayerScreen(
         }
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+    }
+
     val screenModifier =
         if (isLandscape) Modifier.fillMaxSize()
-        else Modifier.fillMaxSize().statusBarsPadding()
+        else Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
 
     Column(
         modifier = screenModifier
-            .background(MaterialTheme.colorScheme.background),
+            .statusBarsPadding(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -122,12 +132,18 @@ fun PlayerScreen(
             if (isLandscape) Modifier.fillMaxSize()
             else Modifier.fillMaxWidth().aspectRatio(16f / 9f)
 
-        Player(
-            playerState,
+        Player(playerState,
             exoPlayer,
             playerModifier,
-            isLandscape
+            isLandscape,
+            expand = {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            },
+            compress = {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            }
         )
+
 
         if (!isLandscape) {
 

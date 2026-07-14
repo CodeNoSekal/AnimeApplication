@@ -41,9 +41,9 @@ class PlayerViewModel @Inject constructor(
             _state.value = PlayerViewState.Loading
             when(val result = getPlayerById(currentId)){
                 is PlayerResult.Success ->{
-                    _state.value = PlayerViewState.Success(result.player)
+                    _state.value = PlayerViewState.Success(result.playerData)
 
-                    val episode = result.player.episodes.firstOrNull { it.isAvailable } ?: run {
+                    val episode = result.playerData.episodes.firstOrNull { it.isAvailable } ?: run {
                         _state.value = PlayerViewState.Error("No episodes available")
                         return@launch
                     }
@@ -81,7 +81,7 @@ class PlayerViewModel @Inject constructor(
 
         if (state.value is PlayerViewState.Success) {
             _playerState.update {
-                updateState((state.value as PlayerViewState.Success).player, new)
+                updateState((state.value as PlayerViewState.Success).playerData, new)
             }
         }
     }
@@ -92,7 +92,7 @@ class PlayerViewModel @Inject constructor(
 
         if (state.value is PlayerViewState.Success) {
             _playerState.update {
-                updateState((state.value as PlayerViewState.Success).player, new)
+                updateState((state.value as PlayerViewState.Success).playerData, new)
             }
         }
     }
@@ -102,7 +102,7 @@ class PlayerViewModel @Inject constructor(
 
         if (state.value is PlayerViewState.Success) {
             _playerState.update {
-                updateState((state.value as PlayerViewState.Success).player, new)
+                updateState((state.value as PlayerViewState.Success).playerData, new)
             }
         }
     }
@@ -112,7 +112,7 @@ class PlayerViewModel @Inject constructor(
 
         if (state.value is PlayerViewState.Success) {
             _playerState.update {
-                updateState((state.value as PlayerViewState.Success).player, new)
+                updateState((state.value as PlayerViewState.Success).playerData, new)
             }
         }
     }
@@ -125,7 +125,7 @@ class PlayerViewModel @Inject constructor(
         val currentState = _state.value
         if (currentState !is PlayerViewState.Success) return
 
-        val player = currentState.player
+        val player = currentState.playerData
         val currentEpisode = _playerState.value.selectedEpisodeNumber
         val lastEpisode = player.episodesAvailable
 

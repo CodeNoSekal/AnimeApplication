@@ -1,7 +1,7 @@
 package com.dmitry.test.animeapplication.data.repository
 
-import com.dmitry.test.animeapplication.data.AuthApi
-import com.dmitry.test.animeapplication.data.VerificationApi
+import com.dmitry.test.animeapplication.data.api.AuthApi
+import com.dmitry.test.animeapplication.data.api.VerificationApi
 import com.dmitry.test.animeapplication.data.authorization.TokenStorage
 import com.dmitry.test.animeapplication.data.request.LoginRequest
 import com.dmitry.test.animeapplication.data.request.RegisterRequest

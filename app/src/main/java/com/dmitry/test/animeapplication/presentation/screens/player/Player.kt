@@ -2,24 +2,27 @@ package com.dmitry.test.animeapplication.presentation.screens.player
 
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,25 +31,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.compose.material3.indicator.PositionAndDurationText
-import androidx.media3.ui.compose.material3.indicator.ProgressSlider
+import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import com.dmitry.test.animeapplication.R
+import com.dmitry.test.animeapplication.domain.format.formatTime
+import com.dmitry.test.animeapplication.presentation.ui.theme.YumeTheme
+import com.dmitry.test.animeapplication.presentation.ui.theme.YumeType
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
-import androidx.compose.animation.core.tween
 import androidx.media3.ui.compose.material3.Player as Media3Player
 
-@OptIn(UnstableApi::class)
+
+@OptIn(UnstableApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun Player(
     playerState: PlayerUiState,
     exoPlayer: ExoPlayer,
     modifier: Modifier,
-    isLandscape: Boolean
+    isLandscape: Boolean,
+    expand: () -> Unit,
+    compress: () -> Unit
 ) {
     var controlsVisible by remember { mutableStateOf(true) }
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
@@ -156,28 +164,92 @@ fun Player(
                     }
                 },
                 bottomControls = { player, showControls ->
+
+                    val progressState = rememberProgressStateWithTickInterval(player, 500)
+                    val current = progressState.currentPositionMs
+                    val duration = progressState.durationMs
+
+                    var progress = (current.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
+
+                    if (duration <= 0)
+                        progress = 0f
+
                     if (controlsAlpha > 0) {
-                        Column(
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
-                                .alpha(controlsAlpha)
+                                .alpha(controlsAlpha),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            PositionAndDurationText(player)
-                            ProgressSlider(
-                                player,
-                                modifier = Modifier.fillMaxWidth(),
-                                onValueChange = {
-                                    isSeeking = true
-                                },
-                                onValueChangeFinished = {
-                                    isSeeking = false
-                                }
+                            Text(
+                                text = formatTime(current),
+                                style = YumeType.sm
                             )
+
+                            PlayerProgressBar(
+                                progress,
+                                onSeek = { newProgress ->
+                                    exoPlayer.seekTo((duration * newProgress).toLong())
+                                },
+                                Modifier.weight(1f)
+                            )
+
+                            Text(
+                                text = formatTime(duration),
+                                style = YumeType.sm
+                            )
+
+                            if (isLandscape){
+                                IconButton(
+                                    onClick = compress
+                                ) {
+                                    Icon(painterResource(R.drawable.compress_24), "compress")
+                                }
+                            }
+                            else {
+                                IconButton(
+                                    onClick = expand
+                                ) {
+                                    Icon(painterResource(R.drawable.expand_24), "expand")
+                                }
+                            }
                         }
                     }
                 }
             )
         }
+    }
+}
+
+@Composable
+fun PlayerProgressBar(
+    progress: Float,
+    onSeek: (Float) -> Unit,
+    modifier: Modifier
+) {
+    var widthPx by remember { mutableIntStateOf(0) }
+
+    Box(
+        contentAlignment = Alignment.CenterStart,
+        modifier = modifier.height(28.dp)
+            .onSizeChanged {widthPx = it.width}
+            .pointerInput(widthPx) {
+                detectTapGestures { offset ->
+                    val newProgress = (offset.x / widthPx).coerceIn(0f, 1f)
+                    onSeek(newProgress)
+                }
+            }
+    ) {
+        Box(
+            Modifier.fillMaxWidth().height(2.dp)
+                .background(YumeTheme.colors.line)
+        )
+
+        Box(
+            Modifier.fillMaxWidth(progress).height(2.dp)
+                .background(YumeTheme.colors.accent)
+        )
     }
 }

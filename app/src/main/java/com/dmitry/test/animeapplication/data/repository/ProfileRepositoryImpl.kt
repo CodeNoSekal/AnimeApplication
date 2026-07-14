@@ -1,6 +1,6 @@
 package com.dmitry.test.animeapplication.data.repository
 
-import com.dmitry.test.animeapplication.data.AuthApi
+import com.dmitry.test.animeapplication.data.api.AuthApi
 import com.dmitry.test.animeapplication.data.response.toDomain
 import com.dmitry.test.animeapplication.domain.repository.ProfileRepository
 import com.dmitry.test.animeapplication.domain.repository.ProfileResult

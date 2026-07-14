@@ -1,6 +1,6 @@
 package com.dmitry.test.animeapplication.domain.models
 
-data class Player(
+data class PlayerData(
     val id: Int,
     val title: String?,
     val episodesTotal: Int,
@@ -10,7 +10,7 @@ data class Player(
     val episodes: List<Episode>
 )
 
-fun Player.getEpisode(target: Int): Episode{
+fun PlayerData.getEpisode(target: Int): Episode{
     return episodes.find {it.id == target} ?: episodes.first()
 }
 
