@@ -20,6 +20,7 @@ import com.dmitry.test.animeapplication.presentation.components.BaseButton
 import com.dmitry.test.animeapplication.presentation.components.SearchButton
 import com.dmitry.test.animeapplication.presentation.ui.theme.YumeTheme
 
+val CatalogTopBarContentHeight = 118.dp
 
 @Composable
 fun CatalogTopBar(

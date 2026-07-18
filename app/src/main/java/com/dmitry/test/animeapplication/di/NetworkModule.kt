@@ -3,6 +3,7 @@ package com.dmitry.test.animeapplication.di
 import com.dmitry.test.animeapplication.BuildConfig
 import com.dmitry.test.animeapplication.data.api.AnimeApi
 import com.dmitry.test.animeapplication.data.api.AuthApi
+import com.dmitry.test.animeapplication.data.api.MeApi
 import com.dmitry.test.animeapplication.data.api.PlayerApi
 import com.dmitry.test.animeapplication.data.api.RefreshApi
 import com.dmitry.test.animeapplication.data.api.VerificationApi
@@ -76,7 +77,7 @@ object NetworkModule {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(MoshiConverterFactory.create(moshi).withNullSerialization())
             .build()
     }
 
@@ -129,5 +130,13 @@ object NetworkModule {
         @MainClient retrofit: Retrofit
     ): VerificationApi {
         return retrofit.create(VerificationApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMeApi(
+        @MainClient retrofit: Retrofit
+    ): MeApi {
+        return retrofit.create(MeApi::class.java)
     }
 }

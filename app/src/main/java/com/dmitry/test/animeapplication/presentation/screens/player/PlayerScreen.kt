@@ -44,6 +44,7 @@ fun PlayerScreen(
     playerData: PlayerData,
     playerState: PlayerUiState,
     onSavePosition: (Long) -> Unit,
+    saveProgress: (Long, Long) -> Unit,
     onPrevEpisodeClick: () -> Unit,
     onNextEpisodeClick: () -> Unit,
     onEpisodeClick: () -> Unit
@@ -77,6 +78,7 @@ fun PlayerScreen(
         val observer = LifecycleEventObserver {_, event ->
             if (event == Lifecycle.Event.ON_STOP) {
                 onSavePosition(exoPlayer.currentPosition)
+                saveProgress(exoPlayer.currentPosition, exoPlayer.duration)
                 exoPlayer.pause()
             }
         }
@@ -91,7 +93,9 @@ fun PlayerScreen(
     DisposableEffect(Unit) {
         onDispose {
             onSavePosition(exoPlayer.currentPosition)
+            saveProgress(exoPlayer.currentPosition, exoPlayer.duration)
             exoPlayer.release()
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
     }
 
@@ -111,26 +115,23 @@ fun PlayerScreen(
         }
     }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
-    }
-
     val screenModifier =
         if (isLandscape) Modifier.fillMaxSize()
-        else Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+        else Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
 
     Column(
-        modifier = screenModifier
-            .statusBarsPadding(),
+        modifier = if (!isLandscape) screenModifier.statusBarsPadding() else screenModifier,
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         val playerModifier =
             if (isLandscape) Modifier.fillMaxSize()
-            else Modifier.fillMaxWidth().aspectRatio(16f / 9f)
+            else Modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 9f)
 
         Player(playerState,
             exoPlayer,
@@ -141,7 +142,8 @@ fun PlayerScreen(
             },
             compress = {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            }
+            },
+            saveProgress = saveProgress
         )
 
 

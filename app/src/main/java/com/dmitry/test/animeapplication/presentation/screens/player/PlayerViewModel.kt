@@ -3,11 +3,19 @@ package com.dmitry.test.animeapplication.presentation.screens.player
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.C
+import com.dmitry.test.animeapplication.domain.models.PlayerData
 import com.dmitry.test.animeapplication.domain.models.Provider
 import com.dmitry.test.animeapplication.domain.models.Quality
+import com.dmitry.test.animeapplication.domain.models.Voiceover
+import com.dmitry.test.animeapplication.domain.models.getAvailableEpisode
 import com.dmitry.test.animeapplication.domain.models.hlsByQuality
+import com.dmitry.test.animeapplication.domain.repository.CurrentProgressResult
 import com.dmitry.test.animeapplication.domain.repository.PlayerResult
+import com.dmitry.test.animeapplication.domain.repository.ProgressResult
 import com.dmitry.test.animeapplication.domain.usecase.GetPlayerByIdUseCase
+import com.dmitry.test.animeapplication.domain.usecase.GetProgressByIdUseCase
+import com.dmitry.test.animeapplication.domain.usecase.PutProgressUseCase
 import com.dmitry.test.animeapplication.presentation.navigation.Player
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,9 +28,12 @@ import javax.inject.Inject
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     private val getPlayerById: GetPlayerByIdUseCase,
+    private val getProgressById: GetProgressByIdUseCase,
+    private val putProgress: PutProgressUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val currentId: Int = checkNotNull(savedStateHandle.get<Int>(Player.ANIME_ID))
+
 
     private val _state = MutableStateFlow<PlayerViewState>(PlayerViewState.Loading)
     private val _playerState = MutableStateFlow(PlayerUiState())
@@ -43,31 +54,44 @@ class PlayerViewModel @Inject constructor(
                 is PlayerResult.Success ->{
                     _state.value = PlayerViewState.Success(result.playerData)
 
-                    val episode = result.playerData.episodes.firstOrNull { it.isAvailable } ?: run {
+                    if (result.playerData.getAvailableEpisode() == null){
                         _state.value = PlayerViewState.Error("No episodes available")
                         return@launch
                     }
 
-                    val source = episode.sources.find {it.provider == Provider.Anilibria } ?: run {
-                        _state.value = PlayerViewState.Error("No sources available")
-                        return@launch
-                    }
+                    when(val progressResult = getProgressById(currentId)){
+                        is CurrentProgressResult.Success -> {
 
-                    val voiceover = source.voiceovers.firstOrNull()?: run {
-                        _state.value = PlayerViewState.Error("No voiceovers available")
-                        return@launch
-                    }
+                            val preferred = progressResult.progress.toPreferredPlayback()
 
-                    val quality = voiceover.quality
+                            val initialState = resolveInitialState(result.playerData, preferred)
 
-                    _playerState.update {
-                        it.copy(
-                            selectedSource = source.provider,
-                            selectedEpisodeNumber = episode.id,
-                            selectedVoiceover = voiceover.voiceover,
-                            selectedQuality = quality,
-                            currentUrl = voiceover.hlsByQuality(quality)
-                        )
+                            _playerState.update {
+                                it.copy(
+                                    selectedEpisodeNumber = initialState.episodeNumber,
+                                    selectedSource = initialState.sourceProvider,
+                                    selectedVoiceoverId = initialState.voiceoverId,
+                                    selectedQuality = initialState.quality,
+                                    currentUrl = initialState.url,
+                                    currentPositionMs = initialState.positionMs
+                                )
+                            }
+                        }
+
+                        is CurrentProgressResult.Error -> {
+                            val initialState = resolveInitialState(result.playerData)
+
+                            _playerState.update {
+                                it.copy(
+                                    selectedEpisodeNumber = initialState.episodeNumber,
+                                    selectedSource = initialState.sourceProvider,
+                                    selectedVoiceoverId = initialState.voiceoverId,
+                                    selectedQuality = initialState.quality,
+                                    currentUrl = initialState.url,
+                                    currentPositionMs = initialState.positionMs
+                                )
+                            }
+                        }
                     }
                 }
                 is PlayerResult.Error ->
@@ -77,7 +101,10 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun selectEpisode(targetEp: Int){
-        val new = _playerState.value.copy(selectedEpisodeNumber = targetEp)
+        val new = _playerState.value.copy(
+            selectedEpisodeNumber = targetEp,
+            currentPositionMs = 0
+        )
 
         if (state.value is PlayerViewState.Success) {
             _playerState.update {
@@ -97,8 +124,8 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun selectVoiceover(targetVo: String){
-        val new = _playerState.value.copy(selectedVoiceover = targetVo)
+    fun selectVoiceover(targetVoiceoverId: Int){
+        val new = _playerState.value.copy(selectedVoiceoverId = targetVoiceoverId)
 
         if (state.value is PlayerViewState.Success) {
             _playerState.update {
@@ -134,11 +161,20 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun prevEpisode(){
+    fun prevEpisode() {
         val currentEpisode = _playerState.value.selectedEpisodeNumber
 
-        if (currentEpisode > 1){
+        if (currentEpisode > 1) {
             selectEpisode(currentEpisode - 1)
+        }
+    }
+
+    fun saveProgress(positionMs: Long, durationMs: Long) {
+
+        if (durationMs != C.TIME_UNSET && durationMs > 0) {
+            viewModelScope.launch {
+                putProgress(_playerState.value.toProgress(currentId, positionMs, durationMs))
+            }
         }
     }
 }

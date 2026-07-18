@@ -14,6 +14,7 @@ import com.dmitry.test.animeapplication.presentation.screens.ErrorScreen
 import com.dmitry.test.animeapplication.presentation.screens.detail.DetailScreen
 import com.dmitry.test.animeapplication.presentation.screens.detail.DetailViewModel
 import com.dmitry.test.animeapplication.presentation.screens.detail.DetailViewState
+import com.dmitry.test.animeapplication.presentation.screens.detail.StatusViewState
 
 fun NavGraphBuilder.detailsComposable(parent: String, navController: NavController){
     composable(
@@ -22,6 +23,7 @@ fun NavGraphBuilder.detailsComposable(parent: String, navController: NavControll
     ) {
         val viewModel: DetailViewModel = hiltViewModel()
         val state by viewModel.state.collectAsStateWithLifecycle()
+        val statusState by viewModel.statusState.collectAsStateWithLifecycle()
 
         when (state) {
             is DetailViewState.Loading -> {
@@ -31,7 +33,10 @@ fun NavGraphBuilder.detailsComposable(parent: String, navController: NavControll
                 DetailScreen(
                     onBackClick = { navController.popBackStack() },
                     onPlayClick = { navController.navigate(Player.build(it)) },
-                    animeData = (state as DetailViewState.Success).animeDetailed
+                    animeData = (state as DetailViewState.Success).animeDetailed,
+                    statusState = statusState,
+                    setStatus = { viewModel.putStatus(it) },
+                    setFavorite = viewModel::putFavorite
                 )
             }
             is DetailViewState.Error -> {

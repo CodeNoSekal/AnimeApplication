@@ -43,6 +43,7 @@ fun NavGraphBuilder.playerGraph(navController: NavController) {
                         playerData = (state as PlayerViewState.Success).playerData,
                         playerState = playerState,
                         onSavePosition = viewModel::savePosition,
+                        saveProgress = viewModel::saveProgress,
                         onPrevEpisodeClick = viewModel::prevEpisode,
                         onNextEpisodeClick = viewModel::nextEpisode,
                         onEpisodeClick = { navController.navigate(Player.EPISODES)}

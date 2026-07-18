@@ -32,7 +32,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.dmitry.test.animeapplication.R
-import com.dmitry.test.animeapplication.presentation.components.AnimeList
+import com.dmitry.test.animeapplication.presentation.components.list.AnimeList
 import com.dmitry.test.animeapplication.presentation.ui.theme.YumeTheme
 import com.dmitry.test.animeapplication.presentation.ui.theme.YumeType
 

@@ -2,10 +2,12 @@ package com.dmitry.test.animeapplication.di
 
 import com.dmitry.test.animeapplication.data.repository.AnimeRepositoryImpl
 import com.dmitry.test.animeapplication.data.repository.AuthRepositoryImpl
+import com.dmitry.test.animeapplication.data.repository.MeRepositoryImpl
 import com.dmitry.test.animeapplication.data.repository.PlayerRepositoryImpl
 import com.dmitry.test.animeapplication.data.repository.ProfileRepositoryImpl
 import com.dmitry.test.animeapplication.domain.repository.AnimeRepository
 import com.dmitry.test.animeapplication.domain.repository.AuthRepository
+import com.dmitry.test.animeapplication.domain.repository.MeRepository
 import com.dmitry.test.animeapplication.domain.repository.PlayerRepository
 import com.dmitry.test.animeapplication.domain.repository.ProfileRepository
 import dagger.Binds
@@ -42,4 +44,10 @@ abstract class RepositoryModule {
     abstract fun bindPlayerRepository(
         impl: PlayerRepositoryImpl
     ): PlayerRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMeRepository(
+        impl: MeRepositoryImpl
+    ): MeRepository
 }

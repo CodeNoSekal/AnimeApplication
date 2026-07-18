@@ -10,8 +10,19 @@ data class PlayerData(
     val episodes: List<Episode>
 )
 
-fun PlayerData.getEpisode(target: Int): Episode{
-    return episodes.find {it.id == target} ?: episodes.first()
+fun PlayerData.getEpisode(target: Int?): Episode?{
+    return episodes.find { it.id == target } ?: getAvailableEpisode()
+}
+
+
+fun PlayerData.getAvailableEpisode(): Episode?{
+    episodes.forEach {
+        if (it.isAvailable) {
+            return it
+        }
+    }
+
+    return null
 }
 
 data class Episode(
@@ -31,11 +42,12 @@ data class Source(
     val voiceovers: List<Voiceover>
 )
 
-fun Source.getVoiceover(target: String): Voiceover{
-    return voiceovers.find {it.voiceover == target} ?: voiceovers.first()
+fun Source.getVoiceover(target: Int?): Voiceover{
+    return voiceovers.find {it.voiceoverId == target} ?: voiceovers.first()
 }
 
 data class Voiceover(
+    val voiceoverId: Int,
     val url: String?,
     val type: String,
     val voiceover: String,
@@ -59,6 +71,12 @@ sealed class Provider {
     object Kodik : Provider()
     object Undefined : Provider()
 
+    fun toRaw(): String? = when (this) {
+        Kodik -> "kodik"
+        Anilibria -> "anilibria"
+        Undefined -> null
+    }
+
     companion object {
         fun getProvider(raw: String): Provider {
             return when (raw.lowercase()) {
@@ -69,6 +87,8 @@ sealed class Provider {
         }
     }
 }
+
+
 
 sealed class Quality {
     object FHD : Quality()

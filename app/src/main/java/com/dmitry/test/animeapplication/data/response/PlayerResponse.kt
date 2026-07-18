@@ -45,6 +45,8 @@ data class SourceResponse(
 
 @JsonClass(generateAdapter = true)
 data class VoiceoverResponse(
+    @param:Json(name="voiceover_id")
+    val voiceoverId: Int,
     val url: String? = null,
     val type: String = "",
     val voiceover: String = "",
@@ -96,6 +98,7 @@ fun List<SourceResponse>.toDomain(): List<Source> {
 fun List<VoiceoverResponse>.toDomain(): List<Voiceover> {
     return map {
         Voiceover(
+            voiceoverId = it.voiceoverId,
             url = it.url,
             type = it.type,
             voiceover = it.voiceover,
