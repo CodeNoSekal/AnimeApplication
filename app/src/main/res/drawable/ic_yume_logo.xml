@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Yume logo — self-contained crescent-moon mark on a rounded tile.
+  Use for splash, headers, About, etc. 160x160 viewport.
+  (The crescent "bite" is filled with the tile color, so keep tileColor in sync.)
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+
+    <!-- rounded tile -->
+    <path android:pathData="M44,0 L116,0 A44,44 0 0 1 160,44 L160,116 A44,44 0 0 1 116,160 L44,160 A44,44 0 0 1 0,116 L0,44 A44,44 0 0 1 44,0 Z"
+        android:fillColor="#171A2A" />
+
+    <!-- moon (accent gradient) -->
+    <path android:pathData="M42,78 a38,38 0 1,0 76,0 a38,38 0 1,0 -76,0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:startX="42" android:startY="40" android:endX="118" android:endY="116"
+                android:type="linear">
+                <item android:offset="0" android:color="#FF8A88FF" />
+                <item android:offset="1" android:color="#FF6E6CFF" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- bite (tile color) -->
+    <path android:pathData="M64,66 a32,32 0 1,0 64,0 a32,32 0 1,0 -64,0 Z"
+        android:fillColor="#171A2A" />
+
+    <!-- little stars -->
+    <path android:pathData="M58,52 m-2.6,0 a2.6,2.6 0 1,0 5.2,0 a2.6,2.6 0 1,0 -5.2,0 Z" android:fillColor="#A78BFA" />
+    <path android:pathData="M108,104 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0 Z" android:fillColor="#8A88FF" android:fillAlpha="0.8" />
+</vector>
