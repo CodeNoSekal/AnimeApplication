@@ -11,7 +11,7 @@ import com.dmitry.test.animeapplication.domain.models.hlsByQuality
 
 data class PlayerUiState(
     val selectedEpisodeNumber: Int = 1,
-    val selectedSource: Provider = Provider.Anilibria,
+    val selectedSource: Provider = Provider.Libria,
     val selectedVoiceoverId: Int? = null,
     val selectedQuality: Quality = Quality.FHD,
     val currentUrl: String? = null,

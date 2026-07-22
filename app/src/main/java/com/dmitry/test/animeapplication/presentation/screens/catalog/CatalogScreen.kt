@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,10 +45,10 @@ fun CatalogScreen(
     val topBarHeight = statusBarHeight + CatalogTopBarContentHeight
     val topBarHeightPx = with(density) { topBarHeight.toPx() }
 
-    var barOffsetPx by remember { mutableFloatStateOf(0f) }
+    var barOffsetPx by rememberSaveable { mutableFloatStateOf(0f) }
     val barOffsetDp = with(density) {barOffsetPx.toDp()}
 
-    val connection = remember {
+    val connection = remember(topBarHeightPx) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 val prev = barOffsetPx
@@ -56,6 +58,8 @@ fun CatalogScreen(
         }
     }
 
+    val listState = rememberLazyListState()
+
 
     Box(
         modifier = Modifier
@@ -63,6 +67,7 @@ fun CatalogScreen(
             .fillMaxSize().nestedScroll(connection)
     ) {
         AnimeList(
+            state = listState,
             animeItems = animeItems,
             onItemClicked = onItemClicked,
             contentPadding = PaddingValues(top = topBarHeight + barOffsetDp)

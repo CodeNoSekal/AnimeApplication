@@ -6,7 +6,7 @@ data class PlayerData(
     val episodesTotal: Int,
     val episodesAvailable: Int,
     val kodik: Boolean,
-    val anilibria: Boolean,
+    val libria: Boolean,
     val episodes: List<Episode>
 )
 
@@ -67,13 +67,15 @@ fun Voiceover.hlsByQuality(q: Quality): String? {
 }
 
 sealed class Provider {
-    object Anilibria : Provider()
+    object Libria : Provider()
+    object Liberty : Provider()
     object Kodik : Provider()
     object Undefined : Provider()
 
     fun toRaw(): String? = when (this) {
         Kodik -> "kodik"
-        Anilibria -> "anilibria"
+        Libria -> "libria"
+        Liberty -> "liberty"
         Undefined -> null
     }
 
@@ -81,7 +83,8 @@ sealed class Provider {
         fun getProvider(raw: String): Provider {
             return when (raw.lowercase()) {
                 "kodik" -> Kodik
-                "anilibria" -> Anilibria
+                "libria" -> Libria
+                "liberty" -> Liberty
                 else -> Undefined
             }
         }

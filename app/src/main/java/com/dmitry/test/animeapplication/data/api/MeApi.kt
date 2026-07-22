@@ -70,14 +70,12 @@ interface MeApi {
         q: String? = null,
     ): AnimeResponse
 
-    @GET("me/anime")
+    @GET("me/anime/favorite")
     suspend fun getAnimeListByFavourite(
         @Query("page")
         page: Int,
         @Query("per_page")
         perPage: Int = 50,
-        @Query("favorite")
-        favorite: Boolean,
         @Query("q")
         q: String? = null,
     ): AnimeResponse

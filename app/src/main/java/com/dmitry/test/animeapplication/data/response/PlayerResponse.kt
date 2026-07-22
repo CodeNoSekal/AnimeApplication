@@ -20,8 +20,8 @@ data class PlayerResponse(
     val episodesAvailable: Int = 0,
     @param:Json(name = "has_kodik")
     val kodik: Boolean = false,
-    @param:Json(name = "has_anilibria")
-    val anilibria: Boolean = false,
+    @param:Json(name = "has_libria")
+    val libria: Boolean = false,
     val episodes: List<EpisodeResponse> = emptyList()
 )
 
@@ -66,7 +66,7 @@ fun PlayerResponse.toDomain(): PlayerData {
         episodesTotal = episodesTotal,
         episodesAvailable = episodesAvailable,
         kodik = kodik,
-        anilibria = anilibria,
+        libria = libria,
         episodes = episodes.toDomain()
     )
 }

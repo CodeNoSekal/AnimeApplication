@@ -21,21 +21,16 @@ class CatalogViewModel @Inject constructor(
 
     val anime: Flow<PagingData<Anime>> =
         combine(
-            getAnimeCatalog(),
+            getAnimeCatalog().cachedIn(viewModelScope),
             observeLibraryUpdates(),
-        ){ pagingData, updates ->
+        ) { pagingData, updates ->
             pagingData.map { anime ->
-                val update = updates[anime.id]
-
-                if (update != null) {
+                updates[anime.id]?.let { update ->
                     anime.copy(
                         status = update.status,
                         favorite = update.favorite
                     )
-                } else {
-                    anime
-                }
+                } ?: anime
             }
-        }.cachedIn(viewModelScope)
-
+        }
 }

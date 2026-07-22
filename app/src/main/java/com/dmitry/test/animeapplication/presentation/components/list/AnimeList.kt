@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
 import com.dmitry.test.animeapplication.domain.models.Anime
 import com.dmitry.test.animeapplication.presentation.ui.theme.YumeTheme
@@ -37,6 +39,7 @@ import com.dmitry.test.animeapplication.presentation.ui.theme.YumeType
 
 @Composable
 fun AnimeList(
+    state: LazyListState,
     animeItems: LazyPagingItems<Anime>,
     onItemClicked: (Int) -> Unit,
     contentPadding: PaddingValues
@@ -45,27 +48,36 @@ fun AnimeList(
     val isInitialLoading =
         animeItems.loadState.refresh is LoadState.Loading && animeItems.itemCount == 0
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentPadding = contentPadding + PaddingValues(horizontal = 8.dp, vertical = 8.dp),
-    ) {
-        if (isInitialLoading) {
+    if (isInitialLoading) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentPadding = contentPadding + PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+        ) {
             items(count = 8) {
                 ListItemPlaceholder()
             }
         }
-        items(
-            count = animeItems.itemCount
-        ) { index ->
+    } else {
+        LazyColumn(
+            state = state,
+            modifier = Modifier
+                .fillMaxSize(),
+            contentPadding = contentPadding + PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+        ) {
+            items(
+                count = animeItems.itemCount,
+                key = animeItems.itemKey { anime -> anime.id }
+            ) { index ->
 
-            val anime = animeItems[index]
+                val anime = animeItems[index]
 
-            if (anime != null) {
-                ListItemCard(
-                    anime,
-                    onItemClicked
-                )
+                if (anime != null) {
+                    ListItemCard(
+                        anime,
+                        onItemClicked
+                    )
+                }
             }
         }
     }

@@ -40,14 +40,16 @@ fun RatingBadge(
                 id = R.drawable.star_24),
                 contentDescription = null,
                 modifier = Modifier
-                    .offset(y = 1.dp)
+                    .offset(y = (0).dp)
                     .size(12.dp),
                 tint = Color.Black.copy(alpha = 0.75f),
             )
             Icon(painterResource(
                 id = R.drawable.star_24),
                 contentDescription = null,
-                modifier = Modifier.size(12.dp),
+                modifier = Modifier
+                    .offset(y = (-1).dp)
+                    .size(12.dp),
                 tint = colors.rating
             )
         }

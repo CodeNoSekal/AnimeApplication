@@ -23,7 +23,11 @@ class AnimeRepositoryImpl @Inject constructor(
                 enablePlaceholders = false
             ),
             pagingSourceFactory = {
-                AnimePagingSource(api, null)
+                AnimePagingSource(
+                    loadPage = { page ->
+                        api.getAnimeList(page)
+                    }
+                )
             }
         ).flow
     }
@@ -35,7 +39,9 @@ class AnimeRepositoryImpl @Inject constructor(
                 enablePlaceholders = false
             ),
             pagingSourceFactory = {
-                AnimePagingSource(api, q)
+                AnimePagingSource(loadPage = { page ->
+                    api.getAnimeList(page = page, q = q)
+                })
             }
         ).flow
     }

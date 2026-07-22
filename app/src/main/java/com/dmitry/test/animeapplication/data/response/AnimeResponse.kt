@@ -36,10 +36,8 @@ data class AnimeShort(
     val year: Int?,
     @param:Json(name = "shikimori_rating")
     val rating: Double?,
-    val kind: String,
+    val kind: String?,
 
-    @param:Json(name = "in_library")
-    val inLibrary: Boolean,
     @param:Json(name = "my_status")
     val myStatus: String?,
     val favorite: Boolean,
@@ -59,15 +57,13 @@ data class AnimeDetailResponse(
     val year: Int?,
     @param:Json(name = "shikimori_rating")
     val rating: Double?,
-    val kind: String,
+    val kind: String?,
 
     @param:Json(name = "has_kodik")
     val hasKodik: Boolean,
-    @param:Json(name = "has_anilibria")
-    val hasAnilibria: Boolean,
+    @param:Json(name = "has_libria")
+    val hasLibria: Boolean,
 
-    @param:Json(name = "in_library")
-    val inLibrary: Boolean,
     @param:Json(name = "my_status")
     val myStatus: String?,
     val favorite: Boolean,

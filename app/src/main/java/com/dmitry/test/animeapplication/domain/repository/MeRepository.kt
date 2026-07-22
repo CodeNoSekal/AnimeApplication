@@ -1,5 +1,7 @@
 package com.dmitry.test.animeapplication.domain.repository
 
+import androidx.paging.PagingData
+import com.dmitry.test.animeapplication.domain.models.Anime
 import com.dmitry.test.animeapplication.domain.models.Progress
 import com.dmitry.test.animeapplication.domain.models.ProgressData
 import com.dmitry.test.animeapplication.domain.models.ProgressItemData
@@ -14,6 +16,9 @@ interface MeRepository {
     suspend fun getStatus(id: Int): StatusResult
     suspend fun putStatus(id: Int, status: String?): StatusResult
     suspend fun putFavorite(id: Int, favorite: Boolean): StatusResult
+
+    fun getAnimeListByStatus(status: String, q: String?): Flow<PagingData<Anime>>
+    fun getAnimeListByFavorite(q: String?): Flow<PagingData<Anime>>
 }
 
 sealed interface ProgressResult {

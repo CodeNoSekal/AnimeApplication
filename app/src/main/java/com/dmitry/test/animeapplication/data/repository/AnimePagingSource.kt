@@ -3,23 +3,20 @@ package com.dmitry.test.animeapplication.data.repository
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.dmitry.test.animeapplication.data.api.AnimeApi
+import com.dmitry.test.animeapplication.data.response.AnimeResponse
 import com.dmitry.test.animeapplication.data.response.toDomain
 import com.dmitry.test.animeapplication.domain.models.Anime
 import retrofit2.HttpException
 import java.io.IOException
 
 class AnimePagingSource (
-    private val api: AnimeApi,
-    private val q: String?
+    private val loadPage: suspend (page: Int) -> AnimeResponse
 ) : PagingSource<Int, Anime>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Anime> {
         return try {
             val currentPage = params.key ?: 1
 
-            val response = api.getAnimeList(
-                page = currentPage,
-                q = q
-            )
+            val response = loadPage(currentPage)
 
             val anime = response.items.map { animeData ->
                 animeData.toDomain()
@@ -45,4 +42,10 @@ class AnimePagingSource (
         }
     }
 
+}
+
+sealed class PagingType {
+    object Basic : PagingType()
+    object Favorite : PagingType()
+    object Status : PagingType()
 }
