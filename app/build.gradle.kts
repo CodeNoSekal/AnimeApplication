@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitry.test.animeapplication"
+    namespace = "com.dmitry.yume"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.dmitry.test.animeapplication"
+        applicationId = "com.dmitry.yume"
         minSdk = 24
         //noinspection OldTargetApi
         targetSdk = 36
