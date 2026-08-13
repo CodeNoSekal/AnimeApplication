@@ -1,0 +1,59 @@
+package com.dmitry.yume.data.repository
+
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import com.dmitry.yume.data.api.AnimeApi
+import com.dmitry.yume.data.response.toDomain
+import com.dmitry.yume.domain.models.Anime
+import com.dmitry.yume.domain.repository.AnimeDetailResult
+import com.dmitry.yume.domain.repository.AnimeRepository
+import kotlinx.coroutines.flow.Flow
+import okio.IOException
+import retrofit2.HttpException
+import javax.inject.Inject
+
+class AnimeRepositoryImpl @Inject constructor(
+    private val api: AnimeApi
+) : AnimeRepository {
+    override fun getAnime(): Flow<PagingData<Anime>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 50,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                AnimePagingSource(
+                    loadPage = { page ->
+                        api.getAnimeList(page)
+                    }
+                )
+            }
+        ).flow
+    }
+
+    override fun searchAnime(q: String): Flow<PagingData<Anime>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 50,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                AnimePagingSource(loadPage = { page ->
+                    api.getAnimeList(page = page, q = q)
+                })
+            }
+        ).flow
+    }
+
+    override suspend fun getAnimeById(id: Int): AnimeDetailResult {
+        try {
+            val response = api.getAnimeById(id)
+            return AnimeDetailResult.Success(response.toDomain())
+        } catch (e: IOException){
+            return AnimeDetailResult.Error(e.message)
+        } catch (e: HttpException){
+            return AnimeDetailResult.Error(e.message)
+        }
+    }
+}
