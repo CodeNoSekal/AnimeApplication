@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface MeRepository {
     val libraryUpdates: Flow<Map<Int, Status>>
-    suspend fun putProgress(progress: Progress)
+    suspend fun putProgress(progress: Progress): OperationResult
     suspend fun getProgress(): ProgressResult
     suspend fun getProgressById(id: Int): CurrentProgressResult
     suspend fun getStatus(id: Int): StatusResult

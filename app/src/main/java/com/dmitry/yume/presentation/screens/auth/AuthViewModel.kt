@@ -59,12 +59,24 @@ class AuthViewModel @Inject constructor(
         )
     }
 
-    fun toggleMode() = _state.update {
-        AuthUiState(mode = if (it.mode == AuthMode.Login) AuthMode.Register else AuthMode.Login)
+    fun toggleMode() = _state.update { state ->
+        if (state.isLoading) {
+            state
+        } else {
+            AuthUiState(
+                mode = if (state.mode == AuthMode.Login) {
+                    AuthMode.Register
+                } else {
+                    AuthMode.Login
+                }
+            )
+        }
     }
 
     fun submit() {
         val s = _state.value
+        if (s.isLoading) return
+
         when (s.mode) {
             AuthMode.Login -> {
                 val emailRes = AuthValidation.email(s.email)
@@ -93,9 +105,9 @@ class AuthViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, formError = null) }
+        _state.value = s.copy(isLoading = true, formError = null)
 
+        viewModelScope.launch {
             val result = when (s.mode) {
                 AuthMode.Login -> login(s.email, s.password)
                 AuthMode.Register -> register(s.email, s.password, s.displayName)

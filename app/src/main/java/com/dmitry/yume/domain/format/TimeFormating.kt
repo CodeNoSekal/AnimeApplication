@@ -1,7 +1,7 @@
 package com.dmitry.yume.domain.format
 
 fun formatTime(time: Long): String{
-    val secondsTotal = time / 1000
+    val secondsTotal = time.coerceAtLeast(0L) / 1000
     val minutesTotal = secondsTotal / 60
 
     val minutes = minutesTotal % 60

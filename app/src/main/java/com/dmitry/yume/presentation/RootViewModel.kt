@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,6 +18,7 @@ class RootViewModel @Inject constructor(
     private val validateSession: ValidateSessionUseCase,
     observeSessionState: ObserveSessionStateUseCase
 ) : ViewModel() {
+    private var validationJob: Job? = null
 
     init {
         retrySessionValidation()
@@ -31,7 +33,9 @@ class RootViewModel @Inject constructor(
             )
 
     fun retrySessionValidation() {
-        viewModelScope.launch {
+        if (validationJob?.isActive == true) return
+
+        validationJob = viewModelScope.launch {
             validateSession()
         }
     }

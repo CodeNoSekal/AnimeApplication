@@ -1,7 +1,6 @@
 package com.dmitry.yume.presentation.screens.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +48,10 @@ fun HomeScreen(
 
     val progressData by homeViewModel.progressState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(homeViewModel) {
+        homeViewModel.load()
+    }
+
     Scaffold(
         topBar = { HomeTopBar(onSearchClicked) }
     ) { innerPadding ->
@@ -60,10 +64,7 @@ fun HomeScreen(
             if (progressData is ProgressViewState.Success) {
                 ContinueTab(
                     data = (progressData as ProgressViewState.Success).progress,
-                    onPlayClick = { id ->
-                        onPlayClick(id)
-                        homeViewModel.load()
-                    }
+                    onPlayClick = onPlayClick
                 )
             }
         }

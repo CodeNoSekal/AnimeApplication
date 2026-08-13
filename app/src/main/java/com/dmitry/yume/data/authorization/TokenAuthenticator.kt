@@ -4,6 +4,7 @@ import com.dmitry.yume.data.api.RefreshApi
 import com.dmitry.yume.data.api.NoAuth
 import com.dmitry.yume.data.request.RefreshRequest
 import javax.inject.Provider
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
 import okhttp3.Request
@@ -72,6 +73,8 @@ class TokenAuthenticator @Inject constructor(
                     return@runBlocking null
                 } catch (e: IOException) {
                     return@runBlocking null
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (_: Exception) {
                     return@runBlocking null
                 }

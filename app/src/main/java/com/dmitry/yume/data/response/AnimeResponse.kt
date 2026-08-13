@@ -25,47 +25,47 @@ data class Meta(
 data class AnimeShort(
     @param:Json(name = "shikimori_id")
     val id: Int,
-    val title: String?,
+    val title: String? = null,
     @param:Json(name = "title_en")
-    val titleEn: String?,
+    val titleEn: String? = null,
     @param:Json(name = "poster_url")
-    val posterUrl: String?,
-    val year: Int?,
+    val posterUrl: String? = null,
+    val year: Int? = null,
     @param:Json(name = "shikimori_rating")
-    val rating: Double?,
-    val kind: String?,
+    val rating: Double? = null,
+    val kind: String? = null,
 
     @param:Json(name = "my_status")
-    val myStatus: String?,
-    val favorite: Boolean,
+    val myStatus: String? = null,
+    val favorite: Boolean = false,
     @param:Json(name = "my_score")
-    val myScore: Int?,
+    val myScore: Int? = null,
 )
 
 @JsonClass(generateAdapter = true)
 data class AnimeDetailResponse(
     @param:Json(name = "shikimori_id")
     val id: Int,
-    val title: String?,
+    val title: String? = null,
     @param:Json(name = "title_en")
-    val titleEn: String?,
+    val titleEn: String? = null,
     @param:Json(name = "poster_full")
-    val posterUrl: String?,
-    val year: Int?,
+    val posterUrl: String? = null,
+    val year: Int? = null,
     @param:Json(name = "shikimori_rating")
-    val rating: Double?,
-    val kind: String?,
+    val rating: Double? = null,
+    val kind: String? = null,
 
     @param:Json(name = "has_kodik")
-    val hasKodik: Boolean,
+    val hasKodik: Boolean = false,
     @param:Json(name = "has_libria")
-    val hasLibria: Boolean,
+    val hasLibria: Boolean = false,
 
     @param:Json(name = "my_status")
-    val myStatus: String?,
-    val favorite: Boolean,
+    val myStatus: String? = null,
+    val favorite: Boolean = false,
     @param:Json(name = "my_score")
-    val myScore: Int?,
+    val myScore: Int? = null,
 )
 
 fun AnimeShort.toDomain(): Anime {
@@ -88,6 +88,11 @@ fun AnimeDetailResponse.toDomain(): AnimeDetailed{
         titleEn = titleEn,
         posterUrl = posterUrl,
         year = year,
-        rating = rating
+        rating = rating,
+        hasKodik = hasKodik,
+        hasLibria = hasLibria,
+        status = myStatus,
+        favorite = favorite,
+        score = myScore
     )
 }

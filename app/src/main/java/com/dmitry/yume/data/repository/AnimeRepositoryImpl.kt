@@ -9,8 +9,7 @@ import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.repository.AnimeDetailResult
 import com.dmitry.yume.domain.repository.AnimeRepository
 import kotlinx.coroutines.flow.Flow
-import okio.IOException
-import retrofit2.HttpException
+import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 
 class AnimeRepositoryImpl @Inject constructor(
@@ -50,10 +49,10 @@ class AnimeRepositoryImpl @Inject constructor(
         try {
             val response = api.getAnimeById(id)
             return AnimeDetailResult.Success(response.toDomain())
-        } catch (e: IOException){
-            return AnimeDetailResult.Error(e.message)
-        } catch (e: HttpException){
-            return AnimeDetailResult.Error(e.message)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception){
+            return AnimeDetailResult.Error(e.message ?: "Не удалось загрузить данные аниме")
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.dmitry.yume.presentation.screens.detail
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +15,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,13 +36,16 @@ class DetailViewModel @Inject constructor(
     val statusState: StateFlow<StatusViewState> = _statusState.asStateFlow()
 
     private val currentId: Int = checkNotNull(savedStateHandle.get<Int>(Details.ANIME_ID))
+    private val statusMutationMutex = Mutex()
+    private var loadJob: Job? = null
 
     init {
         load()
     }
 
     fun load() {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _state.value = DetailViewState.Loading
             _statusState.value = StatusViewState.Loading
 
@@ -51,41 +56,44 @@ class DetailViewModel @Inject constructor(
                     _state.value = DetailViewState.Error(result.message)
             }
 
-            when (val statusResult = getStatusById(currentId)) {
-                is StatusResult.Success ->
-                    _statusState.value = StatusViewState.Success(statusResult.status)
-                is StatusResult.Error ->
-                    _statusState.value = StatusViewState.Error(statusResult.message)
+            statusMutationMutex.withLock {
+                when (val statusResult = getStatusById(currentId)) {
+                    is StatusResult.Success ->
+                        _statusState.value = StatusViewState.Success(statusResult.status)
+                    is StatusResult.Error ->
+                        _statusState.value = StatusViewState.Error(statusResult.message)
+                }
             }
         }
     }
 
     fun putFavorite() {
         viewModelScope.launch {
-            val currentStatus = statusState.value as? StatusViewState.Success ?: return@launch
-            val favorite = currentStatus.status.favorite
+            statusMutationMutex.withLock {
+                val currentStatus = statusState.value as? StatusViewState.Success
+                    ?: return@withLock
+                val favorite = currentStatus.status.favorite
 
-            when (val statusResult = putFavorite(currentId, !favorite)) {
-                is StatusResult.Success ->
-                    _statusState.value = StatusViewState.Success(statusResult.status)
-                is StatusResult.Error ->
-                    Log.e(TAG, "putFavorite failed, id=$currentId message=${statusResult.message}")
+                when (val statusResult = putFavorite(currentId, !favorite)) {
+                    is StatusResult.Success ->
+                        _statusState.value = StatusViewState.Success(statusResult.status)
+                    is StatusResult.Error ->
+                        _statusState.value = StatusViewState.Error(statusResult.message)
+                }
             }
         }
     }
 
     fun putStatus(status: String?) {
         viewModelScope.launch {
-            when (val statusResult = putStatus(currentId, status)) {
-                is StatusResult.Success ->
-                    _statusState.value = StatusViewState.Success(statusResult.status)
-                is StatusResult.Error ->
-                    Log.e(TAG, "putStatus failed, id=$currentId status=$status message=${statusResult.message}")
+            statusMutationMutex.withLock {
+                when (val statusResult = putStatus(currentId, status)) {
+                    is StatusResult.Success ->
+                        _statusState.value = StatusViewState.Success(statusResult.status)
+                    is StatusResult.Error ->
+                        _statusState.value = StatusViewState.Error(statusResult.message)
+                }
             }
         }
-    }
-
-    private companion object {
-        const val TAG = "DetailViewModel"
     }
 }

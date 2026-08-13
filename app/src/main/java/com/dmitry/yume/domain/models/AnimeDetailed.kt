@@ -6,5 +6,10 @@ data class AnimeDetailed(
     val titleEn: String?,
     val posterUrl: String?,
     val year: Int?,
-    val rating: Double?
+    val rating: Double?,
+    val hasKodik: Boolean = false,
+    val hasLibria: Boolean = false,
+    val status: String? = null,
+    val favorite: Boolean = false,
+    val score: Int? = null
 )

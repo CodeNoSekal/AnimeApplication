@@ -1,6 +1,5 @@
 package com.dmitry.yume.data.repository
 
-import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -14,9 +13,11 @@ import com.dmitry.yume.domain.models.Progress
 import com.dmitry.yume.domain.models.Status
 import com.dmitry.yume.domain.repository.CurrentProgressResult
 import com.dmitry.yume.domain.repository.MeRepository
+import com.dmitry.yume.domain.repository.OperationResult
 import com.dmitry.yume.domain.repository.ProgressResult
 import com.dmitry.yume.domain.repository.StatusResult
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -30,19 +31,17 @@ class MeRepositoryImpl @Inject constructor(
 
     private val _libraryUpdates = MutableStateFlow<Map<Int, Status>>(emptyMap())
     override val libraryUpdates = _libraryUpdates.asStateFlow()
-
     private val librarySources = CopyOnWriteArraySet<AnimePagingSource>()
 
-    override suspend fun putProgress(progress: Progress) {
+    override suspend fun putProgress(progress: Progress): OperationResult =
         try {
             meApi.putProgress(ProgressRequest.from(progress))
-
-        } catch (e: HttpException) {
-            logHttpError("putProgress", e)
+            OperationResult.Success
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.e(TAG, "putProgress failed", e)
+            OperationResult.Error(e.safeMessage("Не удалось сохранить прогресс"))
         }
-    }
 
     override suspend fun getProgress(): ProgressResult {
         try {
@@ -51,11 +50,11 @@ class MeRepositoryImpl @Inject constructor(
             return ProgressResult.Success(result.toDomain())
 
         } catch (e: HttpException) {
-            logHttpError("getProgress", e)
-            return ProgressResult.Error(e.message)
+            return ProgressResult.Error(e.safeMessage("Не удалось загрузить прогресс"))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.e(TAG, "getProgress failed", e)
-            return ProgressResult.Error(e.message)
+            return ProgressResult.Error(e.safeMessage("Не удалось загрузить прогресс"))
         }
     }
 
@@ -66,11 +65,11 @@ class MeRepositoryImpl @Inject constructor(
             return CurrentProgressResult.Success(result.toDomain())
 
         } catch (e: HttpException) {
-            logHttpError("getProgressById id=$id", e)
-            return CurrentProgressResult.Error(e.message)
+            return CurrentProgressResult.Error(e.safeMessage("Не удалось загрузить прогресс"))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.e(TAG, "getProgressById failed, id=$id", e)
-            return CurrentProgressResult.Error(e.message)
+            return CurrentProgressResult.Error(e.safeMessage("Не удалось загрузить прогресс"))
         }
     }
 
@@ -85,11 +84,11 @@ class MeRepositoryImpl @Inject constructor(
             return StatusResult.Success(updated)
 
         } catch (e: HttpException) {
-            logHttpError("getStatus id=$id", e)
-            return StatusResult.Error(e.message)
+            return StatusResult.Error(e.safeMessage("Не удалось загрузить статус"))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.e(TAG, "getStatus failed, id=$id", e)
-            return StatusResult.Error(e.message)
+            return StatusResult.Error(e.safeMessage("Не удалось загрузить статус"))
         }
     }
 
@@ -105,11 +104,11 @@ class MeRepositoryImpl @Inject constructor(
             return StatusResult.Success(updated)
 
         } catch (e: HttpException) {
-            logHttpError("putStatus id=$id status=$status", e)
-            return StatusResult.Error(e.message)
+            return StatusResult.Error(e.safeMessage("Не удалось изменить статус"))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.e(TAG, "putStatus failed, id=$id status=$status", e)
-            return StatusResult.Error(e.message)
+            return StatusResult.Error(e.safeMessage("Не удалось изменить статус"))
         }
     }
 
@@ -125,11 +124,11 @@ class MeRepositoryImpl @Inject constructor(
             return StatusResult.Success(updated)
 
         } catch (e: HttpException) {
-            logHttpError("putFavorite id=$id favorite=$favorite", e)
-            return StatusResult.Error(e.message)
+            return StatusResult.Error(e.safeMessage("Не удалось изменить избранное"))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.e(TAG, "putFavorite failed, id=$id favorite=$favorite", e)
-            return StatusResult.Error(e.message)
+            return StatusResult.Error(e.safeMessage("Не удалось изменить избранное"))
         }
     }
 
@@ -181,12 +180,9 @@ class MeRepositoryImpl @Inject constructor(
         librarySources.forEach { it.invalidate() }
     }
 
-    private fun logHttpError(action: String, e: HttpException) {
-        val errorBody = e.response()?.errorBody()?.string()
-        Log.e(TAG, "$action failed: HTTP ${e.code()} ${e.message()} body=$errorBody", e)
-    }
-
-    private companion object {
-        const val TAG = "MeRepository"
-    }
+    private fun Exception.safeMessage(fallback: String): String =
+        when (this) {
+            is HttpException -> "$fallback (HTTP ${code()})"
+            else -> message?.takeIf { it.isNotBlank() } ?: fallback
+        }
 }

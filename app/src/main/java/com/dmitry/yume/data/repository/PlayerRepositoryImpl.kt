@@ -4,8 +4,7 @@ import com.dmitry.yume.data.api.PlayerApi
 import com.dmitry.yume.data.response.toDomain
 import com.dmitry.yume.domain.repository.PlayerRepository
 import com.dmitry.yume.domain.repository.PlayerResult
-import okio.IOException
-import retrofit2.HttpException
+import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 
 class PlayerRepositoryImpl @Inject constructor(
@@ -15,10 +14,10 @@ class PlayerRepositoryImpl @Inject constructor(
         try {
             val response = api.getPlayerById(id)
             return PlayerResult.Success(response.toDomain())
-        } catch (e: IOException){
-            return PlayerResult.Error(e.message)
-        } catch (e: HttpException){
-            return PlayerResult.Error(e.message)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception){
+            return PlayerResult.Error(e.message ?: "Не удалось загрузить плеер")
         }
     }
 

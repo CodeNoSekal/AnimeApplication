@@ -13,7 +13,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.intl.Locale
 import com.dmitry.yume.domain.models.PlayerData
 
 @SuppressLint("SourceLockedOrientationActivity")

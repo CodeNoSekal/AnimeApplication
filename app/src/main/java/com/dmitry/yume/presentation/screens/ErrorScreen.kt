@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun ErrorScreen(
-
+    message: String = "Ошибка"
 ) {
     Column(
         modifier = Modifier
@@ -21,6 +21,6 @@ fun ErrorScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Error")
+        Text(message)
     }
 }

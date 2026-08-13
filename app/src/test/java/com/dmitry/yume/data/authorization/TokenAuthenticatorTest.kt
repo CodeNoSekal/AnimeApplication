@@ -198,6 +198,21 @@ class TokenAuthenticatorTest {
         assertEquals(SessionState.Authenticated(NEW_USER), fixture.sessionManager.sessionState.value)
     }
 
+    @Test
+    fun `validation loaded from storage invalidates an older in memory generation`() = runBlocking {
+        val storage = FakeTokenStorage()
+        val sessionManager = AuthSessionManager(storage)
+        sessionManager.establishSession(OLD_TOKENS, USER)
+        val staleSession = sessionManager.currentSession()!!
+
+        storage.saveTokens(NEW_LOGIN_TOKENS.accessToken, NEW_LOGIN_TOKENS.refreshToken)
+        val loadedSession = sessionManager.beginValidation()!!
+
+        assertTrue(loadedSession.generation > staleSession.generation)
+        assertEquals(false, sessionManager.setAuthenticatedIfCurrent(staleSession.generation, USER))
+        assertEquals(NEW_LOGIN_TOKENS, sessionManager.currentTokens())
+    }
+
     private fun fixture(
         refresh: suspend (RefreshRequest) -> AuthResponse
     ): Fixture {

@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.dmitry.yume.data.response.AnimeResponse
 import com.dmitry.yume.data.response.toDomain
 import com.dmitry.yume.domain.models.Anime
+import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -29,6 +30,10 @@ class AnimePagingSource (
         } catch (e: IOException) {
             LoadResult.Error(e)
         } catch (e: HttpException) {
+            LoadResult.Error(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
             LoadResult.Error(e)
         }
     }

@@ -34,7 +34,11 @@ class AuthSessionManager @Inject constructor(
     }
 
     suspend fun beginValidation(): SessionSnapshot? = mutex.withLock {
+        val previousTokens = tokenSnapshot
         tokenStorage.getTokens().also { tokens ->
+            if (tokens != previousTokens) {
+                generation++
+            }
             tokenSnapshot = tokens
             _sessionState.value = if (tokens == null) {
                 SessionState.Unauthenticated

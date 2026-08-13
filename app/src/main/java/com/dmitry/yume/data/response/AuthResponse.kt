@@ -10,7 +10,7 @@ data class AuthResponse(
     val accessToken: String,
     @param:Json(name = "refresh_token")
     val refreshToken: String,
-    val user: UserDTO?
+    val user: UserDTO? = null
 )
 
 @JsonClass(generateAdapter = true)
@@ -28,7 +28,7 @@ data class UserDTO(
     @param:Json(name = "display_name")
     val displayName: String,
     @param:Json(name = "avatar_url")
-    val avatarUrl: String?,
+    val avatarUrl: String? = null,
     @param:Json(name = "is_admin")
     val isAdmin: Boolean
 )

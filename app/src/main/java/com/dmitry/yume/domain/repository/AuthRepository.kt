@@ -31,9 +31,9 @@ enum class AuthErrorReason {
 interface AuthRepository {
     suspend fun register(email: String, password: String, displayName: String) : AuthResult
     suspend fun login(email: String, password: String) : AuthResult
-    suspend fun sendCode()
+    suspend fun sendCode(): OperationResult
     suspend fun verifyEmail(code: String): AuthResult
-    suspend fun logout()
+    suspend fun logout(): OperationResult
     suspend fun validateSession()
     val sessionState: Flow<SessionState>
     suspend fun refreshCurrentUser(): SessionRefreshResult

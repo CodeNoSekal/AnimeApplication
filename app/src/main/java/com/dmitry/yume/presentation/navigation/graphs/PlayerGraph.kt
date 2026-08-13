@@ -49,7 +49,10 @@ fun NavGraphBuilder.playerGraph(navController: NavController) {
                     )
                 }
                 is PlayerViewState.Error -> {
-                    ErrorScreen()
+                    ErrorScreen(
+                        message = (state as PlayerViewState.Error).message
+                            ?: "Не удалось загрузить плеер"
+                    )
                 }
             }
         }
@@ -85,7 +88,10 @@ fun NavGraphBuilder.playerGraph(navController: NavController) {
                     )
                 }
                 is PlayerViewState.Error -> {
-                    ErrorScreen()
+                    ErrorScreen(
+                        message = (state as PlayerViewState.Error).message
+                            ?: "Не удалось загрузить плеер"
+                    )
                 }
             }
         }

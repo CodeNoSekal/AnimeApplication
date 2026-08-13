@@ -97,7 +97,7 @@ fun RootScreen(
     LaunchedEffect(sessionState) {
         if (!isAuthenticated) {
             navController.navigate(Destinations.AUTH_GRAPH) {
-                popUpTo(0) {inclusive = true}
+                popUpTo(Destinations.ROOT) { inclusive = true }
                 launchSingleTop = true
             }
         }

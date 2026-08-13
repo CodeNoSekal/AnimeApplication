@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmitry.yume.domain.models.SessionState
 import com.dmitry.yume.domain.models.User
 import com.dmitry.yume.domain.repository.SessionRefreshResult
+import com.dmitry.yume.domain.repository.OperationResult
 import com.dmitry.yume.domain.usecase.LogoutUseCase
 import com.dmitry.yume.domain.usecase.ObserveSessionStateUseCase
 import com.dmitry.yume.domain.usecase.RefreshCurrentUserUseCase
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,10 +42,13 @@ class ProfileViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(ProfileUiState())
     val state: StateFlow<ProfileUiState> = _state.asStateFlow()
+    private var refreshJob: Job? = null
+    private var logoutJob: Job? = null
 
 
     fun refresh() {
-        viewModelScope.launch {
+        refreshJob?.cancel()
+        refreshJob = viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             when (val result = refreshUser()) {
                 is SessionRefreshResult.Success ->
@@ -55,5 +60,17 @@ class ProfileViewModel @Inject constructor(
     }
 
 
-    fun logout() = viewModelScope.launch { logoutUseCase() }
+    fun logout() {
+        if (logoutJob?.isActive == true) return
+
+        refreshJob?.cancel()
+        logoutJob = viewModelScope.launch {
+            when (val result = logoutUseCase()) {
+                is OperationResult.Success -> Unit
+                is OperationResult.Error -> _state.update {
+                    it.copy(error = result.message)
+                }
+            }
+        }
+    }
 }

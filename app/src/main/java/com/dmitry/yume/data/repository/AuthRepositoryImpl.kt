@@ -13,6 +13,7 @@ import com.dmitry.yume.domain.models.SessionState
 import com.dmitry.yume.domain.repository.AuthErrorReason
 import com.dmitry.yume.domain.repository.AuthRepository
 import com.dmitry.yume.domain.repository.AuthResult
+import com.dmitry.yume.domain.repository.OperationResult
 import com.dmitry.yume.domain.repository.SessionRefreshResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
@@ -51,6 +52,10 @@ class AuthRepositoryImpl @Inject constructor(
             }
         } catch (e: IOException) {
             return SessionRefreshResult.Error("Нет подключения к интернету")
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            return SessionRefreshResult.Error("Не удалось обработать ответ сервера")
         }
     }
 
@@ -72,17 +77,18 @@ class AuthRepositoryImpl @Inject constructor(
             AuthResult.Success
         }
 
-    override suspend fun sendCode() {
+    override suspend fun sendCode(): OperationResult =
         try {
             verificationApi.sendCode()
-        } catch (_: Exception){
-
-        } finally {
+            OperationResult.Success
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            OperationResult.Error(e.operationMessage("Не удалось отправить код"))
         }
-    }
 
     override suspend fun verifyEmail(code: String): AuthResult =
-        safeAuthCall {
+        safeAuthCall(validationReason = AuthErrorReason.IncorrectCode) {
             val session = sessionManager.currentSession()
                 ?: return@safeAuthCall AuthResult.Error("Сессия истекла")
 
@@ -101,17 +107,21 @@ class AuthRepositoryImpl @Inject constructor(
             AuthResult.Success
         }
 
-    override suspend fun logout() {
-        try {
+    override suspend fun logout(): OperationResult {
+        val result = try {
             authApi.logout()
+            OperationResult.Success
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            OperationResult.Error(e.operationMessage("Не удалось завершить сессию на сервере"))
         } finally {
             withContext(NonCancellable) {
                 sessionManager.invalidate()
             }
         }
+
+        return result
     }
 
     override suspend fun validateSession() {
@@ -130,6 +140,10 @@ class AuthRepositoryImpl @Inject constructor(
             }
         } catch (_: IOException) {
             sessionManager.setUnavailableIfCurrent(session.generation)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            sessionManager.setUnavailableIfCurrent(session.generation)
         }
     }
 
@@ -145,12 +159,17 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    private inline fun safeAuthCall(block: () -> AuthResult): AuthResult =
+    private suspend inline fun safeAuthCall(
+        validationReason: AuthErrorReason = AuthErrorReason.Validation,
+        block: () -> AuthResult
+    ): AuthResult =
         try {
             block()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: HttpException) {
             val reason = when(e.code()) {
-                400, 422 -> AuthErrorReason.Validation
+                400, 422 -> validationReason
                 401 -> AuthErrorReason.InvalidCredentials
                 409 -> AuthErrorReason.EmailAlreadyUsed
                 in 500..599 -> AuthErrorReason.Server
@@ -159,6 +178,8 @@ class AuthRepositoryImpl @Inject constructor(
             AuthResult.Error(message = mapMessage(reason, e), reason = reason)
         } catch (e: IOException) {
             AuthResult.Error("Нет подключения к интернету", AuthErrorReason.Network)
+        } catch (_: Exception) {
+            AuthResult.Error("Не удалось обработать ответ сервера", AuthErrorReason.Unknown)
         }
 
     private fun mapMessage(reason: AuthErrorReason, e: HttpException): String = when (reason) {
@@ -175,4 +196,11 @@ class AuthRepositoryImpl @Inject constructor(
             e.response()?.errorBody()?.string()?.takeIf { it.isNotBlank() }
                 ?.let { JSONObject(it).optString("detail").ifBlank { null } }
         } catch (_: Exception) { null }
+
+    private fun Exception.operationMessage(fallback: String): String =
+        when (this) {
+            is HttpException -> "$fallback (HTTP ${code()})"
+            is IOException -> "Нет подключения к интернету"
+            else -> message?.takeIf { it.isNotBlank() } ?: fallback
+        }
 }

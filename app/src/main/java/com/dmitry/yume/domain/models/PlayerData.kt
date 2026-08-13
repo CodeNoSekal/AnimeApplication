@@ -10,21 +10,6 @@ data class PlayerData(
     val episodes: List<Episode>
 )
 
-fun PlayerData.getEpisode(target: Int?): Episode?{
-    return episodes.find { it.id == target } ?: getAvailableEpisode()
-}
-
-
-fun PlayerData.getAvailableEpisode(): Episode?{
-    episodes.forEach {
-        if (it.isAvailable) {
-            return it
-        }
-    }
-
-    return null
-}
-
 data class Episode(
     val id: Int,
     val title: String?,
@@ -33,18 +18,10 @@ data class Episode(
     val sources: List<Source>
 )
 
-fun Episode.getSource(target: Provider): Source{
-    return sources.find {it.provider == target} ?: sources.first()
-}
-
 data class Source(
     val provider: Provider,
     val voiceovers: List<Voiceover>
 )
-
-fun Source.getVoiceover(target: Int?): Voiceover{
-    return voiceovers.find {it.voiceoverId == target} ?: voiceovers.first()
-}
 
 data class Voiceover(
     val voiceoverId: Int,
@@ -56,15 +33,6 @@ data class Voiceover(
     val hls720: String?,
     val hls1080: String?
 )
-
-fun Voiceover.hlsByQuality(q: Quality): String? {
-    return when (q) {
-        Quality.FHD -> hls1080
-        Quality.HD -> hls720
-        Quality.SD -> hls480
-        Quality.Undefined -> hls1080 ?: hls720 ?: hls480 ?: url
-    }
-}
 
 sealed class Provider {
     object Libria : Provider()

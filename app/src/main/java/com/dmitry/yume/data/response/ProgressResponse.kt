@@ -9,16 +9,16 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class ProgressResponse(
-    val items: List<ProgressItem>
+    val items: List<ProgressItem> = emptyList()
 )
 
 @JsonClass(generateAdapter = true)
 data class ProgressItem(
     @param:Json(name = "shikimori_id")
     val id: Int,
-    val title: String?,
+    val title: String? = null,
     @param:Json(name = "poster_thumb")
-    val posterUrl: String?,
+    val posterUrl: String? = null,
     @param:Json(name = "episode_number")
     val episodeNumber: Int,
     @param:Json(name = "position_ms")
@@ -28,9 +28,9 @@ data class ProgressItem(
     @param:Json(name = "is_completed")
     val isCompleted: Boolean,
     @param:Json(name = "source_provider")
-    val sourceProvider: String,
+    val sourceProvider: String? = null,
     @param:Json(name = "voiceover_id")
-    val voiceoverId: Int,
+    val voiceoverId: Int? = null,
 )
 
 fun ProgressResponse.toDomain(): ProgressData =
@@ -59,6 +59,6 @@ fun ProgressItem.toDomain(): ProgressItemData =
         positionMs,
         durationMs,
         isCompleted,
-        Provider.getProvider(sourceProvider),
+        sourceProvider?.let(Provider::getProvider),
         voiceoverId
     )

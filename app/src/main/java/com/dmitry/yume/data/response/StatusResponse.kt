@@ -8,10 +8,10 @@ import com.squareup.moshi.JsonClass
 data class StatusResponse(
     @param:Json(name = "anime_id")
     val animeId: Int,
-    val status: String?,
-    val favorite: Boolean,
-    val score: Int?,
-    val review: String?
+    val status: String? = null,
+    val favorite: Boolean = false,
+    val score: Int? = null,
+    val review: String? = null
 )
 
 fun StatusResponse.toDomain(): Status =

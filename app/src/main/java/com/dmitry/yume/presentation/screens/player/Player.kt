@@ -84,7 +84,9 @@ fun Player(
     DisposableEffect(exoPlayer) {
         val listener = object : androidx.media3.common.Player.Listener {
             override fun onIsPlayingChanged(value: Boolean) {
-                saveProgress()
+                if (!value) {
+                    saveProgress()
+                }
                 isPlaying = value
             }
         }
@@ -150,7 +152,6 @@ fun Player(
                                 IconButton(
                                     onClick = {
                                         exoPlayer.pause()
-                                        saveProgress()
                                     }
                                 ) {
                                     Icon(painterResource(R.drawable.pause_24), "pause", modifier = Modifier.size(32.dp))
@@ -159,7 +160,6 @@ fun Player(
                                 IconButton(
                                     onClick = {
                                         exoPlayer.play()
-                                        saveProgress()
                                     }
                                 ) {
                                     Icon(painterResource(R.drawable.play_24), "play", modifier = Modifier.size(32.dp))
