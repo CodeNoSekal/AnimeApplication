@@ -14,7 +14,7 @@ fun NavGraphBuilder.searchComposable(parent: String, navController: NavControlle
     ) {
         SearchScreen(
             onItemClicked = { id ->
-                navController.navigate(Details.build(Destinations.CATALOG, id))
+                navController.navigate(Details.build(parent, id))
             },
             onBackClick = {
                 navController.popBackStack()

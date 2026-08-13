@@ -46,7 +46,7 @@ fun CatalogTopBar(
                     modifier = Modifier
                         .weight(0.5f),
                     text = "Сортировка",
-                    icon = R.drawable.bars_sort_18
+                    icon = R.drawable.bars_sort_24
                 )
 
                 BaseButton(
@@ -54,7 +54,7 @@ fun CatalogTopBar(
                     modifier = Modifier
                         .weight(0.5f),
                     text = "Фильтры",
-                    icon = R.drawable.filter_18
+                    icon = R.drawable.filter_24
                 )
             }
         }

@@ -1,6 +1,7 @@
 package com.dmitry.yume.data.authorization
 
 import com.dmitry.yume.data.api.RefreshApi
+import com.dmitry.yume.data.api.NoAuth
 import com.dmitry.yume.data.request.RefreshRequest
 import javax.inject.Provider
 import kotlinx.coroutines.runBlocking
@@ -9,11 +10,12 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
 import retrofit2.HttpException
+import retrofit2.Invocation
 import java.io.IOException
 import javax.inject.Inject
 
 class TokenAuthenticator @Inject constructor(
-    private val tokenStorage: TokenStorage,
+    private val sessionManager: AuthSessionManager,
     private val refreshApi: Provider<RefreshApi>
 ) : Authenticator {
 
@@ -23,70 +25,93 @@ class TokenAuthenticator @Inject constructor(
         route: Route?,
         response: Response
     ): Request? {
-        if (responseCount(response) >= 2)
-            return null
+        val skipAuth = response.request.tag(Invocation::class.java)
+            ?.method()?.isAnnotationPresent(NoAuth::class.java) == true
+        if (skipAuth) return null
 
         val failedAuthorization =
             response.request.header("Authorization")
 
         return synchronized(refreshLock) {
             runBlocking {
-                val currentAccessToken =
-                    tokenStorage.getAccessToken()
+                val currentTokens = sessionManager.currentTokens()
+                val currentAuthorization = currentTokens?.bearerAuthorization()
 
-                val currentAuthorization =
-                    currentAccessToken?.let { "Bearer $it" }
+                if (responseCount(response) >= 2) {
+                    if (currentAuthorization != null && currentAuthorization != failedAuthorization) {
+                        return@runBlocking response.request.withAuthorization(currentAuthorization)
+                    }
 
-                if (
-                    currentAuthorization != null &&
-                    currentAuthorization != failedAuthorization
-                ) {
-                    return@runBlocking response.request
-                        .newBuilder()
-                        .header("Authorization", currentAuthorization)
-                        .build()
+                    currentTokens?.let {
+                        sessionManager.invalidateIfCurrent(it.refreshToken)
+                    }
+                    return@runBlocking null
                 }
 
-                val refreshToken =
-                    tokenStorage.getRefreshToken()
-                        ?: return@runBlocking null
+                if (currentAuthorization != null && currentAuthorization != failedAuthorization) {
+                    return@runBlocking response.request.withAuthorization(currentAuthorization)
+                }
+
+                val tokens = currentTokens ?: run {
+                    sessionManager.invalidate()
+                    return@runBlocking null
+                }
 
                 val newTokens = try {
                     refreshApi.get().refresh(
-                        RefreshRequest(refreshToken)
+                        RefreshRequest(tokens.refreshToken)
                     )
                 } catch (e: HttpException) {
                     if (e.code() == 401 || e.code() == 403) {
-                        tokenStorage.clear()
+                        val invalidated = sessionManager.invalidateIfCurrent(tokens.refreshToken)
+                        if (!invalidated) {
+                            return@runBlocking retryWithLatestToken(response.request, failedAuthorization)
+                        }
                     }
 
                     return@runBlocking null
                 } catch (e: IOException) {
                     return@runBlocking null
-                }
-
-                val latestRefreshToken = tokenStorage.getRefreshToken()
-
-                if (latestRefreshToken != refreshToken) {
+                } catch (_: Exception) {
                     return@runBlocking null
                 }
 
-                tokenStorage.saveTokens(
+                val refreshedTokens = StoredTokens(
                     accessToken = newTokens.accessToken,
                     refreshToken = newTokens.refreshToken
                 )
+                val replaced = sessionManager.replaceTokensIfCurrent(
+                    expectedRefreshToken = tokens.refreshToken,
+                    newTokens = refreshedTokens
+                )
 
-                response.request
-                    .newBuilder()
-                    .header(
-                        "Authorization",
-                        "Bearer ${newTokens.accessToken}"
-                    )
-                    .build()
+                if (replaced) {
+                    response.request.withAuthorization(refreshedTokens.bearerAuthorization())
+                } else {
+                    retryWithLatestToken(response.request, failedAuthorization)
+                }
             }
         }
     }
 
+    private fun retryWithLatestToken(
+        request: Request,
+        failedAuthorization: String?
+    ): Request? {
+        val latestAuthorization = sessionManager.currentTokens()?.bearerAuthorization()
+        return if (latestAuthorization != null && latestAuthorization != failedAuthorization) {
+            request.withAuthorization(latestAuthorization)
+        } else {
+            null
+        }
+    }
+
+    private fun StoredTokens.bearerAuthorization(): String = "Bearer $accessToken"
+
+    private fun Request.withAuthorization(authorization: String): Request =
+        newBuilder()
+            .header("Authorization", authorization)
+            .build()
 
     private fun responseCount(r: Response): Int {
         var n = 1

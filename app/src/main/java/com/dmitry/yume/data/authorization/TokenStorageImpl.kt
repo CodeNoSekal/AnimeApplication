@@ -20,12 +20,16 @@ class TokenStorageImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAccessToken(): String? {
-        return dataStore.data.first()[ACCESS_TOKEN]
-    }
+    override suspend fun getTokens(): StoredTokens? {
+        val preferences = dataStore.data.first()
+        val accessToken = preferences[ACCESS_TOKEN]
+        val refreshToken = preferences[REFRESH_TOKEN]
 
-    override suspend fun getRefreshToken(): String? {
-        return dataStore.data.first()[REFRESH_TOKEN]
+        return if (!accessToken.isNullOrBlank() && !refreshToken.isNullOrBlank()) {
+            StoredTokens(accessToken, refreshToken)
+        } else {
+            null
+        }
     }
 
     override suspend fun clear() {

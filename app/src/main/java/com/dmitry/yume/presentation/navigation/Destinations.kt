@@ -74,31 +74,31 @@ enum class TopLevelDestination(
     COLLECTIONS(
         Destinations.COLLECTIONS_GRAPH,
         Destinations.COLLECTIONS,
-        R.drawable.heart_20,
+        R.drawable.heart_24,
         R.string.nav_lists
     ),
     CATALOG(
         Destinations.CATALOG_GRAPH,
         Destinations.CATALOG,
-        R.drawable.apps_20,
+        R.drawable.apps_24,
         R.string.nav_catalog
     ),
     HOME(
         Destinations.HOME_GRAPH,
         Destinations.HOME,
-        R.drawable.home_20,
+        R.drawable.home_24,
         R.string.nav_home
     ),
     SEARCH(
         Destinations.SEARCH_GRAPH,
         Destinations.SEARCH,
-        R.drawable.search_20,
+        R.drawable.search_24,
         R.string.nav_search
     ),
     PROFILE(
         Destinations.PROFILE_GRAPH,
         Destinations.PROFILE,
-        R.drawable.user_20,
+        R.drawable.user_24,
         R.string.nav_profile
     )
 }

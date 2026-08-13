@@ -1,7 +1,6 @@
 package com.dmitry.yume.presentation.screens.player
 
 import com.dmitry.yume.domain.models.PlayerData
-import com.dmitry.yume.domain.models.Progress
 import com.dmitry.yume.domain.models.Provider
 import com.dmitry.yume.domain.models.Quality
 import com.dmitry.yume.domain.models.getEpisode
@@ -17,16 +16,6 @@ data class PlayerUiState(
     val currentUrl: String? = null,
     val currentPositionMs: Long = 0L
 )
-
-fun PlayerUiState.toProgress(animeId: Int, positionMs: Long, durationMs: Long): Progress =
-    Progress(
-        animeId,
-        selectedEpisodeNumber,
-        positionMs,
-        durationMs,
-        selectedSource.toRaw(),
-        selectedVoiceoverId
-    )
 
 fun updateState(
     data: PlayerData,

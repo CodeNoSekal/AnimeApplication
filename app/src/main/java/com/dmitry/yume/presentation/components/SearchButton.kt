@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -38,7 +39,11 @@ fun SearchButton(
             horizontalArrangement = Arrangement.spacedBy(11.dp),
             modifier = Modifier.padding(horizontal = 14.dp)
         ) {
-            Icon(painterResource(R.drawable.search_20), null)
+            Icon(
+                painter = painterResource(R.drawable.search_24),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
             Text("Поиск по каталогу...", color = colors.textMuted, style = YumeType.bodyMedium,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
         }

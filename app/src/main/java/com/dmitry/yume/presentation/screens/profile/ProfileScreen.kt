@@ -172,7 +172,7 @@ fun ProfileContent(
                 )
             ) {
                 Icon(
-                    painterResource(R.drawable.exit_20),
+                    painterResource(R.drawable.exit_24),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )

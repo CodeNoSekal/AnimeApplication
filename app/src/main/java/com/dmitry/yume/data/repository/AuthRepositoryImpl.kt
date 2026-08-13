@@ -2,7 +2,8 @@ package com.dmitry.yume.data.repository
 
 import com.dmitry.yume.data.api.AuthApi
 import com.dmitry.yume.data.api.VerificationApi
-import com.dmitry.yume.data.authorization.TokenStorage
+import com.dmitry.yume.data.authorization.AuthSessionManager
+import com.dmitry.yume.data.authorization.StoredTokens
 import com.dmitry.yume.data.request.LoginRequest
 import com.dmitry.yume.data.request.RegisterRequest
 import com.dmitry.yume.data.request.VerifyRequest
@@ -13,9 +14,10 @@ import com.dmitry.yume.domain.repository.AuthErrorReason
 import com.dmitry.yume.domain.repository.AuthRepository
 import com.dmitry.yume.domain.repository.AuthResult
 import com.dmitry.yume.domain.repository.SessionRefreshResult
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import retrofit2.HttpException
 import java.io.IOException
@@ -24,26 +26,25 @@ import javax.inject.Inject
 class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi,
     private val verificationApi: VerificationApi,
-    private val tokenStorage: TokenStorage
+    private val sessionManager: AuthSessionManager
 ) : AuthRepository {
 
-    private val _sessionState =
-        MutableStateFlow<SessionState>(SessionState.Loading)
-
     override val sessionState: Flow<SessionState> =
-        _sessionState.asStateFlow()
+        sessionManager.sessionState
 
     override suspend fun refreshCurrentUser(): SessionRefreshResult {
+        val session = sessionManager.currentSession()
+            ?: return SessionRefreshResult.Error("Сессия истекла")
+
         try {
             val user = authApi.getMe().toDomain()
-            _sessionState.value = SessionState.Authenticated(user)
+            sessionManager.setAuthenticatedIfCurrent(session.generation, user)
             return SessionRefreshResult.Success
         } catch (e: HttpException) {
-            if (e.code() == 401 || e.code() == 404) {
-                tokenStorage.clear()
-                _sessionState.value =
-                    SessionState.Unauthenticated
-
+            if (e.code() == 404) {
+                sessionManager.invalidateIfCurrent(session.generation)
+                return SessionRefreshResult.Error("Сессия истекла")
+            } else if (e.code() == 401 && sessionManager.currentSession() == null) {
                 return SessionRefreshResult.Error("Сессия истекла")
             } else {
                 return SessionRefreshResult.Error("Не удалось обновить профиль")
@@ -82,19 +83,18 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun verifyEmail(code: String): AuthResult =
         safeAuthCall {
+            val session = sessionManager.currentSession()
+                ?: return@safeAuthCall AuthResult.Error("Сессия истекла")
+
             verificationApi.verify(
                 VerifyRequest(code)
             )
 
-            val currentState = _sessionState.value
+            val updated = sessionManager.updateAuthenticatedUser(session.generation) { user ->
+                user.copy(emailVerified = true)
+            }
 
-            if (currentState is SessionState.Authenticated) {
-                _sessionState.value = currentState.copy(
-                    user = currentState.user.copy(
-                        emailVerified = true
-                    )
-                )
-            } else {
+            if (!updated) {
                 validateSession()
             }
 
@@ -104,55 +104,43 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun logout() {
         try {
             authApi.logout()
-        } catch (_: Exception){
-
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
         } finally {
-            tokenStorage.clear()
-            _sessionState.value = SessionState.Unauthenticated
+            withContext(NonCancellable) {
+                sessionManager.invalidate()
+            }
         }
     }
 
     override suspend fun validateSession() {
-        _sessionState.value = SessionState.Loading
-
-        val accessToken = tokenStorage.getAccessToken()
-
-        if (accessToken.isNullOrBlank()) {
-            _sessionState.value = SessionState.Unauthenticated
-            return
-        }
+        val session = sessionManager.beginValidation() ?: return
 
         try {
             val user = authApi.getMe().toDomain()
-
-            _sessionState.value =
-                SessionState.Authenticated(user)
+            sessionManager.setAuthenticatedIfCurrent(session.generation, user)
         } catch (e: HttpException) {
-            if (e.code() == 401 || e.code() == 404) {
-                tokenStorage.clear()
-                _sessionState.value =
-                    SessionState.Unauthenticated
+            if (e.code() == 404) {
+                sessionManager.invalidateIfCurrent(session.generation)
+            } else if (e.code() == 401 && sessionManager.currentSession() == null) {
+                return
             } else {
-                _sessionState.value =
-                    SessionState.Unavailable
+                sessionManager.setUnavailableIfCurrent(session.generation)
             }
         } catch (_: IOException) {
-            _sessionState.value =
-                SessionState.Unavailable
+            sessionManager.setUnavailableIfCurrent(session.generation)
         }
     }
 
     private suspend fun persist(response: AuthResponse) {
-        tokenStorage.saveTokens(
-            response.accessToken,
-            response.refreshToken
+        val user = response.user?.toDomain()
+        sessionManager.establishSession(
+            tokens = StoredTokens(response.accessToken, response.refreshToken),
+            user = user
         )
 
-        val user = response.user?.toDomain()
-
-        if (user != null){
-            _sessionState.value = SessionState.Authenticated(user)
-        } else {
+        if (user == null) {
             validateSession()
         }
     }

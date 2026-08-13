@@ -55,7 +55,7 @@ fun Player(
     isLandscape: Boolean,
     expand: () -> Unit,
     compress: () -> Unit,
-    saveProgress: (Long, Long) -> Unit
+    saveProgress: () -> Unit
 ) {
     var controlsVisible by remember { mutableStateOf(true) }
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
@@ -84,7 +84,7 @@ fun Player(
     DisposableEffect(exoPlayer) {
         val listener = object : androidx.media3.common.Player.Listener {
             override fun onIsPlayingChanged(value: Boolean) {
-                saveProgress(exoPlayer.currentPosition, exoPlayer.duration)
+                saveProgress()
                 isPlaying = value
             }
         }
@@ -140,7 +140,7 @@ fun Player(
                             IconButton(
                                 onClick = {
                                     exoPlayer.seekBack()
-                                    saveProgress(exoPlayer.currentPosition, exoPlayer.duration)
+                                    saveProgress()
                                 }
                             ) {
                                 Icon(painterResource(R.drawable.replay_10_24), "seek back 10")
@@ -150,7 +150,7 @@ fun Player(
                                 IconButton(
                                     onClick = {
                                         exoPlayer.pause()
-                                        saveProgress(exoPlayer.currentPosition, exoPlayer.duration)
+                                        saveProgress()
                                     }
                                 ) {
                                     Icon(painterResource(R.drawable.pause_24), "pause", modifier = Modifier.size(32.dp))
@@ -159,7 +159,7 @@ fun Player(
                                 IconButton(
                                     onClick = {
                                         exoPlayer.play()
-                                        saveProgress(exoPlayer.currentPosition, exoPlayer.duration)
+                                        saveProgress()
                                     }
                                 ) {
                                     Icon(painterResource(R.drawable.play_24), "play", modifier = Modifier.size(32.dp))
@@ -169,7 +169,7 @@ fun Player(
                             IconButton(
                                 onClick = {
                                     exoPlayer.seekForward()
-                                    saveProgress(exoPlayer.currentPosition, exoPlayer.duration)
+                                    saveProgress()
                                 }
                             ) {
                                 Icon(painterResource(R.drawable.time_forward_ten_24), "seek forward 10")
@@ -206,7 +206,7 @@ fun Player(
                                 progress,
                                 onSeek = { newProgress ->
                                     exoPlayer.seekTo((duration * newProgress).toLong())
-                                    saveProgress(exoPlayer.currentPosition, exoPlayer.duration)
+                                    saveProgress()
                                 },
                                 Modifier.weight(1f)
                             )

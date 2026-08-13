@@ -123,7 +123,7 @@ fun SearchScreen(
                                 onClick = viewModel::clearQuery
                             ) {
                                 Icon(
-                                    painterResource(R.drawable.cross_18),
+                                    painterResource(R.drawable.cross_24),
                                     contentDescription = "clear",
                                     Modifier.size(14.dp)
                                 )

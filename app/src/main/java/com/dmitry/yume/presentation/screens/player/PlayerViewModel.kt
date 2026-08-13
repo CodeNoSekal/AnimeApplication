@@ -144,37 +144,53 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun savePosition(targetPos: Long){
-        _playerState.update { it.copy(currentPositionMs = targetPos) }
-    }
+    fun nextEpisode() = moveEpisode(1)
 
-    fun nextEpisode(){
-        val currentState = _state.value
-        if (currentState !is PlayerViewState.Success) return
+    fun prevEpisode() = moveEpisode(-1)
 
-        val player = currentState.playerData
+    private fun moveEpisode(offset: Int) {
+        val playerData =
+            (_state.value as? PlayerViewState.Success)?.playerData ?: return
+
         val currentEpisode = _playerState.value.selectedEpisodeNumber
-        val lastEpisode = player.episodesAvailable
-
-        if (currentEpisode < lastEpisode){
-            selectEpisode(currentEpisode + 1)
+        val currentIndex = playerData.episodes.indexOfFirst {
+            it.id == currentEpisode
         }
+
+        if (currentIndex == -1) return
+
+        val targetEpisode =
+            playerData.episodes.getOrNull(currentIndex + offset) ?: return
+
+        selectEpisode(targetEpisode.id)
     }
 
-    fun prevEpisode() {
-        val currentEpisode = _playerState.value.selectedEpisodeNumber
+    fun saveProgress(playbackContext: PlaybackContext, positionMs: Long, durationMs: Long) {
 
-        if (currentEpisode > 1) {
-            selectEpisode(currentEpisode - 1)
-        }
-    }
+        if (durationMs == C.TIME_UNSET || durationMs <= 0) return
 
-    fun saveProgress(positionMs: Long, durationMs: Long) {
+        val safePosition = positionMs.coerceIn(0, durationMs)
 
-        if (durationMs != C.TIME_UNSET && durationMs > 0) {
-            viewModelScope.launch {
-                putProgress(_playerState.value.toProgress(currentId, positionMs, durationMs))
+        _playerState.update { state ->
+            val isCurrentPlayback =
+                state.selectedEpisodeNumber == playbackContext.episodeNumber &&
+                        state.selectedSource == playbackContext.sourceProvider &&
+                        state.selectedVoiceoverId == playbackContext.voiceoverId
+
+            if (isCurrentPlayback) {
+                state.copy(currentPositionMs = safePosition)
+            } else {
+                state
             }
+        }
+
+        val progress = playbackContext.toProgress(
+            positionMs = positionMs.coerceIn(0, durationMs),
+            durationMs = durationMs
+        )
+
+        viewModelScope.launch {
+            putProgress(progress)
         }
     }
 }

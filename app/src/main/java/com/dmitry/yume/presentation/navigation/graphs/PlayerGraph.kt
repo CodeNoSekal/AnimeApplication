@@ -42,7 +42,6 @@ fun NavGraphBuilder.playerGraph(navController: NavController) {
                     PlayerScreen(
                         playerData = (state as PlayerViewState.Success).playerData,
                         playerState = playerState,
-                        onSavePosition = viewModel::savePosition,
                         saveProgress = viewModel::saveProgress,
                         onPrevEpisodeClick = viewModel::prevEpisode,
                         onNextEpisodeClick = viewModel::nextEpisode,
