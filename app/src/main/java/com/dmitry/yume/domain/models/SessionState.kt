@@ -2,7 +2,7 @@ package com.dmitry.yume.domain.models
 
 sealed interface SessionState {
     data object Loading : SessionState
-    data object Unauthenticated : SessionState
+    data object Guest : SessionState
     data class Authenticated(
         val user: User
     ) : SessionState

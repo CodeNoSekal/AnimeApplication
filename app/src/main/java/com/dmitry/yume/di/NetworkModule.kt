@@ -4,6 +4,7 @@ import com.dmitry.yume.BuildConfig
 import com.dmitry.yume.data.api.AnimeApi
 import com.dmitry.yume.data.api.AuthApi
 import com.dmitry.yume.data.api.MeApi
+import com.dmitry.yume.data.api.MetaApi
 import com.dmitry.yume.data.api.PlayerApi
 import com.dmitry.yume.data.api.RefreshApi
 import com.dmitry.yume.data.api.VerificationApi
@@ -141,5 +142,13 @@ object NetworkModule {
         @MainClient retrofit: Retrofit
     ): MeApi {
         return retrofit.create(MeApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMetaApi(
+        @MainClient retrofit: Retrofit
+    ): MetaApi {
+        return retrofit.create(MetaApi::class.java)
     }
 }

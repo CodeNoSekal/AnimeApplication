@@ -2,6 +2,7 @@ package com.dmitry.yume.data.response
 
 import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.models.AnimeDetailed
+import com.dmitry.yume.domain.models.Episode
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -108,4 +109,11 @@ fun AnimeDetailResponse.toDomain(): AnimeDetailed{
         favorite = favorite,
         score = myScore
     )
+}
+
+@JvmName("animeShortToDomain")
+fun List<AnimeShort>.toDomain(): List<Anime> {
+    return map {
+        it.toDomain()
+    }
 }

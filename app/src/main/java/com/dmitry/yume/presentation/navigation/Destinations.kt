@@ -2,19 +2,7 @@ package com.dmitry.yume.presentation.navigation
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.runtime.getValue
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.dmitry.yume.R
-import com.dmitry.yume.presentation.screens.detail.DetailScreen
-import com.dmitry.yume.presentation.screens.detail.DetailViewModel
-import com.dmitry.yume.presentation.screens.detail.DetailViewState
 
 object Destinations {
     const val ROOT = "root"
@@ -24,7 +12,7 @@ object Destinations {
     const val CATALOG = "catalog"
     const val PROFILE = "profile"
     const val COLLECTIONS = "collections"
-    const val SEARCH = "search"
+    const val EXPLORATION = "exploration"
 
     const val FILTERS = "filters"
 
@@ -35,7 +23,7 @@ object Destinations {
     const val CATALOG_GRAPH = "catalog_graph"
     const val PROFILE_GRAPH = "profile_graph"
     const val COLLECTIONS_GRAPH = "collections_graph"
-    const val SEARCH_GRAPH = "search_graph"
+    const val EXPLORATION_GRAPH = "exploration_graph"
 }
 
 object Details {
@@ -88,8 +76,8 @@ enum class TopLevelDestination(
         R.string.nav_home
     ),
     SEARCH(
-        Destinations.SEARCH_GRAPH,
-        Destinations.SEARCH,
+        Destinations.EXPLORATION_GRAPH,
+        Destinations.EXPLORATION,
         R.drawable.search_24,
         R.string.nav_search
     ),

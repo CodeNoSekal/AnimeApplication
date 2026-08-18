@@ -79,7 +79,7 @@ class AuthRepositoryImplTest {
         assertTrue(result is OperationResult.Error)
         assertNull(fixture.storage.getTokens())
         assertEquals(
-            SessionState.Unauthenticated,
+            SessionState.Guest,
             fixture.sessionManager.sessionState.value
         )
     }

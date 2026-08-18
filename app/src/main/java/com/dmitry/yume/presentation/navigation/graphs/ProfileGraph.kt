@@ -11,9 +11,21 @@ fun NavGraphBuilder.profileGraph(navController: NavController) {
     navigation(route = Destinations.PROFILE_GRAPH, startDestination = Destinations.PROFILE) {
         composable(route = Destinations.PROFILE) {
             ProfileScreen(
-                onVerificationClick = { navController.navigate(Destinations.VERIFICATION_GRAPH) {
-                    launchSingleTop = true
-                } }
+                onVerificationClick = {
+                    navController.navigate(Destinations.VERIFICATION_GRAPH) {
+                        launchSingleTop = true
+                    }
+                },
+                onLoginClick = {
+                    navController.navigate(Destinations.AUTH_GRAPH) {
+                        launchSingleTop = true
+                    }
+                },
+                onRegistrationClick = {
+                    navController.navigate(Destinations.AUTH_GRAPH) {
+                        launchSingleTop = true
+                    }
+                },
             )
         }
     }

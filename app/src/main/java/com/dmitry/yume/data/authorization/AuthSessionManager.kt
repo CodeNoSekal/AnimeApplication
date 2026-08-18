@@ -41,7 +41,7 @@ class AuthSessionManager @Inject constructor(
             }
             tokenSnapshot = tokens
             _sessionState.value = if (tokens == null) {
-                SessionState.Unauthenticated
+                SessionState.Guest
             } else {
                 SessionState.Loading
             }
@@ -81,7 +81,7 @@ class AuthSessionManager @Inject constructor(
             tokenStorage.clear()
             tokenSnapshot = null
             generation++
-            _sessionState.value = SessionState.Unauthenticated
+            _sessionState.value = SessionState.Guest
             true
         }
     }
@@ -93,7 +93,7 @@ class AuthSessionManager @Inject constructor(
             tokenStorage.clear()
             tokenSnapshot = null
             generation++
-            _sessionState.value = SessionState.Unauthenticated
+            _sessionState.value = SessionState.Guest
             true
         }
     }
@@ -102,7 +102,7 @@ class AuthSessionManager @Inject constructor(
         tokenStorage.clear()
         tokenSnapshot = null
         generation++
-        _sessionState.value = SessionState.Unauthenticated
+        _sessionState.value = SessionState.Guest
     }
 
     suspend fun setAuthenticatedIfCurrent(

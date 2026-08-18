@@ -1,11 +1,7 @@
 package com.dmitry.yume.presentation.screens.catalog
 
-import android.media.Rating
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import androidx.paging.map
 import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.usecase.GetAnimeCatalogUseCase
@@ -17,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
@@ -36,7 +31,7 @@ class CatalogViewModel @Inject constructor(
         _optionsState
             .flatMapLatest { value ->
                 getAnimeCatalog(
-                    status = value.status?.toRaw() ?: "",
+                    status = value.status?.toRaw(),
                     sort = value.sort.toRaw(),
                     order = value.order.toRaw()
                 )

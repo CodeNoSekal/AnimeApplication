@@ -16,7 +16,7 @@ class AnimeRepositoryImpl @Inject constructor(
     private val api: AnimeApi
 ) : AnimeRepository {
     override fun getAnime(
-        status: String,
+        status: String?,
         sort: String,
         order: String
     ): Flow<PagingData<Anime>> {

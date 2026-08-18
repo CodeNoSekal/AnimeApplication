@@ -16,7 +16,7 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
     navigation(route = Destinations.HOME_GRAPH, startDestination = Destinations.HOME) {
         composable(Destinations.HOME) {
             HomeScreen(
-                onItemClicked = { id ->
+                onItemClick = { id ->
                     navController.navigate(Details.build(Destinations.HOME, id))
                 },
                 onSearchClicked = {

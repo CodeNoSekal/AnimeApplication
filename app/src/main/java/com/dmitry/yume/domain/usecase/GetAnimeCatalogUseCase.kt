@@ -10,7 +10,7 @@ class GetAnimeCatalogUseCase @Inject constructor(
     private val repository: AnimeRepository
 ) {
     operator fun invoke(
-        status: String,
+        status: String?,
         sort: String,
         order: String
     ): Flow<PagingData<Anime>> {

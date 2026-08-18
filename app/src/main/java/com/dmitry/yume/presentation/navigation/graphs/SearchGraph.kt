@@ -6,18 +6,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.dmitry.yume.presentation.navigation.Destinations
 import com.dmitry.yume.presentation.navigation.Details
+import com.dmitry.yume.presentation.navigation.Search
 import com.dmitry.yume.presentation.navigation.screens.detailsComposable
-import com.dmitry.yume.presentation.screens.SearchScreen
+import com.dmitry.yume.presentation.screens.exploration.ExplorationScreen
 
-fun NavGraphBuilder.searchGraph(navController: NavController) {
-    navigation(route = Destinations.SEARCH_GRAPH, startDestination = Destinations.SEARCH) {
-        composable(Destinations.SEARCH) {
-            SearchScreen(
-                onItemClicked = { id ->
-                    navController.navigate(Details.build(Destinations.SEARCH, id))
-                }
+fun NavGraphBuilder.explorationGraph(navController: NavController) {
+    navigation(route = Destinations.EXPLORATION_GRAPH, startDestination = Destinations.EXPLORATION) {
+        composable(Destinations.EXPLORATION) {
+            ExplorationScreen(
+                onSearchClicked = {
+                    navController.navigate(Search.route(Destinations.HOME))
+                },
             )
         }
-        detailsComposable(Destinations.SEARCH, navController)
+        detailsComposable(Destinations.EXPLORATION, navController)
     }
 }

@@ -40,13 +40,13 @@ import com.dmitry.yume.presentation.ui.theme.YumeType
 
 @Composable
 fun HomeScreen(
-    onItemClicked: (Int) -> Unit,
+    onItemClick: (Int) -> Unit,
     onSearchClicked: () -> Unit,
     homeViewModel: HomeViewModel = hiltViewModel(),
     onPlayClick: (Int) -> Unit,
 ) {
-
     val progressData by homeViewModel.progressState.collectAsStateWithLifecycle()
+    val homeData by homeViewModel.homeState.collectAsStateWithLifecycle()
 
     LaunchedEffect(homeViewModel) {
         homeViewModel.load()
@@ -55,143 +55,14 @@ fun HomeScreen(
     Scaffold(
         topBar = { HomeTopBar(onSearchClicked) }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
-                .fillMaxSize(),
-        ) {
-            if (progressData is ProgressViewState.Success) {
-                ContinueTab(
-                    data = (progressData as ProgressViewState.Success).progress,
-                    onPlayClick = onPlayClick
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ContinueTab(
-    data: ProgressData,
-    onPlayClick: (Int) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = "Продолжить просмотр",
-            style = YumeType.h2
-        )
-
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(data.items) { item ->
-                ProgressItemCard(
-                    item,
-                    onPlayClick
-                )
-            }
-        }
-    }
-
-}
-
-@Composable
-fun ProgressItemCard(
-    data: ProgressItemData,
-    onPlayClick: (Int) -> Unit
-) {
-    val outerShape = RoundedCornerShape(8.dp)
-
-    Surface(
-        onClick = { onPlayClick(data.animeId) },
-        modifier = Modifier
-            .clip(outerShape)
-            .height(120.dp)
-            .width(270.dp)
-            .background(YumeTheme.colors.surfaceCard)
-    ) {
-        val innerShape = RoundedCornerShape(8.dp)
-
-        Box {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
-                Box(
-                    Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(2f / 3f)
-                        .clip(innerShape)
-                ) {
-                    AsyncImage(
-                        model = data.posterUrl,
-                        contentDescription = data.title,
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    0f to Color(0xFF06070E).copy(alpha = 0.55f),
-                                    0.5f to Color.Transparent
-                                )
-                            )
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(vertical = 4.dp, horizontal = 12.dp)
-
-                ) {
-                    data.title?.let {
-                        Text(
-                            text = it,
-                            style = YumeType.bodyMedium,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .padding(top = 2.dp)
-                        )
-                    }
-
-                    Text(
-                        text = "${data.episodeNumber} серия",
-                        color = YumeTheme.colors.textMuted,
-                        style = YumeType.xs,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .padding(top = 2.dp)
-                    )
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.BottomStart
-            ) {
-                Box(
-                    modifier = Modifier
-                        .background(color = YumeTheme.colors.accent)
-                        .fillMaxWidth((data.positionMs.toDouble() / data.durationMs).toFloat())
-                        .height(2.dp),
-                    )
-            }
-
+        if (homeData is HomeViewState.Success){
+            HomeContent(
+                innerPadding = innerPadding,
+                progressData = progressData,
+                homeData = (homeData as HomeViewState.Success).home,
+                onPlayClick = onPlayClick,
+                onItemClick = onItemClick,
+            )
         }
     }
 }

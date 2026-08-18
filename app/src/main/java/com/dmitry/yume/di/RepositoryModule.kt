@@ -3,10 +3,12 @@ package com.dmitry.yume.di
 import com.dmitry.yume.data.repository.AnimeRepositoryImpl
 import com.dmitry.yume.data.repository.AuthRepositoryImpl
 import com.dmitry.yume.data.repository.MeRepositoryImpl
+import com.dmitry.yume.data.repository.MetaRepositoryImpl
 import com.dmitry.yume.data.repository.PlayerRepositoryImpl
 import com.dmitry.yume.domain.repository.AnimeRepository
 import com.dmitry.yume.domain.repository.AuthRepository
 import com.dmitry.yume.domain.repository.MeRepository
+import com.dmitry.yume.domain.repository.MetaRepository
 import com.dmitry.yume.domain.repository.PlayerRepository
 import dagger.Binds
 import dagger.Module
@@ -41,4 +43,11 @@ abstract class RepositoryModule {
     abstract fun bindMeRepository(
         impl: MeRepositoryImpl
     ): MeRepository
+
+
+    @Binds
+    @Singleton
+    abstract fun bindMetaRepository(
+        impl: MetaRepositoryImpl
+    ): MetaRepository
 }

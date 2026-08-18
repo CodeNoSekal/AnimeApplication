@@ -60,7 +60,7 @@ class TokenAuthenticatorTest {
 
         assertNull(retried)
         assertNull(fixture.storage.getTokens())
-        assertEquals(SessionState.Unauthenticated, fixture.sessionManager.sessionState.value)
+        assertEquals(SessionState.Guest, fixture.sessionManager.sessionState.value)
     }
 
     @Test
@@ -119,7 +119,7 @@ class TokenAuthenticatorTest {
         assertNull(retried)
         assertEquals(0, fixture.refreshCalls.get())
         assertNull(fixture.storage.getTokens())
-        assertEquals(SessionState.Unauthenticated, fixture.sessionManager.sessionState.value)
+        assertEquals(SessionState.Guest, fixture.sessionManager.sessionState.value)
     }
 
     @Test
@@ -178,7 +178,7 @@ class TokenAuthenticatorTest {
 
         assertNull(session)
         assertNull(sessionManager.currentTokens())
-        assertEquals(SessionState.Unauthenticated, sessionManager.sessionState.value)
+        assertEquals(SessionState.Guest, sessionManager.sessionState.value)
     }
 
     @Test

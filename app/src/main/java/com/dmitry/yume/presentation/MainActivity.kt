@@ -41,7 +41,7 @@ import com.dmitry.yume.presentation.navigation.graphs.collectionsGraph
 import com.dmitry.yume.presentation.navigation.graphs.homeGraph
 import com.dmitry.yume.presentation.navigation.graphs.playerGraph
 import com.dmitry.yume.presentation.navigation.graphs.profileGraph
-import com.dmitry.yume.presentation.navigation.graphs.searchGraph
+import com.dmitry.yume.presentation.navigation.graphs.explorationGraph
 import com.dmitry.yume.presentation.navigation.graphs.verifyGraph
 import com.dmitry.yume.presentation.navigation.navigateToTab
 import com.dmitry.yume.presentation.screens.ErrorScreen
@@ -75,7 +75,7 @@ fun AnimeApp(rootViewModel: RootViewModel = hiltViewModel()){
     when (sessionState) {
         SessionState.Loading -> SplashScreen()
         SessionState.Unavailable -> ErrorScreen()
-        SessionState.Unauthenticated -> RootScreen(sessionState)
+        SessionState.Guest -> RootScreen(sessionState)
         is SessionState.Authenticated -> RootScreen(sessionState)
     }
 }
@@ -88,21 +88,6 @@ fun RootScreen(
 
     val isAuthenticated = sessionState is SessionState.Authenticated
 
-    val start = remember {
-        if (isAuthenticated)
-            Destinations.HOME_GRAPH
-        else Destinations.AUTH_GRAPH
-    }
-
-    LaunchedEffect(sessionState) {
-        if (!isAuthenticated) {
-            navController.navigate(Destinations.AUTH_GRAPH) {
-                popUpTo(Destinations.ROOT) { inclusive = true }
-                launchSingleTop = true
-            }
-        }
-    }
-
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val inTopLevelDestination = backStackEntry?.destination?.hierarchy?.any { dest ->
@@ -112,7 +97,6 @@ fun RootScreen(
     Scaffold(
         bottomBar = {
             if(
-                isAuthenticated &&
                 inTopLevelDestination &&
                 currentRoute != Destinations.FILTERS
             ){
@@ -123,7 +107,7 @@ fun RootScreen(
         NavHost(
             navController = navController,
             route = Destinations.ROOT,
-            startDestination = start,
+            startDestination = Destinations.HOME_GRAPH,
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
             popEnterTransition = { EnterTransition.None },
@@ -140,7 +124,7 @@ fun RootScreen(
 
             collectionsGraph(navController)
 
-            searchGraph(navController)
+            explorationGraph(navController)
 
             profileGraph(navController)
 
@@ -189,3 +173,5 @@ fun BottomBar(
         }
     }
 }
+
+

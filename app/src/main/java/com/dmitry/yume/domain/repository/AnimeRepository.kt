@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface AnimeRepository {
     fun getAnime(
-        status: String,
+        status: String?,
         sort: String,
         order: String
     ): Flow<PagingData<Anime>>

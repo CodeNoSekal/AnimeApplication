@@ -28,7 +28,6 @@ class ProfileViewModel @Inject constructor(
     private val observeSessionState: ObserveSessionStateUseCase
 ) : ViewModel() {
 
-
     val user: StateFlow<User?> =
         observeSessionState()
             .map { sessionState ->
@@ -58,7 +57,6 @@ class ProfileViewModel @Inject constructor(
             }
         }
     }
-
 
     fun logout() {
         if (logoutJob?.isActive == true) return

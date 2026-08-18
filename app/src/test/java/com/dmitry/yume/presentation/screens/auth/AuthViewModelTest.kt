@@ -69,7 +69,7 @@ class AuthViewModelTest {
         private val login: suspend (String, String) -> AuthResult
     ) : AuthRepository {
         override val sessionState: Flow<SessionState> =
-            flowOf(SessionState.Unauthenticated)
+            flowOf(SessionState.Guest)
 
         override suspend fun register(
             email: String,
