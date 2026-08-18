@@ -1,33 +1,17 @@
 package com.dmitry.yume.presentation.screens.catalog
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.dmitry.yume.R
+import com.dmitry.yume.presentation.screens.catalog.components.OrderButton
+import com.dmitry.yume.presentation.screens.catalog.components.SortOption
 import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
 import com.dmitry.yume.presentation.ui.theme.YumeType
 
@@ -61,69 +45,26 @@ fun SortPickerContent(
                 }
             )
         }
-    }
-}
 
-@Composable
-fun SortOption(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp),
-        shape = RoundedCornerShape(14.dp),
-        color = Color.Transparent
-    ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            val selectedColor =
-                if (selected)
-                    colors.textPrimary
-                else colors.textMuted
-
-            CheckCircle(
-                selected,
-                selectedColor
-            )
-
-            Text(
-                text = text,
-                style = YumeType.bodyMedium,
-                color = selectedColor,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-fun CheckCircle(
-    selected: Boolean,
-    color: Color,
-) {
-
-    Box (
-        contentAlignment = Alignment.Center
-    ){
-        Box(
-            modifier = Modifier
-                .border(2.dp, color, CircleShape)
-                .size(16.dp)
-        )
-
-        if (selected) {
-            Box(
+            OrderButton(
+                onClick = { onSortSelected(optionsState.copy(order = Order.Asc)) },
                 modifier = Modifier
-                    .background(color, CircleShape)
-                    .size(8.dp)
+                    .weight(0.5f),
+                order = Order.Asc,
+                isActive = Order.Asc == optionsState.order
+            )
+
+            OrderButton(
+                onClick = { onSortSelected(optionsState.copy(order = Order.Desc)) },
+                modifier = Modifier
+                    .weight(0.5f),
+                order = Order.Desc,
+                isActive = Order.Desc == optionsState.order
             )
         }
     }
