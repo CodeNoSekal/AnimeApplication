@@ -26,6 +26,8 @@ object Destinations {
     const val COLLECTIONS = "collections"
     const val SEARCH = "search"
 
+    const val FILTERS = "filters"
+
 
     const val AUTH_GRAPH = "auth_graph"
     const val VERIFICATION_GRAPH = "verification_graph"
@@ -54,9 +56,6 @@ object Player {
     fun routePattern() = "$PLAYER_GRAPH/{$ANIME_ID}"
 
     fun build(animeId: Int) = "$PLAYER_GRAPH/$animeId"
-
-    const val playerRoute = PLAYER
-    const val episodesRoute = EPISODES
 }
 
 object Search {
@@ -64,7 +63,6 @@ object Search {
 
     fun route(parent: String) = "$parent/$SEARCH"
 }
-
 enum class TopLevelDestination(
     val graph: String,
     val start: String,

@@ -5,22 +5,30 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.ExoPlayer
 import com.dmitry.yume.R
+import com.dmitry.yume.domain.models.PlayerData
 import com.dmitry.yume.presentation.components.BaseButton
+import com.dmitry.yume.presentation.ui.theme.YumeTheme
+import com.dmitry.yume.presentation.ui.theme.YumeType
 
 @Composable
 fun PlayerContent(
     player: ExoPlayer,
     playerState: PlayerUiState,
+    playerData: PlayerData,
     isLandscape: Boolean,
     hasPreviousEpisode: Boolean,
     hasNextEpisode: Boolean,
@@ -30,7 +38,8 @@ fun PlayerContent(
     onExpand: () -> Unit,
     onCompress: () -> Unit,
     onSaveProgress: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -38,7 +47,9 @@ fun PlayerContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val playerModifier = if (isLandscape) {
-            Modifier.fillMaxSize()
+            Modifier
+                .fillMaxHeight()
+                .aspectRatio(16f / 9f)
         } else {
             Modifier
                 .fillMaxWidth()
@@ -52,11 +63,49 @@ fun PlayerContent(
             isLandscape = isLandscape,
             expand = onExpand,
             compress = onCompress,
-            saveProgress = onSaveProgress
+            saveProgress = onSaveProgress,
+            onBackClick = onBackClick,
+            onPreviousEpisode = { onPreviousEpisode() },
+            onNextEpisode = { onNextEpisode() }
         )
 
         if (!isLandscape) {
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(10.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                playerData.title?.let {
+                    Text(
+                        text = it,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 2,
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Start,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+
+                playerData.episodes.find { it.id == playerState.selectedEpisodeNumber }?.title?.let {
+                    Text(
+                        text = it,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        style = YumeType.xs,
+                        textAlign = TextAlign.Start,
+                        color = YumeTheme.colors.textMuted,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
 
             Row(
                 modifier = Modifier

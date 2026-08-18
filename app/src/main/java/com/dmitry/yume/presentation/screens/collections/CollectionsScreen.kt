@@ -85,7 +85,7 @@ fun CollectionsScreen(
             searchOffset = with(density) { searchOffsetPx.toDp() },
             tabs = tabs,
             selectedIndex = pagerState.currentPage,
-            onSearchClicked = {  },
+            onSearchClicked = { onSearchClicked() },
             onTabSelected = { index ->
                 scope.launch {
                     pagerState.animateScrollToPage(index)

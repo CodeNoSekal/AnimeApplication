@@ -120,45 +120,57 @@ fun ProgressItemCard(
     ) {
         val innerShape = RoundedCornerShape(8.dp)
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            Box(
-                Modifier
-                    .fillMaxHeight()
-                    .aspectRatio(2f / 3f)
-                    .clip(innerShape)
+        Box {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
             ) {
-                AsyncImage(
-                    model = data.posterUrl,
-                    contentDescription = data.title,
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                )
                 Box(
                     Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color(0xFF06070E).copy(alpha = 0.55f),
-                                0.5f to Color.Transparent
+                        .fillMaxHeight()
+                        .aspectRatio(2f / 3f)
+                        .clip(innerShape)
+                ) {
+                    AsyncImage(
+                        model = data.posterUrl,
+                        contentDescription = data.title,
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    0f to Color(0xFF06070E).copy(alpha = 0.55f),
+                                    0.5f to Color.Transparent
+                                )
                             )
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 4.dp, horizontal = 12.dp)
+
+                ) {
+                    data.title?.let {
+                        Text(
+                            text = it,
+                            style = YumeType.bodyMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .padding(top = 2.dp)
                         )
-                )
-            }
+                    }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 4.dp, horizontal = 12.dp)
-
-            ) {
-                data.title?.let {
                     Text(
-                        text = it,
-                        style = YumeType.body,
+                        text = "${data.episodeNumber} серия",
+                        color = YumeTheme.colors.textMuted,
+                        style = YumeType.xs,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
@@ -166,6 +178,20 @@ fun ProgressItemCard(
                     )
                 }
             }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.BottomStart
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(color = YumeTheme.colors.accent)
+                        .fillMaxWidth((data.positionMs.toDouble() / data.durationMs).toFloat())
+                        .height(2.dp),
+                    )
+            }
+
         }
     }
 }

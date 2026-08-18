@@ -6,7 +6,11 @@ import com.dmitry.yume.domain.models.AnimeDetailed
 import kotlinx.coroutines.flow.Flow
 
 interface AnimeRepository {
-    fun getAnime(): Flow<PagingData<Anime>>
+    fun getAnime(
+        status: String,
+        sort: String,
+        order: String
+    ): Flow<PagingData<Anime>>
     fun searchAnime(q: String): Flow<PagingData<Anime>>
     suspend fun getAnimeById(id: Int): AnimeDetailResult
 }

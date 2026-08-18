@@ -52,10 +52,18 @@ data class AnimeDetailResponse(
     @param:Json(name = "poster_full")
     val posterUrl: String? = null,
     val year: Int? = null,
+    val description: String? = null,
+
+    val duration: Int? = null,
+    val genres: List<String>? = null,
+    val studios: List<String>? = null,
+
     @param:Json(name = "shikimori_rating")
     val rating: Double? = null,
     val kind: String? = null,
 
+    @param:Json(name = "is_available")
+    val isAvailable: Boolean = false,
     @param:Json(name = "has_kodik")
     val hasKodik: Boolean = false,
     @param:Json(name = "has_libria")
@@ -88,7 +96,12 @@ fun AnimeDetailResponse.toDomain(): AnimeDetailed{
         titleEn = titleEn,
         posterUrl = posterUrl,
         year = year,
+        description = description,
+        duration = duration,
+        genres = genres,
+        studios = studios,
         rating = rating,
+        isAvailable = isAvailable,
         hasKodik = hasKodik,
         hasLibria = hasLibria,
         status = myStatus,

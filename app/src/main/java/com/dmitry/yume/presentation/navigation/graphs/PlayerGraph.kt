@@ -45,7 +45,8 @@ fun NavGraphBuilder.playerGraph(navController: NavController) {
                         saveProgress = viewModel::saveProgress,
                         onPrevEpisodeClick = viewModel::prevEpisode,
                         onNextEpisodeClick = viewModel::nextEpisode,
-                        onEpisodeClick = { navController.navigate(Player.EPISODES)}
+                        onEpisodeClick = { navController.navigate(Player.EPISODES)},
+                        onBackClick = { navController.popBackStack() }
                     )
                 }
                 is PlayerViewState.Error -> {
@@ -70,7 +71,6 @@ fun NavGraphBuilder.playerGraph(navController: NavController) {
             val viewModel: PlayerViewModel = hiltViewModel(parentEntry)
             val state by viewModel.state.collectAsStateWithLifecycle()
             val playerState by viewModel.playerState.collectAsStateWithLifecycle()
-
 
             when (state) {
                 is PlayerViewState.Loading -> {

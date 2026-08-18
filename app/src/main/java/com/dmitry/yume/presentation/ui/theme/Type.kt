@@ -34,6 +34,8 @@ val Nunito = FontFamily(
 object YumeType {
     val displayLg = TextStyle(fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 34.sp, lineHeight = 36.sp, letterSpacing = (-0.02).em)
     val display   = TextStyle(fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, lineHeight = 30.sp, letterSpacing = (-0.02).em)
+    /** Prominent numeric rating, e.g. "9.4" on the anime details screen. */
+    val rating    = TextStyle(fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 60.sp, lineHeight = 64.sp, letterSpacing = (-0.01).em)
     val h1        = TextStyle(fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 27.sp, letterSpacing = (-0.01).em)
     val h2        = TextStyle(fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 24.sp)
     val h3        = TextStyle(fontFamily = Nunito, fontWeight = FontWeight.SemiBold, fontSize = 17.sp, lineHeight = 21.sp)

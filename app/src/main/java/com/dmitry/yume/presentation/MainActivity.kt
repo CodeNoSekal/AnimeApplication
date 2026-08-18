@@ -104,13 +104,20 @@ fun RootScreen(
     }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
     val inTopLevelDestination = backStackEntry?.destination?.hierarchy?.any { dest ->
         TopLevelDestination.entries.any { it.graph == dest.route }
     } == true
 
     Scaffold(
         bottomBar = {
-            if (isAuthenticated && inTopLevelDestination) BottomBar(navController)
+            if(
+                isAuthenticated &&
+                inTopLevelDestination &&
+                currentRoute != Destinations.FILTERS
+            ){
+                BottomBar(navController)
+            }
         }
     ) { innerPadding ->
         NavHost(

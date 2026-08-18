@@ -15,7 +15,11 @@ import javax.inject.Inject
 class AnimeRepositoryImpl @Inject constructor(
     private val api: AnimeApi
 ) : AnimeRepository {
-    override fun getAnime(): Flow<PagingData<Anime>> {
+    override fun getAnime(
+        status: String,
+        sort: String,
+        order: String
+    ): Flow<PagingData<Anime>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 50,
@@ -24,7 +28,12 @@ class AnimeRepositoryImpl @Inject constructor(
             pagingSourceFactory = {
                 AnimePagingSource(
                     loadPage = { page ->
-                        api.getAnimeList(page)
+                        api.getAnimeList(
+                            page = page,
+                            status = status,
+                            sort = sort,
+                            order = order
+                        )
                     }
                 )
             }

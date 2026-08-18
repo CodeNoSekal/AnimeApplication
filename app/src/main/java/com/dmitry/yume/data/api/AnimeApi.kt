@@ -18,8 +18,12 @@ interface AnimeApi {
         page: Int,
         @Query("per_page")
         perPage: Int = 50,
+        @Query("status")
+        status: String = "",
         @Query("sort")
         sort: String = "rating",
+        @Query("order")
+        order: String = "desc",
         @Query("q")
         q: String? = null
     ): AnimeResponse

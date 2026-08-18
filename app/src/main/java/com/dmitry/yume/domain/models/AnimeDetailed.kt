@@ -11,5 +11,10 @@ data class AnimeDetailed(
     val hasLibria: Boolean = false,
     val status: String? = null,
     val favorite: Boolean = false,
-    val score: Int? = null
+    val score: Int? = null,
+    val isAvailable: Boolean,
+    val description: String?,
+    val duration: Int?,
+    val genres: List<String>?,
+    val studios: List<String>?
 )

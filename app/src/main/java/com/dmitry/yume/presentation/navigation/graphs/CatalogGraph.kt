@@ -8,6 +8,7 @@ import com.dmitry.yume.presentation.navigation.Destinations
 import com.dmitry.yume.presentation.navigation.Details
 import com.dmitry.yume.presentation.navigation.Search
 import com.dmitry.yume.presentation.navigation.screens.detailsComposable
+import com.dmitry.yume.presentation.navigation.screens.filtersComposable
 import com.dmitry.yume.presentation.navigation.screens.searchComposable
 import com.dmitry.yume.presentation.screens.catalog.CatalogScreen
 
@@ -20,10 +21,14 @@ fun NavGraphBuilder.catalogGraph(navController: NavController) {
                 },
                 onSearchClicked = {
                     navController.navigate(Search.route(Destinations.CATALOG))
+                },
+                onFiltersClicked = {
+                    navController.navigate(Destinations.FILTERS)
                 }
             )
         }
         detailsComposable(Destinations.CATALOG, navController)
         searchComposable(Destinations.CATALOG, navController)
+        filtersComposable(navController)
     }
 }

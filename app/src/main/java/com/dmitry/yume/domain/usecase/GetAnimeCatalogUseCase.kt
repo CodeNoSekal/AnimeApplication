@@ -9,7 +9,15 @@ import javax.inject.Inject
 class GetAnimeCatalogUseCase @Inject constructor(
     private val repository: AnimeRepository
 ) {
-    operator fun invoke(): Flow<PagingData<Anime>> {
-        return repository.getAnime()
+    operator fun invoke(
+        status: String,
+        sort: String,
+        order: String
+    ): Flow<PagingData<Anime>> {
+        return repository.getAnime(
+            status = status,
+            sort = sort,
+            order = order
+        )
     }
 }

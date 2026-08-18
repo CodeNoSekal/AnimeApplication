@@ -11,11 +11,17 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,13 +35,17 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.dmitry.yume.presentation.components.list.AnimeList
+import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogScreen(
     onItemClicked: (Int) -> Unit,
     onSearchClicked: () -> Unit,
-    catalogViewModel: CatalogViewModel = hiltViewModel()
+    catalogViewModel: CatalogViewModel = hiltViewModel(),
+    onFiltersClicked: () -> Unit
 ) {
     val animeItems = catalogViewModel.anime.collectAsLazyPagingItems()
 
@@ -60,6 +70,13 @@ fun CatalogScreen(
 
     val listState = rememberLazyListState()
 
+    var showSortSheet by remember { mutableStateOf(false) }
+
+    val options by catalogViewModel.optionsState.collectAsState()
+    var draftOptions by remember { mutableStateOf(options) }
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
 
     Box(
         modifier = Modifier
@@ -74,6 +91,13 @@ fun CatalogScreen(
         )
         CatalogTopBar(
             onSearchClicked,
+            onSortClicked = {
+                draftOptions = options
+                showSortSheet = true
+            },
+            onFiltersClicked = {
+                onFiltersClicked()
+            },
             modifier = Modifier
                 .offset { IntOffset(0, barOffsetPx.roundToInt()) }
         )
@@ -84,5 +108,24 @@ fun CatalogScreen(
                 .windowInsetsTopHeight(WindowInsets.statusBars)
                 .background(MaterialTheme.colorScheme.background)
         )
+
+        if (showSortSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    catalogViewModel.setOptions(draftOptions)
+                    showSortSheet = false },
+                containerColor = colors.surfaceCard,
+                sheetGesturesEnabled = false,
+                sheetState = sheetState,
+            ) {
+                SortPickerContent(
+                    optionsState = draftOptions,
+                    onSortSelected = { newSort ->
+                        draftOptions = newSort
+                    }
+                )
+            }
+        }
+
     }
 }

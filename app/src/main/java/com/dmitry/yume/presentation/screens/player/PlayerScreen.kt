@@ -23,7 +23,8 @@ fun PlayerScreen(
     saveProgress: (PlaybackContext, Long, Long) -> Unit,
     onPrevEpisodeClick: () -> Unit,
     onNextEpisodeClick: () -> Unit,
-    onEpisodeClick: () -> Unit
+    onEpisodeClick: () -> Unit,
+    onBackClick: () -> Unit,
 ) {
     val activity = LocalActivity.current ?: return
     val configuration = LocalConfiguration.current
@@ -84,6 +85,7 @@ fun PlayerScreen(
     PlayerContent(
         player = controller.player,
         playerState = playerState,
+        playerData = playerData,
         isLandscape = isLandscape,
         hasPreviousEpisode = navigation.previousEpisodeId != null,
         hasNextEpisode = navigation.nextEpisodeId != null,
@@ -99,6 +101,7 @@ fun PlayerScreen(
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         },
         onSaveProgress = controller::saveCurrentProgress,
-        modifier = contentModifier
+        modifier = contentModifier,
+        onBackClick = onBackClick,
     )
 }

@@ -139,7 +139,7 @@ class DetailViewModelTest {
         override fun searchAnime(q: String): Flow<PagingData<Anime>> = emptyFlow()
         override suspend fun getAnimeById(id: Int): AnimeDetailResult =
             AnimeDetailResult.Success(
-                AnimeDetailed(id, "Title", null, null, 2026, 8.0)
+                AnimeDetailed(id, "Title", null, null, 2026, 8.0,)
             )
     }
 }

@@ -9,9 +9,10 @@
             domain="file"
             path="datastore/auth_prefs.preferences_pb" />
     </cloud-backup>
+    <!--
     <device-transfer>
-        <exclude
-            domain="file"
-            path="datastore/auth_prefs.preferences_pb" />
+        <include .../>
+        <exclude .../>
     </device-transfer>
+    -->
 </data-extraction-rules>
