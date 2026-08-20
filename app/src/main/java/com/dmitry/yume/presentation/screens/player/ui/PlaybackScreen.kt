@@ -1,4 +1,4 @@
-package com.dmitry.yume.presentation.screens.player
+package com.dmitry.yume.presentation.screens.player.ui
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
@@ -13,13 +13,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import com.dmitry.yume.domain.models.PlayerData
+import com.dmitry.yume.domain.models.PlaybackCatalog
+import com.dmitry.yume.presentation.screens.player.PlaybackContext
+import com.dmitry.yume.presentation.screens.player.PlaybackUiState
+import com.dmitry.yume.presentation.screens.player.navigationFor
+import com.dmitry.yume.presentation.screens.player.rememberPlaybackController
 
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
-fun PlayerScreen(
-    playerData: PlayerData,
-    playerState: PlayerUiState,
+fun PlaybackScreen(
+    playbackCatalog: PlaybackCatalog,
+    playbackState: PlaybackUiState,
     saveProgress: (PlaybackContext, Long, Long) -> Unit,
     onPrevEpisodeClick: () -> Unit,
     onNextEpisodeClick: () -> Unit,
@@ -30,47 +34,47 @@ fun PlayerScreen(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    val controller = rememberPlayerController(
+    val controller = rememberPlaybackController(
         onSaveProgress = saveProgress
     )
 
     val playbackContext = remember(
-        playerData.id,
-        playerState.selectedEpisodeNumber,
-        playerState.selectedSource,
-        playerState.selectedVoiceoverId
+        playbackCatalog.animeId,
+        playbackState.selectedEpisodeNumber,
+        playbackState.selectedSource,
+        playbackState.selectedVoiceoverId
     ) {
         PlaybackContext(
-            animeId = playerData.id,
-            episodeNumber = playerState.selectedEpisodeNumber,
-            sourceProvider = playerState.selectedSource,
-            voiceoverId = playerState.selectedVoiceoverId
+            animeId = playbackCatalog.animeId,
+            episodeNumber = playbackState.selectedEpisodeNumber,
+            sourceProvider = playbackState.selectedSource,
+            voiceoverId = playbackState.selectedVoiceoverId
         )
     }
 
-    LaunchedEffect(playbackContext, playerState.currentUrl) {
-        val url = playerState.currentUrl ?: return@LaunchedEffect
+    LaunchedEffect(playbackContext, playbackState.currentUrl) {
+        val url = playbackState.currentUrl ?: return@LaunchedEffect
 
         controller.replaceMedia(
             url = url,
             context = playbackContext,
-            startPositionMs = playerState.currentPositionMs
+            startPositionMs = playbackState.currentPositionMs
         )
     }
 
-    PlayerLifecycleEffect(controller)
-    PlayerKeepScreenOnEffect(controller)
-    PlayerSystemUiEffect(
+    PlaybackLifecycleEffect(controller)
+    PlaybackKeepScreenOnEffect(controller)
+    PlaybackSystemUiEffect(
         activity = activity,
         isLandscape = isLandscape
     )
-    PlayerReleaseEffect(
+    PlaybackReleaseEffect(
         controller = controller,
         activity = activity
     )
 
-    val navigation = playerData.navigationFor(
-        selectedEpisodeNumber = playerState.selectedEpisodeNumber
+    val navigation = playbackCatalog.navigationFor(
+        selectedEpisodeNumber = playbackState.selectedEpisodeNumber
     )
 
     val contentModifier = if (isLandscape) {
@@ -82,10 +86,10 @@ fun PlayerScreen(
             .statusBarsPadding()
     }
 
-    PlayerContent(
+    PlaybackContent(
         player = controller.player,
-        playerState = playerState,
-        playerData = playerData,
+        playbackState = playbackState,
+        playbackCatalog = playbackCatalog,
         isLandscape = isLandscape,
         hasPreviousEpisode = navigation.previousEpisodeId != null,
         hasNextEpisode = navigation.nextEpisodeId != null,

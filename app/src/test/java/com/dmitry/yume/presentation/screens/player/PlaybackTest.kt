@@ -1,10 +1,10 @@
 package com.dmitry.yume.presentation.screens.player
 
-import com.dmitry.yume.domain.models.Episode
-import com.dmitry.yume.domain.models.PlayerData
+import com.dmitry.yume.domain.models.PlaybackEpisode
+import com.dmitry.yume.domain.models.PlaybackCatalog
 import com.dmitry.yume.domain.models.Provider
-import com.dmitry.yume.domain.models.Quality
-import com.dmitry.yume.domain.models.Source
+import com.dmitry.yume.domain.models.VideoQuality
+import com.dmitry.yume.domain.models.PlaybackSource
 import com.dmitry.yume.domain.models.Voiceover
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -36,8 +36,8 @@ class PlaybackTest {
             playerData(
                 episode(
                     sources = listOf(
-                        Source(Provider.Libria, emptyList()),
-                        Source(Provider.Kodik, emptyList())
+                        PlaybackSource(Provider.Libria, emptyList()),
+                        PlaybackSource(Provider.Kodik, emptyList())
                     )
                 )
             )
@@ -52,11 +52,11 @@ class PlaybackTest {
             playerData(
                 episode(
                     sources = listOf(
-                        Source(
+                        PlaybackSource(
                             provider = Provider.Libria,
                             voiceovers = listOf(voiceover(id = 1))
                         ),
-                        Source(
+                        PlaybackSource(
                             provider = Provider.Kodik,
                             voiceovers = listOf(
                                 voiceover(
@@ -68,11 +68,11 @@ class PlaybackTest {
                     )
                 )
             ),
-            PreferredPlayback(
+            PlaybackPreference(
                 episodeNumber = 1,
                 sourceProvider = Provider.Libria,
                 voiceoverId = 1,
-                quality = Quality.FHD,
+                quality = VideoQuality.FHD,
                 positionMs = 12_000L
             )
         )
@@ -80,7 +80,7 @@ class PlaybackTest {
         val resolved = result as PlaybackResolution.Success
         assertEquals(Provider.Kodik, resolved.sourceProvider)
         assertEquals(2, resolved.voiceoverId)
-        assertEquals(Quality.HD, resolved.quality)
+        assertEquals(VideoQuality.HD, resolved.quality)
         assertEquals("https://example.test/episode.m3u8", resolved.url)
         assertEquals(12_000L, resolved.positionMs)
     }
@@ -91,7 +91,7 @@ class PlaybackTest {
             playerData(
                 episode(
                     sources = listOf(
-                        Source(
+                        PlaybackSource(
                             provider = Provider.Libria,
                             voiceovers = listOf(
                                 voiceover(
@@ -103,17 +103,17 @@ class PlaybackTest {
                     )
                 )
             ),
-            PreferredPlayback(
+            PlaybackPreference(
                 episodeNumber = 1,
                 sourceProvider = Provider.Libria,
                 voiceoverId = 1,
-                quality = Quality.FHD,
+                quality = VideoQuality.FHD,
                 positionMs = 0L
             )
         )
 
         val resolved = result as PlaybackResolution.Success
-        assertEquals(Quality.SD, resolved.quality)
+        assertEquals(VideoQuality.SD, resolved.quality)
         assertEquals("https://example.test/480.m3u8", resolved.url)
     }
 
@@ -125,18 +125,18 @@ class PlaybackTest {
                 episode(
                     id = 2,
                     sources = listOf(
-                        Source(
+                        PlaybackSource(
                             Provider.Libria,
                             listOf(voiceover(id = 2, url = "https://example.test/video"))
                         )
                     )
                 )
             ),
-            PreferredPlayback(
+            PlaybackPreference(
                 episodeNumber = 1,
                 sourceProvider = Provider.Libria,
                 voiceoverId = 1,
-                quality = Quality.FHD,
+                quality = VideoQuality.FHD,
                 positionMs = 25_000L
             )
         )
@@ -165,27 +165,27 @@ class PlaybackTest {
         assertEquals(message, (result as PlaybackResolution.Error).message)
     }
 
-    private fun playerData(vararg episodes: Episode) = PlayerData(
-        id = 10,
+    private fun playerData(vararg episodes: PlaybackEpisode) = PlaybackCatalog(
+        animeId = 10,
         title = "Test",
         episodesTotal = episodes.size,
         episodesAvailable = episodes.count { it.isAvailable },
-        kodik = true,
-        libria = true,
+        hasKodik = true,
+        hasLibria = true,
         episodes = episodes.toList()
     )
 
     private fun episode(
         id: Int = 1,
         isAvailable: Boolean = true,
-        sources: List<Source> = listOf(
-            Source(
+        sources: List<PlaybackSource> = listOf(
+            PlaybackSource(
                 Provider.Libria,
                 listOf(voiceover(id = 1, url = "https://example.test/video"))
             )
         )
-    ) = Episode(
-        id = id,
+    ) = PlaybackEpisode(
+        number = id,
         title = null,
         airDate = "",
         isAvailable = isAvailable,
@@ -199,11 +199,11 @@ class PlaybackTest {
         hls720: String? = null,
         hls1080: String? = null
     ) = Voiceover(
-        voiceoverId = id,
+        id = id,
         url = url,
         type = "",
-        voiceover = "",
-        quality = Quality.Undefined,
+        name = "",
+        maxQuality = VideoQuality.Unknown,
         hls480 = hls480,
         hls720 = hls720,
         hls1080 = hls1080

@@ -1,4 +1,4 @@
-package com.dmitry.yume.presentation.screens.player
+package com.dmitry.yume.presentation.screens.player.ui
 
 import android.app.Activity
 import androidx.compose.runtime.Composable
@@ -9,10 +9,11 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.dmitry.yume.presentation.screens.player.PlaybackController
 
 @Composable
-fun PlayerLifecycleEffect(
-    controller: PlayerController
+fun PlaybackLifecycleEffect(
+    controller: PlaybackController
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -33,8 +34,8 @@ fun PlayerLifecycleEffect(
 }
 
 @Composable
-fun PlayerReleaseEffect(
-    controller: PlayerController,
+fun PlaybackReleaseEffect(
+    controller: PlaybackController,
     activity: Activity
 ) {
     DisposableEffect(controller, activity) {
@@ -48,7 +49,7 @@ fun PlayerReleaseEffect(
 }
 
 @Composable
-fun PlayerSystemUiEffect(
+fun PlaybackSystemUiEffect(
     activity: Activity,
     isLandscape: Boolean
 ) {

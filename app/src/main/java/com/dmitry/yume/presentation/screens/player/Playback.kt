@@ -1,22 +1,21 @@
 package com.dmitry.yume.presentation.screens.player
 
-import com.dmitry.yume.domain.models.PlayerData
+import com.dmitry.yume.domain.models.PlaybackCatalog
 import com.dmitry.yume.domain.models.ProgressItemData
 import com.dmitry.yume.domain.models.Provider
-import com.dmitry.yume.domain.models.Quality
-import com.dmitry.yume.domain.models.Source
+import com.dmitry.yume.domain.models.VideoQuality
 import com.dmitry.yume.domain.models.Voiceover
 
-data class PreferredPlayback(
+data class PlaybackPreference(
     val episodeNumber: Int?,
     val sourceProvider: Provider?,
     val voiceoverId: Int?,
-    val quality: Quality?,
+    val quality: VideoQuality?,
     val positionMs: Long
 )
 
-fun ProgressItemData.toPreferredPlayback(): PreferredPlayback =
-    PreferredPlayback(
+fun ProgressItemData.toPlaybackPreference(): PlaybackPreference =
+    PlaybackPreference(
         episodeNumber = episodeNumber,
         sourceProvider = sourceProvider,
         voiceoverId = voiceoverId,
@@ -24,8 +23,8 @@ fun ProgressItemData.toPreferredPlayback(): PreferredPlayback =
         positionMs = positionMs
     )
 
-fun PlayerUiState.toPreferredPlayback(): PreferredPlayback =
-    PreferredPlayback(
+fun PlaybackUiState.toPlaybackPreference(): PlaybackPreference =
+    PlaybackPreference(
         episodeNumber = selectedEpisodeNumber,
         sourceProvider = selectedSource,
         voiceoverId = selectedVoiceoverId,
@@ -38,7 +37,7 @@ sealed interface PlaybackResolution {
         val episodeNumber: Int,
         val sourceProvider: Provider,
         val voiceoverId: Int,
-        val quality: Quality,
+        val quality: VideoQuality,
         val url: String,
         val positionMs: Long
     ) : PlaybackResolution
@@ -47,14 +46,14 @@ sealed interface PlaybackResolution {
 }
 
 fun resolvePlayback(
-    playerData: PlayerData,
-    preferredPlayback: PreferredPlayback? = null
+    playbackCatalog: PlaybackCatalog,
+    playbackPreference: PlaybackPreference? = null
 ): PlaybackResolution {
-    val episode = playerData.episodes
+    val episode = playbackCatalog.episodes
         .firstOrNull {
-            it.id == preferredPlayback?.episodeNumber && it.isAvailable
+            it.number == playbackPreference?.episodeNumber && it.isAvailable
         }
-        ?: playerData.episodes.firstOrNull { it.isAvailable }
+        ?: playbackCatalog.episodes.firstOrNull { it.isAvailable }
         ?: return PlaybackResolution.Error("Нет доступных эпизодов")
 
     if (episode.sources.isEmpty()) {
@@ -62,30 +61,30 @@ fun resolvePlayback(
     }
 
     val sourceCandidates = episode.sources.preferredFirst {
-        it.provider == preferredPlayback?.sourceProvider
+        it.provider == playbackPreference?.sourceProvider
     }
 
     val hasVoiceovers = sourceCandidates.any { it.voiceovers.isNotEmpty() }
 
     for (source in sourceCandidates) {
         val voiceoverCandidates = source.voiceovers.preferredFirst {
-            it.voiceoverId == preferredPlayback?.voiceoverId
+            it.id == playbackPreference?.voiceoverId
         }
 
         for (voiceover in voiceoverCandidates) {
-            val stream = voiceover.resolveStream(preferredPlayback?.quality)
+            val stream = voiceover.resolveStream(playbackPreference?.quality)
                 ?: continue
 
-            val positionMs = if (episode.id == preferredPlayback?.episodeNumber) {
-                preferredPlayback.positionMs.coerceAtLeast(0L)
+            val positionMs = if (episode.number == playbackPreference?.episodeNumber) {
+                playbackPreference.positionMs.coerceAtLeast(0L)
             } else {
                 0L
             }
 
             return PlaybackResolution.Success(
-                episodeNumber = episode.id,
+                episodeNumber = episode.number,
                 sourceProvider = source.provider,
-                voiceoverId = voiceover.voiceoverId,
+                voiceoverId = voiceover.id,
                 quality = stream.quality,
                 url = stream.url,
                 positionMs = positionMs
@@ -101,18 +100,18 @@ fun resolvePlayback(
 }
 
 private data class ResolvedStream(
-    val quality: Quality,
+    val quality: VideoQuality,
     val url: String
 )
 
 private fun Voiceover.resolveStream(
-    preferredQuality: Quality?
+    preferredQuality: VideoQuality?
 ): ResolvedStream? {
     val qualityCandidates = when (preferredQuality) {
-        Quality.FHD -> listOf(Quality.FHD, Quality.HD, Quality.SD)
-        Quality.HD -> listOf(Quality.HD, Quality.SD, Quality.FHD)
-        Quality.SD -> listOf(Quality.SD, Quality.HD, Quality.FHD)
-        Quality.Undefined, null -> listOf(Quality.FHD, Quality.HD, Quality.SD)
+        VideoQuality.FHD -> listOf(VideoQuality.FHD, VideoQuality.HD, VideoQuality.SD)
+        VideoQuality.HD -> listOf(VideoQuality.HD, VideoQuality.SD, VideoQuality.FHD)
+        VideoQuality.SD -> listOf(VideoQuality.SD, VideoQuality.HD, VideoQuality.FHD)
+        VideoQuality.Unknown, null -> listOf(VideoQuality.FHD, VideoQuality.HD, VideoQuality.SD)
     }
 
     for (candidate in qualityCandidates) {
@@ -127,18 +126,18 @@ private fun Voiceover.resolveStream(
         ?: return null
 
     return ResolvedStream(
-        quality = quality.takeUnless { it == Quality.Undefined }
-            ?: Quality.Undefined,
+        quality = maxQuality.takeUnless { it == VideoQuality.Unknown }
+            ?: VideoQuality.Unknown,
         url = fallbackUrl
     )
 }
 
-private fun Voiceover.urlFor(quality: Quality): String? =
+private fun Voiceover.urlFor(quality: VideoQuality): String? =
     when (quality) {
-        Quality.FHD -> hls1080
-        Quality.HD -> hls720
-        Quality.SD -> hls480
-        Quality.Undefined -> null
+        VideoQuality.FHD -> hls1080
+        VideoQuality.HD -> hls720
+        VideoQuality.SD -> hls480
+        VideoQuality.Unknown -> null
     }
 
 private fun <T> List<T>.preferredFirst(

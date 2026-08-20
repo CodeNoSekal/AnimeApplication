@@ -1,4 +1,4 @@
-package com.dmitry.yume.presentation.screens.player
+package com.dmitry.yume.presentation.screens.player.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,16 +19,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.ExoPlayer
 import com.dmitry.yume.R
-import com.dmitry.yume.domain.models.PlayerData
+import com.dmitry.yume.domain.models.PlaybackCatalog
 import com.dmitry.yume.presentation.components.BaseButton
+import com.dmitry.yume.presentation.screens.player.PlaybackUiState
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeType
 
 @Composable
-fun PlayerContent(
+fun PlaybackContent(
     player: ExoPlayer,
-    playerState: PlayerUiState,
-    playerData: PlayerData,
+    playbackState: PlaybackUiState,
+    playbackCatalog: PlaybackCatalog,
     isLandscape: Boolean,
     hasPreviousEpisode: Boolean,
     hasNextEpisode: Boolean,
@@ -46,7 +47,7 @@ fun PlayerContent(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val playerModifier = if (isLandscape) {
+        val videoModifier = if (isLandscape) {
             Modifier
                 .fillMaxHeight()
                 .aspectRatio(16f / 9f)
@@ -56,10 +57,10 @@ fun PlayerContent(
                 .aspectRatio(16f / 9f)
         }
 
-        Player(
-            playerState = playerState,
+        VideoPlayer(
+            playbackState = playbackState,
             exoPlayer = player,
-            modifier = playerModifier,
+            modifier = videoModifier,
             isLandscape = isLandscape,
             expand = onExpand,
             compress = onCompress,
@@ -78,7 +79,7 @@ fun PlayerContent(
                     .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                playerData.title?.let {
+                playbackCatalog.title?.let {
                     Text(
                         text = it,
                         modifier = Modifier
@@ -91,7 +92,7 @@ fun PlayerContent(
                     )
                 }
 
-                playerData.episodes.find { it.id == playerState.selectedEpisodeNumber }?.title?.let {
+                playbackCatalog.episodes.find { it.number == playbackState.selectedEpisodeNumber }?.title?.let {
                     Text(
                         text = it,
                         modifier = Modifier
@@ -124,7 +125,7 @@ fun PlayerContent(
                 BaseButton(
                     onClick = onEpisodePicker,
                     modifier = Modifier.weight(0.6f),
-                    text = "Серия ${playerState.selectedEpisodeNumber}"
+                    text = "Серия ${playbackState.selectedEpisodeNumber}"
                 )
 
                 BaseButton(

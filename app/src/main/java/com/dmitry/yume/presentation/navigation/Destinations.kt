@@ -15,6 +15,7 @@ object Destinations {
     const val EXPLORATION = "exploration"
 
     const val FILTERS = "filters"
+    const val GENRES = "genres"
 
 
     const val AUTH_GRAPH = "auth_graph"
@@ -35,15 +36,15 @@ object Details {
     fun build(parent: String, animeId: Int) = "$parent/$DETAILS/$animeId"
 }
 
-object Player {
-    const val PLAYER_GRAPH = "player_graph"
-    const val PLAYER = "player"
-    const val EPISODES = "episodes"
+object PlaybackDestination {
+    const val GRAPH = "player_graph"
+    const val SCREEN = "player"
+    const val EPISODE_PICKER = "episodes"
     const val ANIME_ID = "animeId"
 
-    fun routePattern() = "$PLAYER_GRAPH/{$ANIME_ID}"
+    fun routePattern() = "$GRAPH/{$ANIME_ID}"
 
-    fun build(animeId: Int) = "$PLAYER_GRAPH/$animeId"
+    fun build(animeId: Int) = "$GRAPH/$animeId"
 }
 
 object Search {

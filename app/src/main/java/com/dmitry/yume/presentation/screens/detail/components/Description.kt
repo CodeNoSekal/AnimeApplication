@@ -31,36 +31,6 @@ fun Description(
     var maxLinesDesc by remember { mutableIntStateOf(4) }
     val interactionSource = remember { MutableInteractionSource() }
 
-//    description?.let {
-//        Box(
-//            modifier = Modifier
-//                .padding(horizontal = 20.dp)
-//                .clip(RoundedCornerShape(14.dp))
-//                .background(YumeTheme.colors.surfaceCard)
-//                .animateContentSize(
-//                    animationSpec = spring()
-//                )
-//                .clickable(onClick = {
-//                    maxLinesDesc = if (maxLinesDesc == 4)
-//                        Int.MAX_VALUE
-//                    else
-//                        4
-//                })
-//        ) {
-//            Text(
-//                text = it,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(horizontal = 12.dp, vertical = 8.dp),
-//                maxLines = maxLinesDesc,
-//                overflow = TextOverflow.Ellipsis,
-//                style = YumeType.body,
-//                textAlign = TextAlign.Start,
-//                color = MaterialTheme.colorScheme.onBackground,
-//            )
-//        }
-//    }
-
     description?.let {
         Text(
             text = it,

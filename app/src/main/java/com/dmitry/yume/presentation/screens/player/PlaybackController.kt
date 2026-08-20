@@ -11,7 +11,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import java.util.UUID
 
 @Stable
-class PlayerController(
+class PlaybackController(
     val player: ExoPlayer,
     private val onSaveProgress:
         (PlaybackContext, Long, Long) -> Unit
@@ -60,15 +60,15 @@ class PlayerController(
 }
 
 @Composable
-fun rememberPlayerController(
+fun rememberPlaybackController(
     onSaveProgress:
         (PlaybackContext, Long, Long) -> Unit
-): PlayerController {
+): PlaybackController {
     val context = LocalContext.current
     val latestSaveProgress by rememberUpdatedState(onSaveProgress)
 
     return remember {
-        PlayerController(
+        PlaybackController(
             player = ExoPlayer.Builder(context)
                 .setSeekBackIncrementMs(10_000)
                 .setSeekForwardIncrementMs(10_000)

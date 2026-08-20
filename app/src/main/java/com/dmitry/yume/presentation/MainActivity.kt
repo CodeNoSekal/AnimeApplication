@@ -39,7 +39,7 @@ import com.dmitry.yume.presentation.navigation.graphs.authGraph
 import com.dmitry.yume.presentation.navigation.graphs.catalogGraph
 import com.dmitry.yume.presentation.navigation.graphs.collectionsGraph
 import com.dmitry.yume.presentation.navigation.graphs.homeGraph
-import com.dmitry.yume.presentation.navigation.graphs.playerGraph
+import com.dmitry.yume.presentation.navigation.graphs.playbackGraph
 import com.dmitry.yume.presentation.navigation.graphs.profileGraph
 import com.dmitry.yume.presentation.navigation.graphs.explorationGraph
 import com.dmitry.yume.presentation.navigation.graphs.verifyGraph
@@ -98,7 +98,8 @@ fun RootScreen(
         bottomBar = {
             if(
                 inTopLevelDestination &&
-                currentRoute != Destinations.FILTERS
+                currentRoute != Destinations.FILTERS &&
+                currentRoute != Destinations.GENRES
             ){
                 BottomBar(navController)
             }
@@ -128,7 +129,7 @@ fun RootScreen(
 
             profileGraph(navController)
 
-            playerGraph(navController)
+            playbackGraph(navController)
         }
     }
 }
@@ -173,5 +174,4 @@ fun BottomBar(
         }
     }
 }
-
 

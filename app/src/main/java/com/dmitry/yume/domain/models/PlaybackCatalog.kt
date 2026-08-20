@@ -1,50 +1,47 @@
 package com.dmitry.yume.domain.models
 
-data class PlayerData(
-    val id: Int,
+data class PlaybackCatalog(
+    val animeId: Int,
     val title: String?,
     val episodesTotal: Int,
     val episodesAvailable: Int,
-    val kodik: Boolean,
-    val libria: Boolean,
-    val episodes: List<Episode>
+    val hasKodik: Boolean,
+    val hasLibria: Boolean,
+    val episodes: List<PlaybackEpisode>
 )
 
-data class Episode(
-    val id: Int,
+data class PlaybackEpisode(
+    val number: Int,
     val title: String?,
     val airDate: String,
     val isAvailable: Boolean,
-    val sources: List<Source>
+    val sources: List<PlaybackSource>
 )
 
-data class Source(
+data class PlaybackSource(
     val provider: Provider,
     val voiceovers: List<Voiceover>
 )
 
 data class Voiceover(
-    val voiceoverId: Int,
-    val url: String?,
-    val type: String,
-    val voiceover: String,
-    val quality: Quality,
-    val hls480: String?,
-    val hls720: String?,
-    val hls1080: String?
+    val id: Int,
+    val name: String,
+    val maxQuality: VideoQuality,
 )
 
 sealed class Provider {
     object Libria : Provider()
     object Liberty : Provider()
     object Kodik : Provider()
-    object Undefined : Provider()
+    data class Unknown(
+        val rawName: String
+    ) : Provider()
 
-    fun toRaw(): String? = when (this) {
+    fun toRaw(): String = when (this) {
         Kodik -> "kodik"
         Libria -> "libria"
         Liberty -> "liberty"
-        Undefined -> null
+        is Unknown -> rawName
     }
 
     companion object {
@@ -53,7 +50,7 @@ sealed class Provider {
                 "kodik" -> Kodik
                 "libria" -> Libria
                 "liberty" -> Liberty
-                else -> Undefined
+                else -> Unknown(raw)
             }
         }
     }
@@ -61,19 +58,19 @@ sealed class Provider {
 
 
 
-sealed class Quality {
-    object FHD : Quality()
-    object HD : Quality()
-    object SD : Quality()
-    object Undefined : Quality()
+sealed class VideoQuality {
+    object FHD : VideoQuality()
+    object HD : VideoQuality()
+    object SD : VideoQuality()
+    object Unknown : VideoQuality()
 
     companion object {
-        fun getQuality(raw: String): Quality {
+        fun fromRaw(raw: String): VideoQuality {
             return when {
                 raw.contains("1080") -> FHD
                 raw.contains("720") -> HD
                 raw.contains("480") -> SD
-                else -> Undefined
+                else -> Unknown
             }
         }
     }

@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.dmitry.yume.presentation.navigation.Destinations
 import com.dmitry.yume.presentation.navigation.Details
-import com.dmitry.yume.presentation.navigation.Player
+import com.dmitry.yume.presentation.navigation.PlaybackDestination
 import com.dmitry.yume.presentation.navigation.Search
 import com.dmitry.yume.presentation.navigation.screens.detailsComposable
 import com.dmitry.yume.presentation.navigation.screens.searchComposable
@@ -22,7 +22,7 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
                 onSearchClicked = {
                     navController.navigate(Search.route(Destinations.HOME))
                 },
-                onPlayClick = { navController.navigate(Player.build(it)) },
+                onPlayClick = { navController.navigate(PlaybackDestination.build(it)) },
             )
         }
         detailsComposable(Destinations.HOME, navController)

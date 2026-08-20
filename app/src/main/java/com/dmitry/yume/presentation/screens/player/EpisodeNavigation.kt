@@ -1,17 +1,17 @@
 package com.dmitry.yume.presentation.screens.player
 
-import com.dmitry.yume.domain.models.PlayerData
+import com.dmitry.yume.domain.models.PlaybackCatalog
 
 data class EpisodeNavigation(
     val previousEpisodeId: Int?,
     val nextEpisodeId: Int?
 )
 
-fun PlayerData.navigationFor(
+fun PlaybackCatalog.navigationFor(
     selectedEpisodeNumber: Int
 ): EpisodeNavigation {
     val index = episodes.indexOfFirst {
-        it.id == selectedEpisodeNumber
+        it.number == selectedEpisodeNumber
     }
 
     if (index == -1) {
@@ -22,7 +22,7 @@ fun PlayerData.navigationFor(
     }
 
     return EpisodeNavigation(
-        previousEpisodeId = episodes.getOrNull(index - 1)?.id,
-        nextEpisodeId = episodes.getOrNull(index + 1)?.id
+        previousEpisodeId = episodes.getOrNull(index - 1)?.number,
+        nextEpisodeId = episodes.getOrNull(index + 1)?.number
     )
 }

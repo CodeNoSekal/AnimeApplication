@@ -5,17 +5,15 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.dmitry.yume.presentation.navigation.Destinations
 import com.dmitry.yume.presentation.screens.catalog.components.filters.FiltersScreen
+import com.dmitry.yume.presentation.screens.catalog.components.filters.GenresScreen
 
-fun NavGraphBuilder.filtersComposable(navController: NavController){
+fun NavGraphBuilder.genresComposable(navController: NavController){
     composable(
-        route = Destinations.FILTERS
+        route = Destinations.GENRES
     ) {
-        FiltersScreen(
+        GenresScreen(
             onBackClick = {
                 navController.popBackStack()
-            },
-            onGenresClick = {
-                navController.navigate(Destinations.GENRES)
             }
         )
     }

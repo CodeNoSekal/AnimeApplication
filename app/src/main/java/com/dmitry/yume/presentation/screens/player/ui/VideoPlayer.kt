@@ -1,4 +1,4 @@
-package com.dmitry.yume.presentation.screens.player
+package com.dmitry.yume.presentation.screens.player.ui
 
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateFloatAsState
@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -48,6 +45,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import com.dmitry.yume.R
 import com.dmitry.yume.domain.format.formatTime
+import com.dmitry.yume.presentation.screens.player.PlaybackUiState
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeType
 import kotlinx.coroutines.delay
@@ -58,8 +56,8 @@ import androidx.media3.ui.compose.material3.Player as Media3Player
 
 @OptIn(UnstableApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun Player(
-    playerState: PlayerUiState,
+fun VideoPlayer(
+    playbackState: PlaybackUiState,
     exoPlayer: ExoPlayer,
     modifier: Modifier,
     isLandscape: Boolean,
@@ -74,10 +72,10 @@ fun Player(
 
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
     var playWhenReady by remember { mutableStateOf(exoPlayer.playWhenReady) }
-    var playbackState by remember { mutableIntStateOf(exoPlayer.playbackState) }
+    var exoPlaybackState by remember { mutableIntStateOf(exoPlayer.playbackState) }
 
     val isBuffering = playWhenReady &&
-            playbackState == Player.STATE_BUFFERING
+            exoPlaybackState == Player.STATE_BUFFERING
 
     var isSeeking by remember { mutableStateOf(false) }
 
@@ -115,7 +113,7 @@ fun Player(
             }
 
             override fun onPlaybackStateChanged(state: Int) {
-                playbackState = state
+                exoPlaybackState = state
             }
         }
 
@@ -135,7 +133,7 @@ fun Player(
         val controlsSpacing = if (isLandscape) 28.dp else 18.dp
         val bottomPadding = if (isLandscape) 16.dp else 6.dp
 
-        playerState.currentUrl?.let{
+        playbackState.currentUrl?.let{
             Media3Player(
                 player = exoPlayer,
                 modifier = Modifier
@@ -285,7 +283,7 @@ fun Player(
                                 style = YumeType.sm
                             )
 
-                            PlayerProgressBar(
+                            PlaybackProgressBar(
                                 progress,
                                 onSeek = { newProgress ->
                                     exoPlayer.seekTo((duration * newProgress).toLong())
@@ -328,7 +326,7 @@ fun Player(
 }
 
 @Composable
-fun PlayerProgressBar(
+fun PlaybackProgressBar(
     progress: Float,
     onSeek: (Float) -> Unit,
     modifier: Modifier

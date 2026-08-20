@@ -36,12 +36,6 @@ fun HomeContent(
             .fillMaxSize()
             .verticalScroll(scrollState),
     ) {
-
-        Hero(
-            onItemClick = onItemClick,
-            heroData = homeData.hero
-        )
-
         if (progressData is ProgressViewState.Success) {
             ContinueTab(
                 data = progressData.progress,

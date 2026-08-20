@@ -9,7 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.dmitry.yume.presentation.navigation.Details
-import com.dmitry.yume.presentation.navigation.Player
+import com.dmitry.yume.presentation.navigation.PlaybackDestination
 import com.dmitry.yume.presentation.screens.ErrorScreen
 import com.dmitry.yume.presentation.screens.detail.DetailScreen
 import com.dmitry.yume.presentation.screens.detail.DetailViewModel
@@ -32,7 +32,7 @@ fun NavGraphBuilder.detailsComposable(parent: String, navController: NavControll
             is DetailViewState.Success -> {
                 DetailScreen(
                     onBackClick = { navController.popBackStack() },
-                    onPlayClick = { navController.navigate(Player.build(it)) },
+                    onPlayClick = { navController.navigate(PlaybackDestination.build(it)) },
                     animeData = (state as DetailViewState.Success).animeDetailed,
                     statusState = statusState,
                     setStatus = { viewModel.putStatus(it) },

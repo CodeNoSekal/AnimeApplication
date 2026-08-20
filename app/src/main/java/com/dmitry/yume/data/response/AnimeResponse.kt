@@ -2,7 +2,6 @@ package com.dmitry.yume.data.response
 
 import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.models.AnimeDetailed
-import com.dmitry.yume.domain.models.Episode
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 

@@ -1,13 +1,14 @@
-package com.dmitry.yume.presentation.screens.player
+package com.dmitry.yume.presentation.screens.player.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.media3.common.Player
+import com.dmitry.yume.presentation.screens.player.PlaybackController
 
 @Composable
-fun PlayerKeepScreenOnEffect(
-    controller: PlayerController
+fun PlaybackKeepScreenOnEffect(
+    controller: PlaybackController
 ) {
     val view = LocalView.current
 

@@ -1,6 +1,8 @@
 package com.dmitry.yume.data.response
 
 import com.dmitry.yume.domain.models.Anime
+import com.dmitry.yume.domain.models.Genre
+import com.dmitry.yume.domain.models.Genres
 import com.dmitry.yume.domain.models.Home
 import com.dmitry.yume.domain.models.Rail
 import com.squareup.moshi.Json
@@ -33,6 +35,29 @@ data class HeroResponse(
     val myScore: Int? = null,
 )
 
+@JsonClass(generateAdapter = true)
+data class RailResponse(
+    val key: String,
+    val title: String,
+    val items: List<AnimeShort>
+)
+
+@JsonClass(generateAdapter = true)
+data class GenresResponse(
+    @param:Json(name = "items")
+    val genres: List<GenreResponse>
+)
+
+fun GenresResponse.toDomain() = Genres(genres.map { it.toDomain() })
+
+@JsonClass(generateAdapter = true)
+data class GenreResponse(
+    val id: Int,
+    val name: String,
+)
+
+fun GenreResponse.toDomain() = Genre(id, name)
+
 fun HeroResponse.toDomain(): Anime {
     return Anime(
         id = id,
@@ -45,13 +70,6 @@ fun HeroResponse.toDomain(): Anime {
         favorite = favorite
     )
 }
-
-@JsonClass(generateAdapter = true)
-data class RailResponse(
-    val key: String,
-    val title: String,
-    val items: List<AnimeShort>
-)
 
 fun HomeResponse.toDomain(): Home{
     return Home(

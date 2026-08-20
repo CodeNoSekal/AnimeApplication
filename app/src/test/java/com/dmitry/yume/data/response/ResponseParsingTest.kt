@@ -130,6 +130,6 @@ class ResponseParsingTest {
             voiceoverId = null
         )
 
-        assertEquals(Provider.Undefined, item.toDomain().sourceProvider)
+        assertEquals(Provider.Unknown("new-provider"), item.toDomain().sourceProvider)
     }
 }

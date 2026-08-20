@@ -5,7 +5,7 @@ import com.dmitry.yume.data.api.AnimeApi
 import com.dmitry.yume.data.api.AuthApi
 import com.dmitry.yume.data.api.MeApi
 import com.dmitry.yume.data.api.MetaApi
-import com.dmitry.yume.data.api.PlayerApi
+import com.dmitry.yume.data.api.PlaybackApi
 import com.dmitry.yume.data.api.RefreshApi
 import com.dmitry.yume.data.api.VerificationApi
 import com.dmitry.yume.data.authorization.AuthInterceptor
@@ -107,10 +107,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun providePlayerApi(
+    fun providePlaybackApi(
         @MainClient retrofit: Retrofit
-    ): PlayerApi {
-        return retrofit.create(PlayerApi::class.java)
+    ): PlaybackApi {
+        return retrofit.create(PlaybackApi::class.java)
     }
 
     @Provides

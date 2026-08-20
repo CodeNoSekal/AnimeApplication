@@ -1,4 +1,4 @@
-package com.dmitry.yume.presentation.screens.player
+package com.dmitry.yume.presentation.screens.player.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,21 +21,21 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dmitry.yume.R
-import com.dmitry.yume.domain.models.Episode
-import com.dmitry.yume.domain.models.PlayerData
+import com.dmitry.yume.domain.models.PlaybackEpisode
+import com.dmitry.yume.domain.models.PlaybackCatalog
+import com.dmitry.yume.presentation.screens.player.PlaybackUiState
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 
 @Composable
 fun EpisodesPicker(
-    playerData: PlayerData,
+    playbackCatalog: PlaybackCatalog,
     episodeSelected: (Int) -> Unit,
     onBackClick: () -> Unit,
-    playerState: PlayerUiState,
+    playbackState: PlaybackUiState,
 ) {
     Scaffold(
         topBar = { EpisodesTopBar(onBackClick) },
@@ -47,11 +46,11 @@ fun EpisodesPicker(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(contentPadding)
         ) {
-            items(playerData.episodes) { item ->
+            items(playbackCatalog.episodes) { item ->
 
                 EpisodeItemCard(
                     item,
-                    playerState,
+                    playbackState,
                     episodeSelected,
                 )
 
@@ -62,16 +61,16 @@ fun EpisodesPicker(
 
 @Composable
 fun EpisodeItemCard(
-    item: Episode,
-    playerState: PlayerUiState,
+    item: PlaybackEpisode,
+    playbackState: PlaybackUiState,
     episodeSelected: (Int) -> Unit
 ) {
     Row(
         modifier = Modifier
-            .clickable { episodeSelected(item.id) }
+            .clickable { episodeSelected(item.number) }
             .fillMaxWidth()
             .background( color =
-                if (playerState.selectedEpisodeNumber == item.id)
+                if (playbackState.selectedEpisodeNumber == item.number)
                     MaterialTheme.colorScheme.surface
                 else
                     MaterialTheme.colorScheme.background
@@ -81,10 +80,10 @@ fun EpisodeItemCard(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "Серия ${item.id}",
+            text = "Серия ${item.number}",
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = if (playerState.selectedEpisodeNumber == item.id) YumeTheme.colors.accent else MaterialTheme.colorScheme.onBackground
+            color = if (playbackState.selectedEpisodeNumber == item.number) YumeTheme.colors.accent else MaterialTheme.colorScheme.onBackground
         )
 
         item.title?.let {
