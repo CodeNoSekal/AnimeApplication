@@ -52,7 +52,7 @@ fun EpisodePickerContent(
 
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .background(colors.surfaceCard),
             verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {

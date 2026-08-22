@@ -12,6 +12,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,6 +71,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.media3.ui.compose.material3.Player as Media3Player
 import androidx.core.net.toUri
+import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
 
 
 private enum class SeekSide {
@@ -122,6 +124,21 @@ fun VideoPlayer(
     var isSeeking by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+    val backInteractionSource = remember { MutableInteractionSource() }
+    val previousInteractionSource = remember { MutableInteractionSource() }
+    val playbackInteractionSource = remember { MutableInteractionSource() }
+    val nextInteractionSource = remember { MutableInteractionSource() }
+    val orientationInteractionSource = remember { MutableInteractionSource() }
+    val isBackPressed by backInteractionSource.collectIsPressedAsState()
+    val isPreviousPressed by previousInteractionSource.collectIsPressedAsState()
+    val isPlaybackPressed by playbackInteractionSource.collectIsPressedAsState()
+    val isNextPressed by nextInteractionSource.collectIsPressedAsState()
+    val isOrientationPressed by orientationInteractionSource.collectIsPressedAsState()
+    val isControlPressed = isBackPressed ||
+        isPreviousPressed ||
+        isPlaybackPressed ||
+        isNextPressed ||
+        isOrientationPressed
 
     fun retryCurrentMedia() {
         val retryPosition = exoPlayer.currentPosition.coerceAtLeast(0L)
@@ -251,9 +268,10 @@ fun VideoPlayer(
         controlsVisible,
         interactionVersion,
         isPlaying,
-        isSeeking
+        isSeeking,
+        isControlPressed,
     ) {
-        if (controlsVisible && isPlaying && !isSeeking) {
+        if (controlsVisible && isPlaying && !isSeeking && !isControlPressed) {
             delay(3_000.milliseconds)
             controlsVisible = false
         }
@@ -425,7 +443,7 @@ fun VideoPlayer(
                             verticalAlignment = Alignment.Top
                         ) {
                             IconButton(
-                                enabled = controlsVisible,
+                                interactionSource = backInteractionSource,
                                 onClick = {
                                     saveProgress()
                                     if (isLandscape) {
@@ -459,7 +477,7 @@ fun VideoPlayer(
                         ) {
                             if (isLandscape) {
                                 IconButton(
-                                    enabled = controlsVisible,
+                                    interactionSource = previousInteractionSource,
                                     onClick = {
                                         showControls()
                                         onPreviousEpisode()
@@ -504,17 +522,25 @@ fun VideoPlayer(
                                 }
 
                                 isBuffering -> {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(mainIconSize),
-                                        color = Color.White,
-                                        strokeWidth = 3.dp
-                                    )
+                                    Box(
+                                        modifier = Modifier.size(controlTouchSize),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(mainIconSize),
+                                            color = Color.White,
+                                            strokeWidth = 3.dp
+                                        )
+                                    }
                                 }
 
                                 isPlaying -> {
                                     IconButton(
-                                        enabled = controlsVisible,
-                                        onClick = exoPlayer::pause,
+                                        interactionSource = playbackInteractionSource,
+                                        onClick = {
+                                            showControls()
+                                            exoPlayer.pause()
+                                        },
                                         modifier = Modifier.size(controlTouchSize)
                                     ) {
                                         Icon(
@@ -527,8 +553,11 @@ fun VideoPlayer(
 
                                 else -> {
                                     IconButton(
-                                        enabled = controlsVisible,
-                                        onClick = exoPlayer::play,
+                                        interactionSource = playbackInteractionSource,
+                                        onClick = {
+                                            showControls()
+                                            exoPlayer.play()
+                                        },
                                         modifier = Modifier.size(controlTouchSize)
                                     ) {
                                         Icon(
@@ -542,8 +571,9 @@ fun VideoPlayer(
 
                             if (isLandscape) {
                                 IconButton(
-                                    enabled = controlsVisible,
+                                    interactionSource = nextInteractionSource,
                                     onClick = {
+                                        showControls()
                                         onNextEpisode()
                                     }
                                 ) {
@@ -580,23 +610,20 @@ fun VideoPlayer(
                                         .fillMaxWidth()
                                         .padding(start = 18.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.Bottom
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         text = "${formatTime(current)} / ${formatTime(duration)}",
                                         style = YumeType.sm,
                                     )
 
-                                    val interactionSource = remember { MutableInteractionSource() }
-
                                     Icon(
                                         painterResource(R.drawable.compress_24),
                                         contentDescription = "compress",
                                         modifier = Modifier
                                             .clickable(
-                                                interactionSource = interactionSource,
+                                                interactionSource = orientationInteractionSource,
                                                 indication = null,
-                                                enabled = controlsVisible,
                                                 onClick = compress
                                             )
                                             .padding(
@@ -634,30 +661,27 @@ fun VideoPlayer(
                                         .padding(start = 8.dp)
                                         .alpha(controlsAlpha),
                                     horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.Bottom
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         text = "${formatTime(current)} / ${formatTime(duration)}",
                                         style = YumeType.sm,
                                     )
 
-                                    val interactionSource = remember { MutableInteractionSource() }
-
                                     Icon(
                                         painterResource(R.drawable.expand_24),
                                         contentDescription = "expand",
                                         modifier = Modifier
                                             .clickable(
-                                                interactionSource = interactionSource,
+                                                interactionSource = orientationInteractionSource,
                                                 indication = null,
-                                                enabled = controlsVisible,
                                                 onClick = expand
                                             )
                                             .padding(
-                                                top = 15.dp,
+                                                top = 6.dp,
                                                 start = 10.dp,
                                                 end = 10.dp,
-                                                bottom = 5.dp
+                                                bottom = 6.dp
                                             )
                                             .size(sideIconSize)
                                     )
@@ -762,7 +786,7 @@ fun PlaybackProgressBar(
         }
     }
 
-    val height = if (isLandscape) 40.dp else 10.dp
+    val height = if (isLandscape) 30.dp else 10.dp
 
     val alignment =
         if (isLandscape) Alignment.CenterStart

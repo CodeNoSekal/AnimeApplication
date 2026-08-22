@@ -40,39 +40,38 @@ fun ListItemCard(
     val cardShape = RoundedCornerShape(12.dp)
     val outerShape = RoundedCornerShape(8.dp)
     val innerShape = RoundedCornerShape(7.dp)
-    val statusGlowColor =
+    val statusGlow =
         when (anime.status) {
-            "смотрю" -> colors.statusWatching
-            "в планах" -> colors.statusPlanned
-            "просмотрено" -> colors.statusCompleted
-            "брошено" -> colors.statusDropped
+            "смотрю" -> colors.statusWatching to 0.34f
+            "в планах" -> colors.statusPlanned to 0.44f
+            "просмотрено" -> colors.statusCompleted to 0.46f
+            "брошено" -> colors.statusDropped to 0.36f
             else -> null
         }
 
-    val statusGlowModifier =
-        if (statusGlowColor != null) {
+    val statusGlowModifier = statusGlow
+        ?.let { (glowColor, peakAlpha) ->
             Modifier.drawWithCache {
                 val glow = Brush.radialGradient(
                     colorStops = arrayOf(
-                        0f to statusGlowColor.copy(alpha = 0.22f),
-                        0.32f to statusGlowColor.copy(alpha = 0.10f),
-                        0.68f to statusGlowColor.copy(alpha = 0.035f),
+                        0f to glowColor.copy(alpha = peakAlpha),
+                        0.30f to glowColor.copy(alpha = peakAlpha * 0.52f),
+                        0.66f to glowColor.copy(alpha = peakAlpha * 0.16f),
                         1f to Color.Transparent,
                     ),
                     center = Offset(
-                        x = 128.dp.toPx(),
-                        y = size.height * 0.38f,
+                        x = 136.dp.toPx(),
+                        y = size.height * 0.36f,
                     ),
-                    radius = size.width * 0.7f,
+                    radius = size.width * 0.58f,
                 )
 
                 onDrawBehind {
                     drawRect(glow)
                 }
             }
-        } else {
-            Modifier
         }
+        ?: Modifier
 
     Row(
         modifier = modifier

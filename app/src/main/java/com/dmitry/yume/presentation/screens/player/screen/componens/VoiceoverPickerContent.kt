@@ -58,27 +58,30 @@ fun VoiceoverPickerContent(
             .padding(bottom = 20.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(
-            text = "Источники",
-            style = YumeType.h2,
-            color = colors.textPrimary,
-        )
+        if (providers.size > 1) {
+            Text(
+                text = "Источники",
+                style = YumeType.h2,
+                color = colors.textPrimary,
+            )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            providers.forEach { provider ->
-                ProviderButton(
-                    onClick = {
-                        if (provider != selected.selectedSourceProvider) {
-                            setProvider(provider)
-                        }},
-                    provider = provider,
-                    playbackState = selected,
-                    modifier = Modifier.weight(1f)
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                providers.forEach { provider ->
+                    ProviderButton(
+                        onClick = {
+                            if (provider != selected.selectedSourceProvider) {
+                                setProvider(provider)
+                            }
+                        },
+                        provider = provider,
+                        playbackState = selected,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
 

@@ -1,7 +1,6 @@
 package com.dmitry.yume.presentation.screens.player.screen
 
 import android.annotation.SuppressLint
-import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
@@ -22,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -55,6 +55,7 @@ fun PlaybackScreen(
     val activity = LocalActivity.current ?: return
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val orientationController = rememberPlaybackOrientationController(activity)
 
     val ready = playbackState.stage as? PlaybackStage.Ready
 
@@ -87,14 +88,14 @@ fun PlaybackScreen(
     }
 
     PlaybackLifecycleEffect(controller)
+    PlaybackPeriodicProgressEffect(controller)
     PlaybackKeepScreenOnEffect(controller)
     PlaybackSystemUiEffect(
         activity = activity,
         isLandscape = isLandscape
     )
     PlaybackReleaseEffect(
-        controller = controller,
-        activity = activity
+        controller = controller
     )
 
     val navigation = playbackCatalog.navigationFor(
@@ -102,7 +103,9 @@ fun PlaybackScreen(
     )
 
     val contentModifier = if (isLandscape) {
-        Modifier.fillMaxSize()
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black)
     } else {
         Modifier
             .fillMaxSize()
@@ -133,14 +136,8 @@ fun PlaybackScreen(
         onVoiceoverPicker = {
             showVoiceoversSheet = true
         },
-        onExpand = {
-            activity.requestedOrientation =
-                ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        },
-        onCompress = {
-            activity.requestedOrientation =
-                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        },
+        onExpand = orientationController::requestLandscape,
+        onCompress = orientationController::requestPortrait,
         onSaveProgress = controller::saveCurrentProgress,
         onRefreshStream = {
             controller.saveCurrentProgress()
