@@ -48,6 +48,7 @@ fun PlaybackScreen(
     setProvider: (Provider) -> Unit,
     onPrevEpisodeClick: () -> Unit,
     onNextEpisodeClick: () -> Unit,
+    onRefreshStream: () -> Unit,
     onEpisodeClick: () -> Unit,
     onBackClick: () -> Unit,
 ) {
@@ -141,6 +142,10 @@ fun PlaybackScreen(
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         },
         onSaveProgress = controller::saveCurrentProgress,
+        onRefreshStream = {
+            controller.saveCurrentProgress()
+            onRefreshStream()
+        },
         modifier = contentModifier,
         onBackClick = onBackClick,
     )

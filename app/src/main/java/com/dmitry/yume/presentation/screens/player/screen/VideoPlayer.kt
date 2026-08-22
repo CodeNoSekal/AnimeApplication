@@ -1,6 +1,7 @@
 package com.dmitry.yume.presentation.screens.player.screen
 
 import android.os.SystemClock
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,9 +50,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import com.dmitry.yume.R
@@ -64,6 +69,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.media3.ui.compose.material3.Player as Media3Player
+import androidx.core.net.toUri
 
 
 private enum class SeekSide {
@@ -76,6 +82,14 @@ private data class SeekFeedback(
     val seconds: Int
 )
 
+private data class PlayerFailure(
+    val message: String,
+    val requiresFreshStream: Boolean,
+)
+
+private const val PLAYER_LOG_TAG = "YumePlayer"
+private const val BUFFERING_TIMEOUT_MS = 20_000L
+
 @OptIn(UnstableApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun VideoPlayer(
@@ -86,6 +100,7 @@ fun VideoPlayer(
     expand: () -> Unit,
     compress: () -> Unit,
     saveProgress: () -> Unit,
+    refreshStream: () -> Unit,
     onBackClick: () -> Unit,
     onPreviousEpisode: () -> Unit,
     onNextEpisode: () -> Unit,
@@ -96,6 +111,10 @@ fun VideoPlayer(
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
     var playWhenReady by remember { mutableStateOf(exoPlayer.playWhenReady) }
     var exoPlaybackState by remember { mutableIntStateOf(exoPlayer.playbackState) }
+    val ready = playbackState.stage as? PlaybackStage.Ready
+    val streamUrl = ready?.selectedStream?.url
+    var playerFailure by remember(streamUrl) { mutableStateOf<PlayerFailure?>(null) }
+    var automaticRetryCount by remember(streamUrl) { mutableIntStateOf(0) }
 
     val isBuffering = playWhenReady &&
             exoPlaybackState == Player.STATE_BUFFERING
@@ -103,6 +122,15 @@ fun VideoPlayer(
     var isSeeking by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+
+    fun retryCurrentMedia() {
+        val retryPosition = exoPlayer.currentPosition.coerceAtLeast(0L)
+        playerFailure = null
+        exoPlayer.stop()
+        exoPlayer.prepare()
+        exoPlayer.seekTo(retryPosition)
+        exoPlayer.play()
+    }
 
     var armedSeekSide by remember { mutableStateOf<SeekSide?>(null) }
     var lastSeekTapAt by remember { mutableLongStateOf(0L) }
@@ -231,7 +259,29 @@ fun VideoPlayer(
         }
     }
 
-    DisposableEffect(exoPlayer) {
+    LaunchedEffect(isBuffering, streamUrl) {
+        if (!isBuffering || streamUrl == null) return@LaunchedEffect
+
+        delay(BUFFERING_TIMEOUT_MS.milliseconds)
+        Log.w(
+            PLAYER_LOG_TAG,
+            "Buffering timeout at ${exoPlayer.currentPosition} ms"
+        )
+
+        if (automaticRetryCount == 0) {
+            automaticRetryCount++
+            retryCurrentMedia()
+        } else {
+            exoPlayer.pause()
+            playerFailure = PlayerFailure(
+                message = "Видео слишком долго загружается",
+                requiresFreshStream = false,
+            )
+            showControls()
+        }
+    }
+
+    DisposableEffect(exoPlayer, streamUrl) {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(value: Boolean) {
                 if (!value) {
@@ -246,6 +296,38 @@ fun VideoPlayer(
 
             override fun onPlaybackStateChanged(state: Int) {
                 exoPlaybackState = state
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                val httpCode = error.findHttpResponseCode()
+                val needsFreshStream = httpCode == 401 || httpCode == 403
+
+                Log.e(
+                    PLAYER_LOG_TAG,
+                    "Playback failed: code=${error.errorCodeName}, " +
+                        "http=$httpCode, state=${exoPlayer.playbackState}, " +
+                        "position=${exoPlayer.currentPosition}, " +
+                        "host=${streamUrl?.toSafeHost()}",
+                    error,
+                )
+
+                if (!needsFreshStream && automaticRetryCount == 0) {
+                    automaticRetryCount++
+                    scope.launch {
+                        delay(1_000.milliseconds)
+                        retryCurrentMedia()
+                    }
+                } else {
+                    playerFailure = PlayerFailure(
+                        message = if (needsFreshStream) {
+                            "Ссылка на видео устарела"
+                        } else {
+                            "Не удалось продолжить воспроизведение"
+                        },
+                        requiresFreshStream = needsFreshStream,
+                    )
+                    showControls()
+                }
             }
         }
 
@@ -264,8 +346,6 @@ fun VideoPlayer(
         val controlTouchSize = if (isLandscape) 64.dp else 48.dp
         val controlsSpacing = if (isLandscape) 28.dp else 18.dp
         val bottomPadding = if (isLandscape) 16.dp else 6.dp
-
-        val ready = playbackState.stage as? PlaybackStage.Ready
 
         ready?.let{
             Media3Player(
@@ -394,6 +474,35 @@ fun VideoPlayer(
                             }
 
                             when {
+                                playerFailure != null -> {
+                                    val failure = requireNotNull(playerFailure)
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                    ) {
+                                        Text(
+                                            text = failure.message,
+                                            color = Color.White,
+                                            style = YumeType.bodyMedium,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                        Button(
+                                            onClick = {
+                                                if (failure.requiresFreshStream) {
+                                                    playerFailure = null
+                                                    saveProgress()
+                                                    refreshStream()
+                                                } else {
+                                                    retryCurrentMedia()
+                                                }
+                                            }
+                                        ) {
+                                            Text("Повторить")
+                                        }
+                                    }
+                                }
+
                                 isBuffering -> {
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(mainIconSize),
@@ -579,8 +688,58 @@ fun VideoPlayer(
                 }
             )
         }
+
+        if (ready == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center,
+            ) {
+                when (val stage = playbackState.stage) {
+                    is PlaybackStage.Error -> {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                        ) {
+                            Text(
+                                text = stage.message,
+                                color = Color.White,
+                                style = YumeType.bodyMedium,
+                                textAlign = TextAlign.Center,
+                            )
+                            Button(onClick = refreshStream) {
+                                Text("Повторить")
+                            }
+                        }
+                    }
+
+                    else -> CircularProgressIndicator(
+                        color = Color.White,
+                        strokeWidth = 3.dp,
+                    )
+                }
+            }
+        }
     }
 }
+
+private fun PlaybackException.findHttpResponseCode(): Int? {
+    var current: Throwable? = this
+
+    while (current != null) {
+        if (current is HttpDataSource.InvalidResponseCodeException) {
+            return current.responseCode
+        }
+        current = current.cause
+    }
+
+    return null
+}
+
+private fun String.toSafeHost(): String? =
+    runCatching { this.toUri().host }.getOrNull()
 
 @Composable
 fun PlaybackProgressBar(

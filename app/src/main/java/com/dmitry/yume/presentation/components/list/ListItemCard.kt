@@ -3,7 +3,6 @@ package com.dmitry.yume.presentation.components.list
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -36,59 +37,66 @@ fun ListItemCard(
     modifier: Modifier = Modifier
 ) {
     val colors = YumeTheme.colors
+    val cardShape = RoundedCornerShape(12.dp)
     val outerShape = RoundedCornerShape(8.dp)
-    val innerShape = RoundedCornerShape(6.dp)
+    val innerShape = RoundedCornerShape(7.dp)
+    val statusGlowColor =
+        when (anime.status) {
+            "смотрю" -> colors.statusWatching
+            "в планах" -> colors.statusPlanned
+            "просмотрено" -> colors.statusCompleted
+            "брошено" -> colors.statusDropped
+            else -> null
+        }
+
+    val statusGlowModifier =
+        if (statusGlowColor != null) {
+            Modifier.drawWithCache {
+                val glow = Brush.radialGradient(
+                    colorStops = arrayOf(
+                        0f to statusGlowColor.copy(alpha = 0.22f),
+                        0.32f to statusGlowColor.copy(alpha = 0.10f),
+                        0.68f to statusGlowColor.copy(alpha = 0.035f),
+                        1f to Color.Transparent,
+                    ),
+                    center = Offset(
+                        x = 128.dp.toPx(),
+                        y = size.height * 0.38f,
+                    ),
+                    radius = size.width * 0.7f,
+                )
+
+                onDrawBehind {
+                    drawRect(glow)
+                }
+            }
+        } else {
+            Modifier
+        }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))      // чтобы ripple клика был скруглён
+            .clip(cardShape)
+            .then(statusGlowModifier)
             .clickable { onItemClicked(anime.id) }
             .padding(vertical = 8.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.Top,
     ) {
-
-        val statusBorderColor =
-            when (anime.status) {
-                "смотрю" -> YumeTheme.colors.statusWatching
-                "в планах" -> YumeTheme.colors.statusPlanned
-                "просмотрено" -> YumeTheme.colors.statusCompleted
-                "брошено" -> YumeTheme.colors.statusDropped
-                else -> null
-            }
-
         Box(
             modifier = Modifier
                 .width(108.dp)
                 .aspectRatio(2f / 3f)
         ) {
-
-            statusBorderColor?.let { color ->
-                Box(
-                    Modifier
-                        .matchParentSize()
-                        .border(6.dp, color.copy(alpha = 0.14f), outerShape)
-                )
-
-                Box(
-                    Modifier
-                        .matchParentSize()
-                        .padding(2.dp)
-                        .border(3.dp, color.copy(alpha = 0.24f), outerShape)
-                )
-            }
-
             Box(
                 Modifier
                     .matchParentSize()
-                    .padding(4.dp)
                     .border(
-                        width = 2.dp,
-                        color = statusBorderColor?.copy(alpha = 0.95f)
-                            ?: colors.line,
+                        width = 1.dp,
+                        color = colors.line,
                         shape = outerShape
                     )
-                    .padding(2.dp)
+                    .padding(1.dp)
                     .clip(innerShape)
             ) {
                 AsyncImage(

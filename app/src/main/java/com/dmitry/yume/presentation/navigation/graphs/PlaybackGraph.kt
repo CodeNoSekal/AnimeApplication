@@ -2,21 +2,19 @@ package com.dmitry.yume.presentation.navigation.graphs
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.dialog
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.dmitry.yume.presentation.navigation.PlaybackDestination
 import com.dmitry.yume.presentation.screens.ErrorScreen
-import com.dmitry.yume.presentation.screens.player.screen.PlaybackScreen
-import com.dmitry.yume.presentation.screens.player.PlaybackViewModel
 import com.dmitry.yume.presentation.screens.player.PlaybackCatalogState
+import com.dmitry.yume.presentation.screens.player.PlaybackViewModel
+import com.dmitry.yume.presentation.screens.player.screen.PlaybackScreen
 
 fun NavGraphBuilder.playbackGraph(navController: NavController) {
     navigation(route = PlaybackDestination.routePattern(), startDestination = PlaybackDestination.SCREEN,
@@ -47,6 +45,7 @@ fun NavGraphBuilder.playbackGraph(navController: NavController) {
                         setProvider = viewModel::selectSource,
                         onPrevEpisodeClick = viewModel::prevEpisode,
                         onNextEpisodeClick = viewModel::nextEpisode,
+                        onRefreshStream = viewModel::resolveSelectedPlayback,
                         onEpisodeClick = { navController.navigate(PlaybackDestination.EPISODE_PICKER)},
                         onBackClick = { navController.popBackStack() }
                     )

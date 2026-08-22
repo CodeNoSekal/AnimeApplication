@@ -3,11 +3,9 @@ package com.dmitry.yume.presentation.screens.player.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +38,7 @@ fun PlaybackContent(
     onExpand: () -> Unit,
     onCompress: () -> Unit,
     onSaveProgress: () -> Unit,
+    onRefreshStream: () -> Unit,
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     onVoiceoverPicker: () -> Unit,
@@ -67,6 +66,7 @@ fun PlaybackContent(
             expand = onExpand,
             compress = onCompress,
             saveProgress = onSaveProgress,
+            refreshStream = onRefreshStream,
             onBackClick = onBackClick,
             onPreviousEpisode = { onPreviousEpisode() },
             onNextEpisode = { onNextEpisode() }
