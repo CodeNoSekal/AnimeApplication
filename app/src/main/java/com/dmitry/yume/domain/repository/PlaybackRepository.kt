@@ -8,7 +8,7 @@ interface PlaybackRepository {
     suspend fun getPlaybackCatalog(animeId: Int): PlaybackCatalogResult
     suspend fun resolvePlayback(
         selection: PlaybackSelection
-    ): ResolvePlaybackResult
+    ): ResolvedPlaybackResult
 }
 sealed interface PlaybackCatalogResult {
     data class Success(
@@ -19,11 +19,11 @@ sealed interface PlaybackCatalogResult {
     ) : PlaybackCatalogResult
 }
 
-sealed interface ResolvePlaybackResult {
+sealed interface ResolvedPlaybackResult {
     data class Success(
         val resolvedPlayback: ResolvedPlayback
-    ) : ResolvePlaybackResult
+    ) : ResolvedPlaybackResult
     data class Error(
         val message: String?
-    ) : ResolvePlaybackResult
+    ) : ResolvedPlaybackResult
 }

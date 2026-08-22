@@ -6,7 +6,7 @@ data class ResolvedPlayback(
     val episodeNumber: Int,
     val voiceoverId: Int,
     val streams: List<VideoStream>,
-    val segments: PlaybackSegments
+    val segments: PlaybackSegments?
 )
 
 data class VideoStream(

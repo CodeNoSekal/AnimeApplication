@@ -27,6 +27,7 @@ data class Voiceover(
     val id: Int,
     val name: String,
     val maxQuality: VideoQuality,
+    val logoUrl: String,
 )
 
 sealed class Provider {
@@ -57,19 +58,20 @@ sealed class Provider {
 }
 
 
-
 sealed class VideoQuality {
     object FHD : VideoQuality()
     object HD : VideoQuality()
     object SD : VideoQuality()
+    object NHD : VideoQuality()
     object Unknown : VideoQuality()
 
     companion object {
-        fun fromRaw(raw: String): VideoQuality {
+        fun fromRaw(raw: String?): VideoQuality {
             return when {
-                raw.contains("1080") -> FHD
-                raw.contains("720") -> HD
-                raw.contains("480") -> SD
+                raw?.contains("1080") == true -> FHD
+                raw?.contains("720") == true -> HD
+                raw?.contains("480") == true -> SD
+                raw?.contains("360") == true -> NHD
                 else -> Unknown
             }
         }

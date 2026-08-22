@@ -1,4 +1,4 @@
-package com.dmitry.yume.presentation.screens.player.ui
+package com.dmitry.yume.presentation.screens.player.screen
 
 import android.app.Activity
 import androidx.compose.runtime.Composable

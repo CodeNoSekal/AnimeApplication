@@ -14,8 +14,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.dmitry.yume.presentation.navigation.PlaybackDestination
 import com.dmitry.yume.presentation.screens.ErrorScreen
-import com.dmitry.yume.presentation.screens.player.ui.EpisodesPicker
-import com.dmitry.yume.presentation.screens.player.ui.PlaybackScreen
+import com.dmitry.yume.presentation.screens.player.screen.PlaybackScreen
 import com.dmitry.yume.presentation.screens.player.PlaybackViewModel
 import com.dmitry.yume.presentation.screens.player.PlaybackCatalogState
 
@@ -32,7 +31,7 @@ fun NavGraphBuilder.playbackGraph(navController: NavController) {
 
             val viewModel: PlaybackViewModel = hiltViewModel(parentEntry)
             val catalogState by viewModel.catalogState.collectAsStateWithLifecycle()
-            val playbackState by viewModel.playbackState.collectAsStateWithLifecycle()
+            val playbackState by viewModel.playbackUiState.collectAsStateWithLifecycle()
 
             when (catalogState) {
                 is PlaybackCatalogState.Loading -> {
@@ -43,47 +42,12 @@ fun NavGraphBuilder.playbackGraph(navController: NavController) {
                         playbackCatalog = (catalogState as PlaybackCatalogState.Success).playbackCatalog,
                         playbackState = playbackState,
                         saveProgress = viewModel::saveProgress,
+                        setEpisode = viewModel::selectEpisode,
+                        setVoiceover = viewModel::selectVoiceover,
+                        setProvider = viewModel::selectSource,
                         onPrevEpisodeClick = viewModel::prevEpisode,
                         onNextEpisodeClick = viewModel::nextEpisode,
                         onEpisodeClick = { navController.navigate(PlaybackDestination.EPISODE_PICKER)},
-                        onBackClick = { navController.popBackStack() }
-                    )
-                }
-                is PlaybackCatalogState.Error -> {
-                    ErrorScreen(
-                        message = (catalogState as PlaybackCatalogState.Error).message
-                            ?: "Не удалось загрузить плеер"
-                    )
-                }
-            }
-        }
-
-        dialog(
-           route = PlaybackDestination.EPISODE_PICKER,
-           dialogProperties = DialogProperties(
-               usePlatformDefaultWidth = false
-           )
-        ) { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(PlaybackDestination.routePattern())
-            }
-
-            val viewModel: PlaybackViewModel = hiltViewModel(parentEntry)
-            val catalogState by viewModel.catalogState.collectAsStateWithLifecycle()
-            val playbackState by viewModel.playbackState.collectAsStateWithLifecycle()
-
-            when (catalogState) {
-                is PlaybackCatalogState.Loading -> {
-
-                }
-                is PlaybackCatalogState.Success -> {
-                    EpisodesPicker(
-                        playbackCatalog = (catalogState as PlaybackCatalogState.Success).playbackCatalog,
-                        playbackState = playbackState,
-                        episodeSelected = {
-                            viewModel.selectEpisode(it)
-                            navController.popBackStack()
-                        },
                         onBackClick = { navController.popBackStack() }
                     )
                 }

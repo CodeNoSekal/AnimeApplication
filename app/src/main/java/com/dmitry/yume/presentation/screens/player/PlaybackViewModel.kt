@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import com.dmitry.yume.di.ApplicationScope
 import com.dmitry.yume.domain.models.PlaybackCatalog
+import com.dmitry.yume.domain.models.PlaybackSelection
 import com.dmitry.yume.domain.models.Provider
 import com.dmitry.yume.domain.models.VideoQuality
 import com.dmitry.yume.domain.repository.CurrentProgressResult
 import com.dmitry.yume.domain.repository.PlaybackCatalogResult
+import com.dmitry.yume.domain.repository.ResolvedPlaybackResult
 import com.dmitry.yume.domain.usecase.GetPlaybackCatalogUseCase
 import com.dmitry.yume.domain.usecase.ResolvePlaybackUseCase
 import com.dmitry.yume.domain.usecase.GetProgressByIdUseCase
@@ -38,13 +40,13 @@ class PlaybackViewModel @Inject constructor(
 
 
     private val _catalogState = MutableStateFlow<PlaybackCatalogState>(PlaybackCatalogState.Loading)
-    private val _playbackState = MutableStateFlow(PlaybackUiState())
+    private val _playbackUiState = MutableStateFlow(PlaybackUiState())
     private val progressSaveQueue = ProgressSaveQueue(applicationScope, putProgress::invoke)
     private var loadJob: Job? = null
+    private var resolveJob: Job? = null
 
     val catalogState: StateFlow<PlaybackCatalogState> = _catalogState.asStateFlow()
-    val playbackState: StateFlow<PlaybackUiState> = _playbackState.asStateFlow()
-
+    val playbackUiState: StateFlow<PlaybackUiState> = _playbackUiState.asStateFlow()
 
 
     init {
@@ -53,9 +55,11 @@ class PlaybackViewModel @Inject constructor(
 
     fun load(){
         loadJob?.cancel()
+        resolveJob?.cancel()
         loadJob = viewModelScope.launch {
             _catalogState.value = PlaybackCatalogState.Loading
-            when(val result = getPlaybackCatalog(currentAnimeId)){
+            _playbackUiState.value = _playbackUiState.value.copy(stage = PlaybackStage.Selecting)
+            when(val playbackCatalogResult = getPlaybackCatalog(currentAnimeId)){
                 is PlaybackCatalogResult.Success -> {
                     val playbackPreference = when(val progressResult = getProgressById(currentAnimeId)){
                         is CurrentProgressResult.Success -> {
@@ -67,53 +71,142 @@ class PlaybackViewModel @Inject constructor(
                     }
 
                     applyPlayback(
-                        playbackCatalog = result.playbackCatalog,
+                        playbackCatalog = playbackCatalogResult.playbackCatalog,
                         playbackPreference = playbackPreference
                     )
                 }
                 is PlaybackCatalogResult.Error ->
-                    _catalogState.value = PlaybackCatalogState.Error(result.message)
+                    _catalogState.value = PlaybackCatalogState.Error(playbackCatalogResult.message)
             }
         }
     }
 
-    fun resolveSelectedPlayback() {
+    fun resolveSelectedPlayback(){
+        val state = _playbackUiState.value
+        val voiceoverId = state.selectedVoiceoverId ?: return
 
+        val selection = PlaybackSelection(
+            animeId = currentAnimeId,
+            episodeNumber = state.selectedEpisodeNumber,
+            sourceProvider = state.selectedSourceProvider,
+            voiceoverId = voiceoverId
+        )
+
+        resolveJob?.cancel()
+        resolveJob = viewModelScope.launch {
+            _playbackUiState.update {
+                it.copy(stage = PlaybackStage.ResolvingStream)
+            }
+
+            when(val result = resolvePlayback(selection)){
+                is ResolvedPlaybackResult.Success -> {
+                    val playback = result.resolvedPlayback
+
+                    val current = _playbackUiState.value
+                    if (
+                        current.selectedEpisodeNumber != selection.episodeNumber ||
+                        current.selectedSourceProvider != selection.sourceProvider ||
+                        current.selectedVoiceoverId != selection.voiceoverId
+                    ){
+                        return@launch
+                    }
+
+                    val stream = playback.streams
+                        .firstOrNull { it.quality == current.selectedQuality}
+                        ?: playback.streams.maxByOrNull {
+                            qualityPriority(it.quality)
+                        }
+
+                    _playbackUiState.update {
+                        if (stream == null) {
+                            it.copy(
+                                stage = PlaybackStage.Error(
+                                    "Эпизод не доступен"
+                                )
+                            )
+                        } else {
+                            it.copy(
+                                selectedQuality = stream.quality,
+                                stage = PlaybackStage.Ready(
+                                    resolvedPlayback = playback,
+                                    selectedStream = stream
+                                )
+                            )
+                        }
+                    }
+                }
+
+                is ResolvedPlaybackResult.Error -> {
+                    _playbackUiState.update {
+                        it.copy(
+                            stage = PlaybackStage.Error(
+                                result.message ?: "Эпизод не доступен"
+                            )
+                        )
+                    }
+                }
+            }
+        }
     }
 
-    fun selectEpisode(targetEp: Int){
-        applyPlaybackChange(
-            _playbackState.value.toPlaybackPreference().copy(
-                episodeNumber = targetEp,
-                positionMs = 0L
+    private fun qualityPriority(quality: VideoQuality): Int =
+        when (quality) {
+            VideoQuality.FHD -> 1080
+            VideoQuality.HD -> 720
+            VideoQuality.SD -> 480
+            VideoQuality.NHD -> 360
+            VideoQuality.Unknown -> 0
+        }
+
+
+
+    fun selectEpisode(targetEpisode: Int){
+        if (_playbackUiState.value.selectedEpisodeNumber != targetEpisode) {
+            applyPlaybackChange(
+                _playbackUiState.value.toPlaybackPreference().copy(
+                    episodeNumber = targetEpisode,
+                    positionMs = 0L
+                )
             )
-        )
+        }
     }
 
 
-    fun selectSource(targetPr: Provider){
-        applyPlaybackChange(
-            _playbackState.value.toPlaybackPreference().copy(
-                sourceProvider = targetPr,
-                voiceoverId = null
+    fun selectSource(targetProvider: Provider){
+        if (_playbackUiState.value.selectedSourceProvider != targetProvider) {
+            applyPlaybackChange(
+                _playbackUiState.value.toPlaybackPreference().copy(
+                    sourceProvider = targetProvider,
+                    voiceoverId = null
+                )
             )
-        )
+        }
     }
 
     fun selectVoiceover(targetVoiceoverId: Int){
-        applyPlaybackChange(
-            _playbackState.value.toPlaybackPreference().copy(
-                voiceoverId = targetVoiceoverId
+        if (_playbackUiState.value.selectedVoiceoverId != targetVoiceoverId){
+            applyPlaybackChange(
+                _playbackUiState.value.toPlaybackPreference().copy(
+                    voiceoverId = targetVoiceoverId
+                )
             )
-        )
+        }
     }
 
-    fun selectQuality(targetQ: VideoQuality){
-        applyPlaybackChange(
-            _playbackState.value.toPlaybackPreference().copy(
-                quality = targetQ
+    fun selectQuality(targetQuality: VideoQuality){
+        _playbackUiState.update { state ->
+            val ready = state.stage as? PlaybackStage.Ready
+                ?: return@update state
+
+            val stream = ready.resolvedPlayback.streams
+                .firstOrNull { it.quality == targetQuality }
+                ?: return@update state
+
+            state.copy(
+                selectedQuality = stream.quality,
+                stage = ready.copy(selectedStream = stream)
             )
-        )
+        }
     }
 
     private fun applyPlaybackChange(playbackPreference: PlaybackPreference) {
@@ -130,10 +223,17 @@ class PlaybackViewModel @Inject constructor(
         playbackCatalog: PlaybackCatalog,
         playbackPreference: PlaybackPreference?
     ) {
-        when (val playback = resolvePlayback(playbackCatalog, playbackPreference)) {
+        when (val playback = selectPlayback(playbackCatalog, playbackPreference)) {
             is PlaybackResolution.Success -> {
-                _playbackState.value = playback.toPlaybackUiState()
-                _catalogState.value = PlaybackCatalogState.Success(playbackCatalog)
+                _catalogState.value =
+                    PlaybackCatalogState.Success(playbackCatalog)
+
+                _playbackUiState.value =
+                    playback.toPlaybackUiState().copy(
+                        stage = PlaybackStage.ResolvingStream
+                    )
+
+                resolveSelectedPlayback()
             }
             is PlaybackResolution.Error -> {
                 _catalogState.value = PlaybackCatalogState.Error(playback.message)
@@ -149,7 +249,7 @@ class PlaybackViewModel @Inject constructor(
         val playbackCatalog =
             (_catalogState.value as? PlaybackCatalogState.Success)?.playbackCatalog ?: return
 
-        val currentEpisode = _playbackState.value.selectedEpisodeNumber
+        val currentEpisode = _playbackUiState.value.selectedEpisodeNumber
         val currentIndex = playbackCatalog.episodes.indexOfFirst {
             it.number == currentEpisode
         }
@@ -168,10 +268,10 @@ class PlaybackViewModel @Inject constructor(
 
         val safePosition = positionMs.coerceIn(0, durationMs)
 
-        _playbackState.update { state ->
+        _playbackUiState.update { state ->
             val isCurrentPlayback =
                 state.selectedEpisodeNumber == playbackContext.episodeNumber &&
-                        state.selectedSource == playbackContext.sourceProvider &&
+                        state.selectedSourceProvider == playbackContext.sourceProvider &&
                         state.selectedVoiceoverId == playbackContext.voiceoverId
 
             if (isCurrentPlayback) {

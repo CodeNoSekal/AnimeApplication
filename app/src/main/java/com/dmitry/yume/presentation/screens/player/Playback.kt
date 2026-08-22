@@ -4,7 +4,6 @@ import com.dmitry.yume.domain.models.PlaybackCatalog
 import com.dmitry.yume.domain.models.ProgressItemData
 import com.dmitry.yume.domain.models.Provider
 import com.dmitry.yume.domain.models.VideoQuality
-import com.dmitry.yume.domain.models.Voiceover
 
 data class PlaybackPreference(
     val episodeNumber: Int?,
@@ -26,7 +25,7 @@ fun ProgressItemData.toPlaybackPreference(): PlaybackPreference =
 fun PlaybackUiState.toPlaybackPreference(): PlaybackPreference =
     PlaybackPreference(
         episodeNumber = selectedEpisodeNumber,
-        sourceProvider = selectedSource,
+        sourceProvider = selectedSourceProvider,
         voiceoverId = selectedVoiceoverId,
         quality = selectedQuality,
         positionMs = currentPositionMs
@@ -37,15 +36,14 @@ sealed interface PlaybackResolution {
         val episodeNumber: Int,
         val sourceProvider: Provider,
         val voiceoverId: Int,
-        val quality: VideoQuality,
-        val url: String,
+        val voiceover: String,
         val positionMs: Long
     ) : PlaybackResolution
 
     data class Error(val message: String) : PlaybackResolution
 }
 
-fun resolvePlayback(
+fun selectPlayback(
     playbackCatalog: PlaybackCatalog,
     playbackPreference: PlaybackPreference? = null
 ): PlaybackResolution {
@@ -56,93 +54,31 @@ fun resolvePlayback(
         ?: playbackCatalog.episodes.firstOrNull { it.isAvailable }
         ?: return PlaybackResolution.Error("Нет доступных эпизодов")
 
-    if (episode.sources.isEmpty()) {
-        return PlaybackResolution.Error("Для серии нет доступных источников")
-    }
+    val source = episode.sources
+        .firstOrNull {
+            it.provider == playbackPreference?.sourceProvider
+        }
+        ?: episode.sources.firstOrNull()
+        ?: return PlaybackResolution.Error("Нет доступных эпизодов")
 
-    val sourceCandidates = episode.sources.preferredFirst {
-        it.provider == playbackPreference?.sourceProvider
-    }
-
-    val hasVoiceovers = sourceCandidates.any { it.voiceovers.isNotEmpty() }
-
-    for (source in sourceCandidates) {
-        val voiceoverCandidates = source.voiceovers.preferredFirst {
+    val voiceover = source.voiceovers
+        .firstOrNull {
             it.id == playbackPreference?.voiceoverId
         }
+        ?: source.voiceovers.firstOrNull()
+        ?: return PlaybackResolution.Error("Нет доступных озвучек")
 
-        for (voiceover in voiceoverCandidates) {
-            val stream = voiceover.resolveStream(playbackPreference?.quality)
-                ?: continue
-
-            val positionMs = if (episode.number == playbackPreference?.episodeNumber) {
-                playbackPreference.positionMs.coerceAtLeast(0L)
-            } else {
-                0L
-            }
-
-            return PlaybackResolution.Success(
-                episodeNumber = episode.number,
-                sourceProvider = source.provider,
-                voiceoverId = voiceover.id,
-                quality = stream.quality,
-                url = stream.url,
-                positionMs = positionMs
-            )
-        }
-    }
-
-    return if (hasVoiceovers) {
-        PlaybackResolution.Error("Для серии отсутствует ссылка на видео")
+    val positionMs = if (episode.number == playbackPreference?.episodeNumber) {
+        playbackPreference.positionMs.coerceAtLeast(0L)
     } else {
-        PlaybackResolution.Error("Для серии нет доступных озвучек")
-    }
-}
-
-private data class ResolvedStream(
-    val quality: VideoQuality,
-    val url: String
-)
-
-private fun Voiceover.resolveStream(
-    preferredQuality: VideoQuality?
-): ResolvedStream? {
-    val qualityCandidates = when (preferredQuality) {
-        VideoQuality.FHD -> listOf(VideoQuality.FHD, VideoQuality.HD, VideoQuality.SD)
-        VideoQuality.HD -> listOf(VideoQuality.HD, VideoQuality.SD, VideoQuality.FHD)
-        VideoQuality.SD -> listOf(VideoQuality.SD, VideoQuality.HD, VideoQuality.FHD)
-        VideoQuality.Unknown, null -> listOf(VideoQuality.FHD, VideoQuality.HD, VideoQuality.SD)
+        0L
     }
 
-    for (candidate in qualityCandidates) {
-        val candidateUrl = urlFor(candidate)
-            ?.takeIf { it.isNotBlank() }
-            ?: continue
-
-        return ResolvedStream(candidate, candidateUrl)
-    }
-
-    val fallbackUrl = url?.takeIf { it.isNotBlank() }
-        ?: return null
-
-    return ResolvedStream(
-        quality = maxQuality.takeUnless { it == VideoQuality.Unknown }
-            ?: VideoQuality.Unknown,
-        url = fallbackUrl
+    return PlaybackResolution.Success(
+        episodeNumber = episode.number,
+        sourceProvider = source.provider,
+        voiceoverId = voiceover.id,
+        voiceover = voiceover.name,
+        positionMs = positionMs
     )
-}
-
-private fun Voiceover.urlFor(quality: VideoQuality): String? =
-    when (quality) {
-        VideoQuality.FHD -> hls1080
-        VideoQuality.HD -> hls720
-        VideoQuality.SD -> hls480
-        VideoQuality.Unknown -> null
-    }
-
-private fun <T> List<T>.preferredFirst(
-    predicate: (T) -> Boolean
-): List<T> {
-    val preferred = firstOrNull(predicate) ?: return this
-    return listOf(preferred) + filterNot { it === preferred }
 }

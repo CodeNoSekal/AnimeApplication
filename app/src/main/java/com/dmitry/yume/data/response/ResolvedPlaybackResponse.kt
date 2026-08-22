@@ -6,17 +6,21 @@ import com.dmitry.yume.domain.models.VideoQuality
 import com.dmitry.yume.domain.models.PlaybackSegments
 import com.dmitry.yume.domain.models.PlaybackSegment
 import com.dmitry.yume.domain.models.VideoStream
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 
 @JsonClass(generateAdapter = true)
 data class ResolvedPlaybackResponse(
     val provider: String,
+    @param:Json(name = "anime_id")
     val animeId: Int,
+    @param:Json(name = "episode_number")
     val episodeNumber: Int,
+    @param:Json(name = "voiceover_id")
     val voiceoverId: Int,
     val streams: List<VideoStreamResponse>,
-    val segments: PlaybackSegmentsResponse
+    val segments: PlaybackSegmentsResponse?
 )
 
 @JsonClass(generateAdapter = true)
@@ -45,7 +49,7 @@ fun ResolvedPlaybackResponse.toDomain(): ResolvedPlayback {
         episodeNumber,
         voiceoverId,
         streams.map { it.toDomain() },
-        segments.toDomain()
+        segments?.toDomain()
     )
 }
 

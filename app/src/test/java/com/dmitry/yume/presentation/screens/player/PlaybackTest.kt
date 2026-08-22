@@ -14,7 +14,7 @@ class PlaybackTest {
 
     @Test
     fun `returns error when there are no available episodes`() {
-        val result = resolvePlayback(
+        val result = selectPlayback(
             playerData(episode(isAvailable = false))
         )
 
@@ -23,7 +23,7 @@ class PlaybackTest {
 
     @Test
     fun `returns error when selected episode has no sources`() {
-        val result = resolvePlayback(
+        val result = selectPlayback(
             playerData(episode(sources = emptyList()))
         )
 
@@ -32,7 +32,7 @@ class PlaybackTest {
 
     @Test
     fun `returns error when every source has no voiceovers`() {
-        val result = resolvePlayback(
+        val result = selectPlayback(
             playerData(
                 episode(
                     sources = listOf(
@@ -48,7 +48,7 @@ class PlaybackTest {
 
     @Test
     fun `falls back to another source when preferred source has no playable video`() {
-        val result = resolvePlayback(
+        val result = selectPlayback(
             playerData(
                 episode(
                     sources = listOf(
@@ -87,7 +87,7 @@ class PlaybackTest {
 
     @Test
     fun `falls back to lower quality and reports the actual selected quality`() {
-        val result = resolvePlayback(
+        val result = selectPlayback(
             playerData(
                 episode(
                     sources = listOf(
@@ -119,7 +119,7 @@ class PlaybackTest {
 
     @Test
     fun `resets position when saved episode is no longer available`() {
-        val result = resolvePlayback(
+        val result = selectPlayback(
             playerData(
                 episode(id = 1, isAvailable = false),
                 episode(

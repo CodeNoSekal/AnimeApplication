@@ -1,4 +1,4 @@
-package com.dmitry.yume.presentation.screens.player.ui
+package com.dmitry.yume.presentation.screens.player.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

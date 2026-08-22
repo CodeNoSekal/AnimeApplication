@@ -6,7 +6,7 @@ import com.dmitry.yume.data.response.toDomain
 import com.dmitry.yume.domain.models.PlaybackSelection
 import com.dmitry.yume.domain.repository.PlaybackRepository
 import com.dmitry.yume.domain.repository.PlaybackCatalogResult
-import com.dmitry.yume.domain.repository.ResolvePlaybackResult
+import com.dmitry.yume.domain.repository.ResolvedPlaybackResult
 import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 
@@ -26,7 +26,7 @@ class PlaybackRepositoryImpl @Inject constructor(
 
     override suspend fun resolvePlayback(
         selection: PlaybackSelection
-    ): ResolvePlaybackResult {
+    ): ResolvedPlaybackResult {
         try {
             val request = ResolvePlaybackRequest(
                 animeId = selection.animeId,
@@ -36,11 +36,11 @@ class PlaybackRepositoryImpl @Inject constructor(
             )
 
             val response = api.resolvePlayback(request)
-            return ResolvePlaybackResult.Success(response.toDomain())
+            return ResolvedPlaybackResult.Success(response.toDomain())
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception){
-            return ResolvePlaybackResult.Error(e.message ?: "Не удалось загрузить плеер")
+            return ResolvedPlaybackResult.Error(e.message ?: "Не удалось загрузить плеер")
         }
     }
 }
