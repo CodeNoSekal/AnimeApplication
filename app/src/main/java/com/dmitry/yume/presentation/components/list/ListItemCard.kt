@@ -92,7 +92,7 @@ fun ListItemCard(
                     .matchParentSize()
                     .border(
                         width = 1.dp,
-                        color = colors.line,
+                        color = statusGlow?.first?.copy(alpha = 0.92f) ?: colors.line,
                         shape = outerShape
                     )
                     .padding(1.dp)

@@ -58,6 +58,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import com.dmitry.yume.R
 import com.dmitry.yume.domain.format.formatTime
@@ -122,6 +123,8 @@ fun VideoPlayer(
             exoPlaybackState == Player.STATE_BUFFERING
 
     var isSeeking by remember { mutableStateOf(false) }
+    var scrubPositionMs by remember { mutableLongStateOf(0L) }
+    var wasPlayingBeforeSeek by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val backInteractionSource = remember { MutableInteractionSource() }
@@ -180,6 +183,35 @@ fun VideoPlayer(
 
     fun hideControls() {
         controlsVisible = false
+    }
+
+    fun startScrubbing(positionMs: Long) {
+        wasPlayingBeforeSeek = exoPlayer.playWhenReady
+        scrubPositionMs = positionMs
+        isSeeking = true
+        showControls()
+        exoPlayer.pause()
+        exoPlayer.setSeekParameters(SeekParameters.CLOSEST_SYNC)
+    }
+
+    fun previewScrubbing(positionMs: Long) {
+        scrubPositionMs = positionMs
+    }
+
+    fun finishScrubbing(positionMs: Long) {
+        scrubPositionMs = positionMs
+        exoPlayer.setSeekParameters(SeekParameters.DEFAULT)
+        exoPlayer.seekTo(positionMs)
+        isSeeking = false
+        saveProgress()
+
+        if (wasPlayingBeforeSeek) {
+            exoPlayer.play()
+        } else {
+            exoPlayer.pause()
+        }
+
+        showControls()
     }
 
     fun handlePlayerTap(x: Float, width: Float) {
@@ -274,6 +306,25 @@ fun VideoPlayer(
         if (controlsVisible && isPlaying && !isSeeking && !isControlPressed) {
             delay(3_000.milliseconds)
             controlsVisible = false
+        }
+    }
+
+    LaunchedEffect(isSeeking, streamUrl) {
+        if (!isSeeking || streamUrl == null) return@LaunchedEffect
+
+        var lastRequestedPosition = Long.MIN_VALUE
+        while (true) {
+            val requestedPosition = scrubPositionMs
+            if (
+                requestedPosition != lastRequestedPosition &&
+                exoPlayer.playbackState == Player.STATE_READY
+            ) {
+                exoPlayer.seekTo(requestedPosition)
+                lastRequestedPosition = requestedPosition
+                delay(200.milliseconds)
+            } else {
+                delay(50.milliseconds)
+            }
         }
     }
 
@@ -436,7 +487,7 @@ fun VideoPlayer(
                         }
                     }
 
-                    if (controlsAlpha > 0) {
+                    if (controlsAlpha > 0 && !isSeeking) {
                         Row(
                             modifier = Modifier.fillMaxWidth().alpha(controlsAlpha),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -466,7 +517,13 @@ fun VideoPlayer(
                 },
                 showControls = controlsVisible,
                 centerControls = { _, _ ->
-                    if (controlsAlpha > 0) {
+                    if (isSeeking) {
+                        Text(
+                            text = formatTime(scrubPositionMs),
+                            style = YumeType.h2,
+                            color = Color.White,
+                        )
+                    } else if (controlsAlpha > 0) {
                         Row(
                             modifier = Modifier.fillMaxWidth().alpha(controlsAlpha),
                             horizontalArrangement = Arrangement.spacedBy(
@@ -605,103 +662,103 @@ fun VideoPlayer(
                                 .alpha(controlsAlpha),
                         ) {
                             if (isLandscape) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 18.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "${formatTime(current)} / ${formatTime(duration)}",
-                                        style = YumeType.sm,
-                                    )
-
-                                    Icon(
-                                        painterResource(R.drawable.compress_24),
-                                        contentDescription = "compress",
+                                if (!isSeeking) {
+                                    Row(
                                         modifier = Modifier
-                                            .clickable(
-                                                interactionSource = orientationInteractionSource,
-                                                indication = null,
-                                                onClick = compress
-                                            )
-                                            .padding(
-                                                top = 15.dp,
-                                                start = 10.dp,
-                                                end = 18.dp,
-                                            )
-                                            .size(sideIconSize)
-                                    )
+                                            .fillMaxWidth()
+                                            .padding(start = 18.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "${formatTime(current)} / ${formatTime(duration)}",
+                                            style = YumeType.sm,
+                                        )
+
+                                        Icon(
+                                            painterResource(R.drawable.compress_24),
+                                            contentDescription = "compress",
+                                            modifier = Modifier
+                                                .clickable(
+                                                    interactionSource = orientationInteractionSource,
+                                                    indication = null,
+                                                    onClick = compress
+                                                )
+                                                .padding(
+                                                    top = 15.dp,
+                                                    start = 10.dp,
+                                                    end = 18.dp,
+                                                )
+                                                .size(sideIconSize)
+                                        )
+                                    }
                                 }
 
                                 PlaybackProgressBar(
                                     progress = progress,
-                                    onSeek = { newProgress ->
-                                        exoPlayer.seekTo(
-                                            (duration * newProgress).toLong()
-                                        )
-                                        saveProgress()
-                                        showControls()
+                                    onSeekStart = { newProgress ->
+                                        startScrubbing((duration * newProgress).toLong())
                                     },
-                                    onSeekingChanged = { seeking ->
-                                        isSeeking = seeking
-
-                                        if (seeking) {
-                                            showControls()
-                                        }
+                                    onSeekPreview = { newProgress ->
+                                        previewScrubbing((duration * newProgress).toLong())
+                                    },
+                                    onSeekEnd = { newProgress ->
+                                        finishScrubbing((duration * newProgress).toLong())
+                                    },
+                                    onSeekCancel = { newProgress ->
+                                        finishScrubbing((duration * newProgress).toLong())
                                     },
                                     modifier = Modifier.padding(horizontal = 8.dp),
                                     isLandscape = true
                                 )
                             } else {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 8.dp)
-                                        .alpha(controlsAlpha),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "${formatTime(current)} / ${formatTime(duration)}",
-                                        style = YumeType.sm,
-                                    )
-
-                                    Icon(
-                                        painterResource(R.drawable.expand_24),
-                                        contentDescription = "expand",
+                                if (!isSeeking) {
+                                    Row(
                                         modifier = Modifier
-                                            .clickable(
-                                                interactionSource = orientationInteractionSource,
-                                                indication = null,
-                                                onClick = expand
-                                            )
-                                            .padding(
-                                                top = 6.dp,
-                                                start = 10.dp,
-                                                end = 10.dp,
-                                                bottom = 6.dp
-                                            )
-                                            .size(sideIconSize)
-                                    )
+                                            .fillMaxWidth()
+                                            .padding(start = 8.dp)
+                                            .alpha(controlsAlpha),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "${formatTime(current)} / ${formatTime(duration)}",
+                                            style = YumeType.sm,
+                                        )
+
+                                        Icon(
+                                            painterResource(R.drawable.expand_24),
+                                            contentDescription = "expand",
+                                            modifier = Modifier
+                                                .clickable(
+                                                    interactionSource = orientationInteractionSource,
+                                                    indication = null,
+                                                    onClick = expand
+                                                )
+                                                .padding(
+                                                    top = 6.dp,
+                                                    start = 10.dp,
+                                                    end = 10.dp,
+                                                    bottom = 6.dp
+                                                )
+                                                .size(sideIconSize)
+                                        )
+                                    }
                                 }
 
                                 PlaybackProgressBar(
                                     progress = progress,
-                                    onSeek = { newProgress ->
-                                        exoPlayer.seekTo(
-                                            (duration * newProgress).toLong()
-                                        )
-                                        saveProgress()
-                                        showControls()
+                                    onSeekStart = { newProgress ->
+                                        startScrubbing((duration * newProgress).toLong())
                                     },
-                                    onSeekingChanged = { seeking ->
-                                        isSeeking = seeking
-
-                                        if (seeking) {
-                                            showControls()
-                                        }
+                                    onSeekPreview = { newProgress ->
+                                        previewScrubbing((duration * newProgress).toLong())
+                                    },
+                                    onSeekEnd = { newProgress ->
+                                        finishScrubbing((duration * newProgress).toLong())
+                                    },
+                                    onSeekCancel = { newProgress ->
+                                        finishScrubbing((duration * newProgress).toLong())
                                     },
                                     modifier = Modifier,
                                     isLandscape = false
@@ -768,8 +825,10 @@ private fun String.toSafeHost(): String? =
 @Composable
 fun PlaybackProgressBar(
     progress: Float,
-    onSeek: (Float) -> Unit,
-    onSeekingChanged: (Boolean) -> Unit,
+    onSeekStart: (Float) -> Unit,
+    onSeekPreview: (Float) -> Unit,
+    onSeekEnd: (Float) -> Unit,
+    onSeekCancel: (Float) -> Unit,
     modifier: Modifier,
     isLandscape: Boolean,
 ) {
@@ -816,10 +875,12 @@ fun PlaybackProgressBar(
                     }
 
                     isDragging = true
-                    onSeekingChanged(true)
+                    var completed = false
 
                     try {
                         updateProgress(down.position.x)
+                        onSeekStart(displayedProgress)
+                        onSeekPreview(displayedProgress)
                         down.consume()
 
                         var pressed = true
@@ -831,14 +892,18 @@ fun PlaybackProgressBar(
                                 ?: break
 
                             updateProgress(change.position.x)
+                            onSeekPreview(displayedProgress)
                             pressed = change.pressed
                             change.consume()
                         }
 
-                        onSeek(displayedProgress)
+                        completed = true
+                        onSeekEnd(displayedProgress)
                     } finally {
+                        if (!completed) {
+                            onSeekCancel(displayedProgress)
+                        }
                         isDragging = false
-                        onSeekingChanged(false)
                     }
                 }
             }

@@ -64,6 +64,7 @@ fun AnimeList(
             modifier = Modifier
                 .fillMaxSize(),
             contentPadding = contentPadding + PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(
                 count = animeItems.itemCount,

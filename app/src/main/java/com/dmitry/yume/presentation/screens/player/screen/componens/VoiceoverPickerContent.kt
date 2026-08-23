@@ -1,6 +1,5 @@
 package com.dmitry.yume.presentation.screens.player.screen.componens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,9 +26,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dmitry.yume.domain.models.PlaybackSource
 import com.dmitry.yume.domain.models.Provider
-import com.dmitry.yume.domain.models.Voiceover
 import com.dmitry.yume.presentation.screens.player.PlaybackUiState
-import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
 import com.dmitry.yume.presentation.ui.theme.YumeType
 
