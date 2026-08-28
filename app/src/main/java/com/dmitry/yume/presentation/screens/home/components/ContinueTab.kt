@@ -53,7 +53,7 @@ fun ContinueTab(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(data.items) { item ->
+            items(data.items, key = { it.animeId }) { item ->
                 ProgressItemCard(
                     item,
                     onPlayClick

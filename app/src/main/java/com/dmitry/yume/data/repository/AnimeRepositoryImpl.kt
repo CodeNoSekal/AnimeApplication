@@ -4,21 +4,22 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.dmitry.yume.data.api.AnimeApi
+import com.dmitry.yume.data.request.OptionsRequest
 import com.dmitry.yume.data.response.toDomain
 import com.dmitry.yume.domain.models.Anime
+import com.dmitry.yume.domain.models.SearchOptions
 import com.dmitry.yume.domain.repository.AnimeDetailResult
 import com.dmitry.yume.domain.repository.AnimeRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.CancellationException
+import retrofit2.http.Query
 import javax.inject.Inject
 
 class AnimeRepositoryImpl @Inject constructor(
     private val api: AnimeApi
 ) : AnimeRepository {
     override fun getAnime(
-        status: String?,
-        sort: String,
-        order: String
+        options: SearchOptions
     ): Flow<PagingData<Anime>> {
         return Pager(
             config = PagingConfig(
@@ -30,9 +31,7 @@ class AnimeRepositoryImpl @Inject constructor(
                     loadPage = { page ->
                         api.getAnimeList(
                             page = page,
-                            status = status,
-                            sort = sort,
-                            order = order
+                            options = OptionsRequest.from(options)
                         )
                     }
                 )
@@ -40,7 +39,10 @@ class AnimeRepositoryImpl @Inject constructor(
         ).flow
     }
 
-    override fun searchAnime(q: String): Flow<PagingData<Anime>> {
+    override fun searchAnime(
+        q: String,
+        options: SearchOptions
+    ): Flow<PagingData<Anime>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 50,
@@ -48,7 +50,11 @@ class AnimeRepositoryImpl @Inject constructor(
             ),
             pagingSourceFactory = {
                 AnimePagingSource(loadPage = { page ->
-                    api.getAnimeList(page = page, q = q)
+                    api.getAnimeList(
+                        page = page,
+                        q = q,
+                        options = OptionsRequest.from(options)
+                    )
                 })
             }
         ).flow

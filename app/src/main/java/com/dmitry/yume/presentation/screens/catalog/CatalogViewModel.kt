@@ -3,44 +3,43 @@ package com.dmitry.yume.presentation.screens.catalog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.map
 import com.dmitry.yume.domain.models.Anime
-import com.dmitry.yume.domain.models.Status
-import com.dmitry.yume.domain.repository.AnimeDetailResult
 import com.dmitry.yume.domain.repository.GenresResult
-import com.dmitry.yume.domain.repository.StatusResult
 import com.dmitry.yume.domain.usecase.GetAnimeCatalogUseCase
-import com.dmitry.yume.domain.usecase.GetGenresUseCase
+import com.dmitry.yume.domain.usecase.GetMetaUseCase
 import com.dmitry.yume.domain.usecase.ObserveLibraryUpdatesUseCase
-import com.dmitry.yume.presentation.screens.detail.DetailViewState
-import com.dmitry.yume.presentation.screens.detail.StatusViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 @HiltViewModel
 class CatalogViewModel @Inject constructor(
     private val getAnimeCatalog: GetAnimeCatalogUseCase,
-    private val getGenres: GetGenresUseCase,
-    private val observeLibraryUpdates: ObserveLibraryUpdatesUseCase
+    private val getMeta: GetMetaUseCase,
+    observeLibraryUpdates: ObserveLibraryUpdatesUseCase
 ) : ViewModel() {
 
-    private val _optionsState = MutableStateFlow(Options())
-    val optionsState: StateFlow<Options> = _optionsState.asStateFlow()
+    private val _metaState = MutableStateFlow<GenresViewState>(GenresViewState.Loading)
+    private val _draftFilters = MutableStateFlow(FilterOptions())
+    private val libraryUpdates = observeLibraryUpdates()
+    private var pagingJob: Job? = null
+    private val _catalog = MutableStateFlow(createCatalog(CatalogOptions(), generation = 0))
+    val catalog: StateFlow<CatalogSession> = _catalog.asStateFlow()
 
-    private val _genresState = MutableStateFlow<GenresViewState>(GenresViewState.Loading)
-    val genresState: StateFlow<GenresViewState> = _genresState.asStateFlow()
+    val draftFilters: StateFlow<FilterOptions> = _draftFilters.asStateFlow()
+    val metaState: StateFlow<GenresViewState> = _metaState.asStateFlow()
+
     private var loadJob: Job? = null
 
     init {
@@ -50,41 +49,137 @@ class CatalogViewModel @Inject constructor(
     private fun load() {
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
-            _genresState.value = GenresViewState.Loading
+            _metaState.value = GenresViewState.Loading
 
-            when (val result = getGenres()) {
+            when (val result = getMeta()) {
                 is GenresResult.Success ->
-                    _genresState.value = GenresViewState.Success(result.genres)
+                    _metaState.value = GenresViewState.Success(result.meta)
                 is GenresResult.Error ->
-                    _genresState.value = GenresViewState.Error(result.message)
+                    _metaState.value = GenresViewState.Error(result.message)
             }
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val anime: Flow<PagingData<Anime>> =
-        _optionsState
-            .flatMapLatest { value ->
-                getAnimeCatalog(
-                    status = value.status?.toRaw(),
-                    sort = value.sort.toRaw(),
-                    order = value.order.toRaw()
+    private fun createCatalog(options: CatalogOptions, generation: Int): CatalogSession {
+        // Keep pages across navigation, but release the old cache when the query changes.
+        pagingJob?.cancel()
+        val job = SupervisorJob(viewModelScope.coroutineContext[Job])
+        pagingJob = job
+        val scope = CoroutineScope(viewModelScope.coroutineContext + job)
+        val anime = getAnimeCatalog(options.toDomain())
+            // combine can submit the same generation more than once for library updates.
+            .cachedIn(scope)
+            .combine(libraryUpdates) { pagingData, updates ->
+                pagingData.map { anime ->
+                    updates[anime.id]?.let { update ->
+                        anime.copy(
+                            myStatus = update.status,
+                            myScore = update.score,
+                            favorite = update.favorite
+                        )
+                    } ?: anime
+                }
+            }
+            // Expose the cached snapshot directly to collectAsLazyPagingItems on re-entry.
+            .cachedIn(scope)
+        return CatalogSession(generation, options, anime)
+    }
+
+    private fun setCatalogOptions(options: CatalogOptions) {
+        val current = _catalog.value
+        if (options != current.options) {
+            _catalog.value = createCatalog(options, current.generation + 1)
+        }
+    }
+
+    fun setSorting(value: SortingOptions){
+        setCatalogOptions(_catalog.value.options.copy(sorting = value))
+    }
+
+    fun assignGenre(id: Int) {
+        _draftFilters.update { options ->
+            when(id) {
+                in options.genres -> options.copy(
+                    genres = options.genres - id,
+                    excludeGenres = options.excludeGenres + id
+                )
+                in options.excludeGenres -> options.copy(
+                    genres = options.genres - id,
+                    excludeGenres = options.excludeGenres - id
+                )
+                else -> options.copy(
+                    genres = options.genres + id,
+                    excludeGenres = options.excludeGenres - id
                 )
             }
-            .combine(
-            observeLibraryUpdates(),
-        ) { pagingData, updates ->
-            pagingData.map { anime ->
-                updates[anime.id]?.let { update ->
-                    anime.copy(
-                        status = update.status,
-                        favorite = update.favorite
-                    )
-                } ?: anime
+        }
+    }
+    fun assignType(kind: AnimeKind) {
+        _draftFilters.update { options ->
+            when(kind) {
+                in options.kinds -> options.copy(
+                    kinds = options.kinds - kind
+                )
+                else -> options.copy(
+                    kinds = options.kinds + kind
+                )
             }
         }
+    }
 
-    fun setOptions(value: Options){
-        _optionsState.update { value }
+    fun assignStatus(status: Status) {
+        _draftFilters.update { options ->
+            when(status) {
+                in options.statuses -> options.copy(
+                    statuses = options.statuses - status
+                )
+                else -> options.copy(
+                    statuses = options.statuses + status
+                )
+            }
+        }
+    }
+
+    fun assignCollection(collection: Collection) {
+        _draftFilters.update { options ->
+            when(collection) {
+                in options.collections -> options.copy(
+                    collections = options.collections - collection,
+                    excludeCollections = options.excludeCollections + collection
+                )
+                in options.excludeCollections -> options.copy(
+                    collections = options.collections - collection,
+                    excludeCollections = options.excludeCollections - collection
+                )
+                else -> options.copy(
+                    collections = options.collections + collection,
+                    excludeCollections = options.excludeCollections - collection
+                )
+            }
+        }
+    }
+
+    fun applyFilters() {
+        setCatalogOptions(_catalog.value.options.copy(filters = _draftFilters.value))
+    }
+
+    fun dropFilters() {
+        _draftFilters.value = FilterOptions()
+        setCatalogOptions(_catalog.value.options.copy(filters = FilterOptions()))
+    }
+
+    fun dropGenres() {
+        _draftFilters.update {
+            it.copy(
+                genres = emptySet(),
+                excludeGenres = emptySet()
+            )
+        }
     }
 }
+
+data class CatalogSession(
+    val generation: Int,
+    val options: CatalogOptions,
+    val anime: Flow<PagingData<Anime>>
+)

@@ -17,8 +17,8 @@ import com.dmitry.yume.presentation.ui.theme.YumeType
 
 @Composable
 fun SortPickerContent(
-    optionsState: Options,
-    onSortSelected: (Options) -> Unit,
+    sortingState: SortingOptions,
+    onSortSelected: (SortingOptions) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -39,9 +39,9 @@ fun SortPickerContent(
         Sort.entries.forEach {
             SortOption(
                 text = it.toUi(),
-                selected = optionsState.sort == it,
+                selected = sortingState.sort == it,
                 onClick = {
-                    onSortSelected(optionsState.copy(sort = it))
+                    onSortSelected(sortingState.copy(sort = it))
                 }
             )
         }
@@ -52,19 +52,19 @@ fun SortPickerContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             OrderButton(
-                onClick = { onSortSelected(optionsState.copy(order = Order.Asc)) },
+                onClick = { onSortSelected(sortingState.copy(order = Order.Asc)) },
                 modifier = Modifier
                     .weight(0.5f),
                 order = Order.Asc,
-                isActive = Order.Asc == optionsState.order
+                isActive = Order.Asc == sortingState.order
             )
 
             OrderButton(
-                onClick = { onSortSelected(optionsState.copy(order = Order.Desc)) },
+                onClick = { onSortSelected(sortingState.copy(order = Order.Desc)) },
                 modifier = Modifier
                     .weight(0.5f),
                 order = Order.Desc,
-                isActive = Order.Desc == optionsState.order
+                isActive = Order.Desc == sortingState.order
             )
         }
     }

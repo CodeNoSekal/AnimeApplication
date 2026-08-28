@@ -41,11 +41,11 @@ fun ListItemCard(
     val outerShape = RoundedCornerShape(8.dp)
     val innerShape = RoundedCornerShape(7.dp)
     val statusGlow =
-        when (anime.status) {
-            "смотрю" -> colors.statusWatching to 0.34f
-            "в планах" -> colors.statusPlanned to 0.44f
-            "просмотрено" -> colors.statusCompleted to 0.46f
-            "брошено" -> colors.statusDropped to 0.36f
+        when (anime.myStatus) {
+            "watching", "смотрю" -> colors.statusWatching to 0.34f
+            "planned", "в планах" -> colors.statusPlanned to 0.44f
+            "completed", "просмотрено" -> colors.statusCompleted to 0.46f
+            "dropped", "брошено" -> colors.statusDropped to 0.36f
             else -> null
         }
 

@@ -16,5 +16,18 @@ data class AnimeDetailed(
     val description: String?,
     val duration: Int?,
     val genres: List<String>?,
-    val studios: List<String>?
+    val studios: List<String>?,
+    val relations: List<Anime>,
+    val kind: String? = null,
+    val releaseStatus: String? = null,
+    val ratingSource: String? = null,
+    val ageRating: String? = null,
+    val episodesTotal: Int? = null,
+    val episodesAvailable: Int? = null,
+    val airedOn: String? = null,
+    val airedOnPrecision: String? = null,
+    val releasedOn: String? = null,
+    val releasedOnPrecision: String? = null,
+    val nextEpisodeAt: String? = null,
+    val lastEpisodeNumber: Int? = null
 )

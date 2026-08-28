@@ -1,6 +1,6 @@
 package com.dmitry.yume.domain.repository
 
-import com.dmitry.yume.domain.models.Genres
+import com.dmitry.yume.domain.models.Meta
 import com.dmitry.yume.domain.models.Home
 
 interface MetaRepository {
@@ -19,7 +19,7 @@ sealed interface HomeResult {
 
 sealed interface GenresResult {
     data class Success(
-        val genres: Genres
+        val meta: Meta
     ) : GenresResult
     data class Error(
         val message: String?

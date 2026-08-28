@@ -7,6 +7,7 @@ import com.dmitry.yume.data.api.MeApi
 import com.dmitry.yume.data.request.FavoriteRequest
 import com.dmitry.yume.data.request.ProgressRequest
 import com.dmitry.yume.data.request.StatusRequest
+import com.dmitry.yume.data.request.ScoreRequest
 import com.dmitry.yume.data.response.toDomain
 import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.models.Progress
@@ -129,6 +130,19 @@ class MeRepositoryImpl @Inject constructor(
             throw e
         } catch (e: Exception) {
             return StatusResult.Error(e.safeMessage("Не удалось изменить избранное"))
+        }
+    }
+
+    override suspend fun putScore(id: Int, score: Int?): StatusResult {
+        return try {
+            val updated = meApi.putScore(id, ScoreRequest(score)).toDomain()
+            _libraryUpdates.update { it + (updated.animeId to updated) }
+            invalidateLibrarySources()
+            StatusResult.Success(updated)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            StatusResult.Error(e.safeMessage("Не удалось сохранить оценку"))
         }
     }
 

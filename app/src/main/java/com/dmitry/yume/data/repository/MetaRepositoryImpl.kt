@@ -5,7 +5,6 @@ import com.dmitry.yume.data.response.toDomain
 import com.dmitry.yume.domain.repository.GenresResult
 import com.dmitry.yume.domain.repository.HomeResult
 import com.dmitry.yume.domain.repository.MetaRepository
-import com.dmitry.yume.domain.repository.ProgressResult
 import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 import javax.inject.Inject
@@ -31,7 +30,7 @@ class MetaRepositoryImpl @Inject constructor(
 
     override suspend fun getGenres(): GenresResult {
         try {
-            val result = api.getGenres()
+            val result = api.getMeta()
 
             return GenresResult.Success(result.toDomain())
 

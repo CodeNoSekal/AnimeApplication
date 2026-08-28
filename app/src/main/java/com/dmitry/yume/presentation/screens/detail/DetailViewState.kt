@@ -18,3 +18,7 @@ sealed class StatusViewState {
 
     data class Error(val message: String?) : StatusViewState()
 }
+
+data class DetailActionState(val isSaving: Boolean = false, val error: String? = null)
+
+data class ScoreEditorState(val isOpen: Boolean = false, val initialScore: Int? = null)

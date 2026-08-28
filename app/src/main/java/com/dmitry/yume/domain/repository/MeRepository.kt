@@ -16,6 +16,7 @@ interface MeRepository {
     suspend fun getStatus(id: Int): StatusResult
     suspend fun putStatus(id: Int, status: String?): StatusResult
     suspend fun putFavorite(id: Int, favorite: Boolean): StatusResult
+    suspend fun putScore(id: Int, score: Int?): StatusResult
 
     fun getAnimeListByStatus(status: String, q: String?): Flow<PagingData<Anime>>
     fun getAnimeListByFavorite(q: String?): Flow<PagingData<Anime>>

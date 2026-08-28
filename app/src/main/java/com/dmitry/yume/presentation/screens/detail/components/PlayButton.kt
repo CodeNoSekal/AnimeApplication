@@ -3,7 +3,7 @@ package com.dmitry.yume.presentation.screens.detail.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +18,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dmitry.yume.R
 import com.dmitry.yume.domain.models.AnimeDetailed
+import com.dmitry.yume.presentation.screens.detail.detailPlaybackLabel
+import com.dmitry.yume.presentation.ui.theme.YumeType
 import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
 
 @Composable
@@ -31,12 +33,14 @@ fun PlayButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = if (animeData.isAvailable) colors.accent else colors.accent.copy(
                 alpha = 0.8f
-            )
+            ),
+            disabledContainerColor = colors.surfaceRaised,
+            disabledContentColor = colors.textSecondary
         ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .height(45.dp),
+            .heightIn(min = 48.dp),
         enabled = animeData.isAvailable
     ) {
         Row(
@@ -53,7 +57,9 @@ fun PlayButton(
                 )
             }
             Text(
-                text = if (animeData.isAvailable) "Смотреть" else "Скоро"
+                text = detailPlaybackLabel(animeData),
+                style = YumeType.bodyMedium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
     }

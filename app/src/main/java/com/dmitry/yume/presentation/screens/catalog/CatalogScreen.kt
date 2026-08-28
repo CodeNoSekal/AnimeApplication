@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -15,9 +16,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +37,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.dmitry.yume.presentation.components.list.AnimeList
 import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
@@ -46,7 +51,52 @@ fun CatalogScreen(
     catalogViewModel: CatalogViewModel = hiltViewModel(),
     onFiltersClicked: () -> Unit
 ) {
-    val animeItems = catalogViewModel.anime.collectAsLazyPagingItems()
+    val catalog by catalogViewModel.catalog.collectAsStateWithLifecycle()
+    CatalogContent(catalog, onItemClicked, onSearchClicked, onFiltersClicked, catalogViewModel::setSorting)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun CatalogContent(
+    catalog: CatalogSession,
+    onItemClicked: (Int) -> Unit,
+    onSearchClicked: () -> Unit,
+    onFiltersClicked: () -> Unit,
+    onSortSelected: (SortingOptions) -> Unit
+) {
+    var showSortSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // A query change starts a new list; navigation back to the same query restores it.
+    key(catalog.generation) {
+        CatalogSessionContent(catalog, onItemClicked, onSearchClicked, onFiltersClicked) {
+            showSortSheet = true
+        }
+    }
+    if (showSortSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSortSheet = false },
+            containerColor = colors.surfaceCard,
+            sheetGesturesEnabled = false,
+            sheetState = sheetState,
+        ) {
+            SortPickerContent(
+                sortingState = catalog.options.sorting,
+                onSortSelected = onSortSelected
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CatalogSessionContent(
+    catalog: CatalogSession,
+    onItemClicked: (Int) -> Unit,
+    onSearchClicked: () -> Unit,
+    onFiltersClicked: () -> Unit,
+    onSortClicked: () -> Unit
+) {
+    val animeItems = catalog.anime.collectAsLazyPagingItems()
 
     val density = LocalDensity.current
 
@@ -69,31 +119,37 @@ fun CatalogScreen(
 
     val listState = rememberLazyListState()
 
-    var showSortSheet by remember { mutableStateOf(false) }
-
-    val options by catalogViewModel.optionsState.collectAsState()
-    var draftOptions by remember { mutableStateOf(options) }
-
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
+    val refreshState = rememberPullToRefreshState()
+    val isRefreshing = animeItems.loadState.refresh is LoadState.Loading && animeItems.itemCount > 0
 
     Box(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize().nestedScroll(connection)
     ) {
-        AnimeList(
-            state = listState,
-            animeItems = animeItems,
-            onItemClicked = onItemClicked,
-            contentPadding = PaddingValues(top = topBarHeight + barOffsetDp)
-        )
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { animeItems.refresh() },
+            state = refreshState,
+            modifier = Modifier.fillMaxSize(),
+            indicator = {
+                PullToRefreshDefaults.Indicator(
+                    state = refreshState,
+                    isRefreshing = isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter).padding(top = topBarHeight + barOffsetDp)
+                )
+            }
+        ) {
+            AnimeList(
+                state = listState,
+                animeItems = animeItems,
+                onItemClicked = onItemClicked,
+                contentPadding = PaddingValues(top = topBarHeight + barOffsetDp)
+            )
+        }
         CatalogTopBar(
             onSearchClicked,
-            onSortClicked = {
-                draftOptions = options
-                showSortSheet = true
-            },
+            onSortClicked = onSortClicked,
             onFiltersClicked = {
                 onFiltersClicked()
             },
@@ -107,24 +163,6 @@ fun CatalogScreen(
                 .windowInsetsTopHeight(WindowInsets.statusBars)
                 .background(MaterialTheme.colorScheme.background)
         )
-
-        if (showSortSheet) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    catalogViewModel.setOptions(draftOptions)
-                    showSortSheet = false },
-                containerColor = colors.surfaceCard,
-                sheetGesturesEnabled = false,
-                sheetState = sheetState,
-            ) {
-                SortPickerContent(
-                    optionsState = draftOptions,
-                    onSortSelected = { newSort ->
-                        draftOptions = newSort
-                    }
-                )
-            }
-        }
 
     }
 }

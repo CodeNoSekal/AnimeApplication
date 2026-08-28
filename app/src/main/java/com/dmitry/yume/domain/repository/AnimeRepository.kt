@@ -3,15 +3,17 @@ package com.dmitry.yume.domain.repository
 import androidx.paging.PagingData
 import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.models.AnimeDetailed
+import com.dmitry.yume.domain.models.SearchOptions
 import kotlinx.coroutines.flow.Flow
 
 interface AnimeRepository {
     fun getAnime(
-        status: String?,
-        sort: String,
-        order: String
+        options: SearchOptions = SearchOptions(),
     ): Flow<PagingData<Anime>>
-    fun searchAnime(q: String): Flow<PagingData<Anime>>
+    fun searchAnime(
+        q: String,
+        options: SearchOptions = SearchOptions()
+    ): Flow<PagingData<Anime>>
     suspend fun getAnimeById(id: Int): AnimeDetailResult
 }
 

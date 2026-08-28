@@ -25,6 +25,7 @@ import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
 fun FavoriteButton(
     onClick: () -> Unit,
     statusState: StatusViewState,
+    enabled: Boolean = true,
 ) {
 
     val mainColor =
@@ -42,10 +43,11 @@ fun FavoriteButton(
 
     Surface(
         onClick = { onClick() },
+        enabled = enabled,
         shape = RoundedCornerShape(14.dp),
         color = mainColor,
         border = BorderStroke(1.dp, contentColor),
-        modifier = Modifier.width(45.dp).height(45.dp)
+        modifier = Modifier.width(48.dp).height(48.dp)
     ) {
         Row(
             modifier = Modifier
@@ -56,7 +58,7 @@ fun FavoriteButton(
             if (statusState is StatusViewState.Success) {
                 Icon(
                     painterResource(R.drawable.heart_24),
-                    contentDescription = null,
+                    contentDescription = if (statusState.status.favorite) "Убрать из избранного" else "Добавить в избранное",
                     Modifier.size(18.dp),
                     tint = contentColor
                 )

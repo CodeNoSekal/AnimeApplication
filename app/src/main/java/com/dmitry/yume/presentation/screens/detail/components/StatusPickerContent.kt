@@ -28,6 +28,7 @@ import com.dmitry.yume.presentation.ui.theme.YumeType
 fun StatusPickerContent(
     status: Status,
     setStatus: (String?) -> Unit,
+    enabled: Boolean = true,
 ) {
 
     val options = listOf(
@@ -58,8 +59,15 @@ fun StatusPickerContent(
             StatusOption(
                 text = label,
                 status = value,
-                selected = status.status == value,
-                onClick = { setStatus(value) }
+                selected = when (status.status) {
+                    "watching" -> "смотрю"
+                    "planned" -> "в планах"
+                    "completed" -> "просмотрено"
+                    "dropped" -> "брошено"
+                    else -> status.status
+                } == value,
+                onClick = { setStatus(value) },
+                enabled = enabled
             )
         }
     }
@@ -71,7 +79,8 @@ fun StatusOption(
     text: String,
     status: String?,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    enabled: Boolean = true
 ) {
     val contentColor =
         when (status) {
@@ -84,6 +93,7 @@ fun StatusOption(
 
     Surface(
         onClick = onClick,
+        enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
             .height(40.dp),

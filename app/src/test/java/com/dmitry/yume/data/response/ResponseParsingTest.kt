@@ -10,6 +10,39 @@ import org.junit.Test
 class ResponseParsingTest {
     private val moshi = Moshi.Builder().build()
 
+    @Test fun `details map release facts separately from personal status and prefer modern rating`() {
+        val domain = moshi.adapter(AnimeDetailResponse::class.java).fromJson("""
+            {"shikimori_id":1,"kind":"tv","status":"anons","my_status":"в планах",
+             "rating":8.7,"shikimori_rating":8.5,"rating_source":"internal",
+             "episodes_total":12,"episodes_available":0,"rating_mpaa":"pg_13",
+             "aired_on":"2027-10-01","aired_on_precision":"month",
+             "released_on":"2027-12-31","released_on_precision":"year",
+             "next_episode_at":"2027-10-01T12:00:00Z","last_episode_number":3}
+        """.trimIndent())!!.toDomain()
+        assertEquals("anons", domain.releaseStatus)
+        assertEquals("в планах", domain.status)
+        assertEquals("tv", domain.kind)
+        assertEquals(8.7, domain.rating!!, 0.001)
+        assertEquals("internal", domain.ratingSource)
+        assertEquals("month", domain.airedOnPrecision)
+        assertEquals("2027-10-01", domain.airedOn)
+        assertEquals("year", domain.releasedOnPrecision)
+        assertEquals(12, domain.episodesTotal)
+        assertEquals(0, domain.episodesAvailable)
+        assertEquals("pg_13", domain.ageRating)
+        assertEquals(3, domain.lastEpisodeNumber)
+    }
+
+    @Test fun `score deletion serializes explicit null with application converter`() {
+        val retrofit = com.dmitry.yume.di.NetworkModule.provideRetrofit(okhttp3.OkHttpClient(), moshi)
+        val converter = retrofit.requestBodyConverter<com.dmitry.yume.data.request.ScoreRequest>(
+            com.dmitry.yume.data.request.ScoreRequest::class.java, emptyArray(), emptyArray()
+        )
+        val buffer = okio.Buffer()
+        converter.convert(com.dmitry.yume.data.request.ScoreRequest(null))!!.writeTo(buffer)
+        assertEquals("{\"score\":null}", buffer.readUtf8())
+    }
+
     @Test
     fun `anime list item allows missing personalized fields`() {
         val json = """

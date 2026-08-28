@@ -12,9 +12,9 @@ import com.dmitry.yume.presentation.navigation.Details
 import com.dmitry.yume.presentation.navigation.PlaybackDestination
 import com.dmitry.yume.presentation.screens.ErrorScreen
 import com.dmitry.yume.presentation.screens.detail.DetailScreen
+import com.dmitry.yume.presentation.screens.detail.DetailPlaceholder
 import com.dmitry.yume.presentation.screens.detail.DetailViewModel
 import com.dmitry.yume.presentation.screens.detail.DetailViewState
-import com.dmitry.yume.presentation.screens.detail.StatusViewState
 
 fun NavGraphBuilder.detailsComposable(parent: String, navController: NavController){
     composable(
@@ -24,10 +24,12 @@ fun NavGraphBuilder.detailsComposable(parent: String, navController: NavControll
         val viewModel: DetailViewModel = hiltViewModel()
         val state by viewModel.state.collectAsStateWithLifecycle()
         val statusState by viewModel.statusState.collectAsStateWithLifecycle()
+        val actionState by viewModel.actionState.collectAsStateWithLifecycle()
+        val scoreEditor by viewModel.scoreEditor.collectAsStateWithLifecycle()
 
         when (state) {
             is DetailViewState.Loading -> {
-
+                DetailPlaceholder(onBackClick = { navController.popBackStack() })
             }
             is DetailViewState.Success -> {
                 DetailScreen(
@@ -36,7 +38,16 @@ fun NavGraphBuilder.detailsComposable(parent: String, navController: NavControll
                     animeData = (state as DetailViewState.Success).animeDetailed,
                     statusState = statusState,
                     setStatus = { viewModel.putStatus(it) },
-                    setFavorite = viewModel::putFavorite
+                    setFavorite = viewModel::putFavorite,
+                    actionState = actionState,
+                    scoreEditor = scoreEditor,
+                    onScoreClick = viewModel::openScoreEditor,
+                    onScoreDismiss = viewModel::dismissScoreEditor,
+                    onScoreSave = viewModel::saveScore,
+                    onErrorDismiss = viewModel::dismissActionError,
+                    onRetryPersonal = viewModel::load,
+                    onRelationClick = { id ->
+                        navController.navigate(Details.build(parent, id)) }
                 )
             }
             is DetailViewState.Error -> {

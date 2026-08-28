@@ -7,6 +7,8 @@ import com.dmitry.yume.data.request.FavoriteRequest
 import com.dmitry.yume.data.request.ProgressRequest
 import com.dmitry.yume.data.request.ReviewRequest
 import com.dmitry.yume.data.request.ScoreRequest
+import com.dmitry.yume.data.request.OptionsRequest
+import com.dmitry.yume.domain.repository.StatusResult
 import com.dmitry.yume.data.request.StatusRequest
 import com.dmitry.yume.data.response.AnimeDetailResponse
 import com.dmitry.yume.data.response.AnimeResponse
@@ -19,6 +21,7 @@ import com.dmitry.yume.domain.repository.OperationResult
 import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -77,8 +80,8 @@ class RepositoryFailureTest {
             override suspend fun getAnimeList(
                 page: Int,
                 perPage: Int,
-                sort: String,
-                q: String?
+                q: String?,
+                options: OptionsRequest
             ): AnimeResponse = error("not used")
 
             override suspend fun getAnimeById(id: Int): AnimeDetailResponse {
@@ -95,8 +98,8 @@ class RepositoryFailureTest {
             override suspend fun getAnimeList(
                 page: Int,
                 perPage: Int,
-                sort: String,
-                q: String?
+                q: String?,
+                options: OptionsRequest
             ): AnimeResponse = error("not used")
 
             override suspend fun getAnimeById(id: Int): AnimeDetailResponse {
@@ -132,6 +135,30 @@ class RepositoryFailureTest {
         repository.putProgress(progress())
     }
 
+    @Test fun `score success publishes complete personal state and deletion clears it`() = runTest {
+        val api = FakeMeApi {}
+        api.scoreResponse = { id, score -> StatusResponse(id, "в планах", true, score.score, "review") }
+        val repository = MeRepositoryImpl(api)
+        assertTrue(repository.putScore(1, 9) is StatusResult.Success)
+        val personal = repository.libraryUpdates.first().getValue(1)
+        assertEquals(9, personal.score)
+        assertEquals("в планах", personal.status)
+        assertEquals(true, personal.favorite)
+        assertEquals("review", personal.review)
+        repository.putScore(1, null)
+        assertNull(repository.libraryUpdates.first().getValue(1).score)
+        api.scoreResponse = { _, _ -> throw IOException("offline") }
+        assertTrue(repository.putScore(1, 8) is StatusResult.Error)
+        assertNull(repository.libraryUpdates.first().getValue(1).score)
+    }
+
+    @Test(expected = CancellationException::class)
+    fun `score save rethrows cancellation`() = runTest {
+        val api = FakeMeApi {}
+        api.scoreResponse = { _, _ -> throw CancellationException("cancelled") }
+        MeRepositoryImpl(api).putScore(1, 8)
+    }
+
     private fun progress() = Progress(
         animeId = 1,
         episodeNumber = 1,
@@ -150,13 +177,14 @@ class RepositoryFailureTest {
     private class FakeMeApi(
         private val putProgressBlock: suspend () -> Unit
     ) : MeApi {
+        var scoreResponse: suspend (Int, ScoreRequest) -> StatusResponse = { _, _ -> error("not used") }
         override suspend fun putProgress(progressRequest: ProgressRequest) = putProgressBlock()
         override suspend fun getProgress(): ProgressResponse = error("not used")
         override suspend fun getProgressById(id: Int): ProgressItem = error("not used")
         override suspend fun getStatus(id: Int): StatusResponse = error("not used")
         override suspend fun putStatus(id: Int, statusRequest: StatusRequest): StatusResponse = error("not used")
         override suspend fun putFavorite(id: Int, favoriteRequest: FavoriteRequest): StatusResponse = error("not used")
-        override suspend fun putScore(id: Int, scoreRequest: ScoreRequest): StatusResponse = error("not used")
+        override suspend fun putScore(id: Int, scoreRequest: ScoreRequest): StatusResponse = scoreResponse(id, scoreRequest)
         override suspend fun putReview(id: Int, reviewRequest: ReviewRequest): StatusResponse = error("not used")
         override suspend fun getAnimeListByStatus(page: Int, perPage: Int, status: String, q: String?): AnimeResponse = error("not used")
         override suspend fun getAnimeListByFavourite(page: Int, perPage: Int, q: String?): AnimeResponse = error("not used")

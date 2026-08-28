@@ -1,7 +1,9 @@
 package com.dmitry.yume.domain.models
 
-data class Genres(
-    val genres: List<Genre>
+data class Meta(
+    val genres: List<Genre>,
+    val yearFrom: Int,
+    val yearTo: Int,
 )
 
 data class Genre(

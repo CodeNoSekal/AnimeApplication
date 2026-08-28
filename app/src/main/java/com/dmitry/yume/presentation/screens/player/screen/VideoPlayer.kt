@@ -668,7 +668,7 @@ fun VideoPlayer(
                                             .fillMaxWidth()
                                             .padding(start = 18.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalAlignment = Alignment.Bottom
                                     ) {
                                         Text(
                                             text = "${formatTime(current)} / ${formatTime(duration)}",
@@ -719,7 +719,7 @@ fun VideoPlayer(
                                             .padding(start = 8.dp)
                                             .alpha(controlsAlpha),
                                         horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalAlignment = Alignment.Bottom
                                     ) {
                                         Text(
                                             text = "${formatTime(current)} / ${formatTime(duration)}",

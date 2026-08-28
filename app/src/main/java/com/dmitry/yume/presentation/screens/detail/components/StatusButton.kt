@@ -27,6 +27,7 @@ import com.dmitry.yume.presentation.ui.theme.YumeType
 fun StatusButton(
     onClick: () -> Unit,
     statusState: StatusViewState,
+    enabled: Boolean = true,
 ) {
 
     val mainColor =
@@ -35,20 +36,21 @@ fun StatusButton(
     val contentColor =
         if ((statusState is StatusViewState.Success)) {
             when (statusState.status.status) {
-                "смотрю" -> colors.statusWatching
-                "в планах" -> colors.statusPlanned
-                "просмотрено" -> colors.statusCompleted
-                "брошено" -> colors.statusDropped
+                "watching", "смотрю" -> colors.statusWatching
+                "planned", "в планах" -> colors.statusPlanned
+                "completed", "просмотрено" -> colors.statusCompleted
+                "dropped", "брошено" -> colors.statusDropped
                 else -> colors.textMuted
             }
         } else colors.textMuted
 
     Surface(
         onClick = onClick,
+        enabled = enabled,
         shape = RoundedCornerShape(14.dp),
         color = mainColor,
         border = BorderStroke(1.dp, contentColor),
-        modifier = Modifier.fillMaxWidth().height(45.dp)
+        modifier = Modifier.fillMaxWidth().height(48.dp)
     ) {
         Row(
             modifier = Modifier
@@ -57,7 +59,14 @@ fun StatusButton(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if ((statusState is StatusViewState.Success)) {
-                Text(statusState.status.status?.replaceFirstChar { it.uppercase() } ?: "Не смотрю",
+                Text(when (val value = statusState.status.status) {
+                    "watching" -> "Смотрю"
+                    "planned" -> "В планах"
+                    "completed" -> "Просмотрено"
+                    "dropped" -> "Брошено"
+                    null -> "В список"
+                    else -> value.replaceFirstChar { it.uppercase() }
+                },
                     style = YumeType.bodyMedium,
                     color = contentColor)
             }
