@@ -1,0 +1,10 @@
+// Run only catalog regression tests while older screen tests target obsolete APIs:
+// gradlew :app:testDebugUnitTest --tests '*CatalogViewModelTest' -I scripts/catalog-tests.init.gradle
+// This changes source selection only for this invocation, not the regular test suite.
+gradle.beforeProject { project ->
+    project.plugins.withId('com.android.application') {
+        project.android.sourceSets.getByName('test').kotlin.setSrcDirs([
+            'src/test/java/com/dmitry/yume/presentation/screens/catalog'
+        ])
+    }
+}
