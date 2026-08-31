@@ -82,6 +82,7 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    implementation(libs.android.image.cropper)
 
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.material)

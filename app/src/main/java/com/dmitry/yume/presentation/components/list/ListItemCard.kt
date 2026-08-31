@@ -29,12 +29,15 @@ import coil3.compose.AsyncImage
 import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeType
+import com.dmitry.yume.presentation.screens.catalog.AnimeKind
+import com.dmitry.yume.presentation.screens.catalog.Status
 
 @Composable
 fun ListItemCard(
     anime: Anime,
     onItemClicked: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    action: (@Composable () -> Unit)? = null,
 ) {
     val colors = YumeTheme.colors
     val cardShape = RoundedCornerShape(12.dp)
@@ -137,7 +140,23 @@ fun ListItemCard(
                     color = colors.textPrimary,
                 )
             }
-            val meta = listOfNotNull(anime.year?.toString(), anime.titleEn).joinToString(" · ")
+            anime.titleEn?.takeIf { it.isNotBlank() }?.let { englishTitle ->
+                Text(
+                    text = englishTitle,
+                    style = YumeType.xs,
+                    color = colors.textMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+
+
+            val kind = AnimeKind.entries.firstOrNull { it.raw == anime.kind }?.title
+                ?: anime.kind?.uppercase()
+            val releaseStatus = Status.entries.firstOrNull { it.raw == anime.status }?.title
+                ?: anime.status
+            val meta = listOfNotNull(anime.year?.toString(), kind, releaseStatus).joinToString(" · ")
             if (meta.isNotBlank()) {
                 Text(
                     text = meta,
@@ -149,5 +168,6 @@ fun ListItemCard(
                 )
             }
         }
+        action?.invoke()
     }
 }

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dmitry.yume.R
 import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
@@ -43,7 +44,7 @@ fun Rating(rating: Double?, score: Int?, enabled: Boolean, onScoreClick: () -> U
             }
             Column(horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 ScoreButton(score, enabled, onScoreClick)
-                if (score != null) Text("Ваша оценка", style = YumeType.xs, color = colors.textMuted)
+                if (score != null) Text("Ваша оценка", style = YumeType.xs, color = colors.textMuted, textAlign = TextAlign.End)
             }
         }
     }

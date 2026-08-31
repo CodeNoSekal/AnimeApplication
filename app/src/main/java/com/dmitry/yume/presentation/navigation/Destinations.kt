@@ -13,6 +13,10 @@ object Destinations {
     const val PROFILE = "profile"
     const val COLLECTIONS = "collections"
     const val EXPLORATION = "exploration"
+    const val EDIT_PROFILE = "edit-profile"
+    const val PROFILE_SETTINGS = "profile-settings"
+    const val CHANGE_EMAIL = "change-email"
+    const val CHANGE_PASSWORD = "change-password"
 
     const val FILTERS = "filters"
     const val GENRES = "genres"
@@ -51,6 +55,15 @@ object Search {
     const val SEARCH = "search"
 
     fun route(parent: String) = "$parent/$SEARCH"
+}
+
+object QuickSearch {
+    const val QUICK_SEARCH = "quick-search"
+    const val CATEGORY = "category"
+
+    fun routePattern(parent: String) = "$parent/$QUICK_SEARCH/{$CATEGORY}"
+
+    fun build(parent: String, category: String) = "$parent/$QUICK_SEARCH/$category"
 }
 enum class TopLevelDestination(
     val graph: String,

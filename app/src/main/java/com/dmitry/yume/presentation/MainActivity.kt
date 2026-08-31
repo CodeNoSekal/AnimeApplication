@@ -99,7 +99,11 @@ fun RootScreen(
             if(
                 inTopLevelDestination &&
                 currentRoute != Destinations.FILTERS &&
-                currentRoute != Destinations.GENRES
+                currentRoute != Destinations.GENRES &&
+                currentRoute != Destinations.EDIT_PROFILE &&
+                currentRoute != Destinations.PROFILE_SETTINGS &&
+                currentRoute != Destinations.CHANGE_EMAIL &&
+                currentRoute != Destinations.CHANGE_PASSWORD
             ){
                 BottomBar(navController)
             }
@@ -174,4 +178,3 @@ fun BottomBar(
         }
     }
 }
-

@@ -84,6 +84,44 @@ class AuthRepositoryImplTest {
         )
     }
 
+    @Test
+    fun `profile update replaces user in current session`() = runTest {
+        val api = FakeAuthApi()
+        api.updateProfileResponse = {
+            UserDTO(1, "mail@example.com", true, "new_user", "Новое имя", null, false)
+        }
+        val fixture = fixture(authApi = api)
+        fixture.sessionManager.establishSession(TOKENS, USER)
+
+        val result = fixture.repository.updateProfile("new_user", "Новое имя")
+
+        assertEquals(OperationResult.Success, result)
+        val user = (fixture.sessionManager.sessionState.value as SessionState.Authenticated).user
+        assertEquals("new_user", user.username)
+        assertEquals("Новое имя", user.displayName)
+    }
+
+    @Test
+    fun `email change updates address and requires verification`() = runTest {
+        val api = FakeAuthApi()
+        api.changeEmailResponse = {
+            com.dmitry.yume.data.response.EmailChangeResponse(
+                status = "email_changed",
+                email = "new@example.com",
+                emailVerified = false,
+            )
+        }
+        val fixture = fixture(authApi = api)
+        fixture.sessionManager.establishSession(TOKENS, USER.copy(emailVerified = true))
+
+        val result = fixture.repository.changeEmail("new@example.com", "password")
+
+        assertEquals(OperationResult.Success, result)
+        val user = (fixture.sessionManager.sessionState.value as SessionState.Authenticated).user
+        assertEquals("new@example.com", user.email)
+        assertEquals(false, user.emailVerified)
+    }
+
     private fun fixture(
         authApi: AuthApi = FakeAuthApi(),
         verificationApi: VerificationApi = FakeVerificationApi()
@@ -110,10 +148,20 @@ class AuthRepositoryImplTest {
     private class FakeAuthApi(
         private val logout: suspend () -> Unit = {}
     ) : AuthApi {
+        var updateProfileResponse: suspend (com.dmitry.yume.data.request.ProfileRequest) -> UserDTO = { error("not used") }
+        var changeEmailResponse: suspend (com.dmitry.yume.data.request.ChangeEmailRequest) -> com.dmitry.yume.data.response.EmailChangeResponse = { error("not used") }
         override suspend fun login(loginRequest: LoginRequest): AuthResponse = error("not used")
         override suspend fun register(registerRequest: RegisterRequest): AuthResponse = error("not used")
         override suspend fun logout() = logout.invoke()
+        override suspend fun logoutAll() = error("not used")
         override suspend fun getMe(): UserDTO = error("not used")
+        override suspend fun updateProfile(request: com.dmitry.yume.data.request.ProfileRequest): UserDTO = updateProfileResponse(request)
+        override suspend fun usernameAvailable(username: String): com.dmitry.yume.data.response.UsernameAvailabilityResponse = error("not used")
+        override suspend fun suggestUsername(displayName: String): com.dmitry.yume.data.response.UsernameSuggestionResponse = error("not used")
+        override suspend fun changePassword(request: com.dmitry.yume.data.request.ChangePasswordRequest) = error("not used")
+        override suspend fun changeEmail(request: com.dmitry.yume.data.request.ChangeEmailRequest): com.dmitry.yume.data.response.EmailChangeResponse = changeEmailResponse(request)
+        override suspend fun uploadAvatar(file: okhttp3.MultipartBody.Part): com.dmitry.yume.data.response.AvatarResponse = error("not used")
+        override suspend fun removeAvatar() = error("not used")
     }
 
     private class FakeVerificationApi(

@@ -16,6 +16,8 @@ import com.dmitry.yume.domain.repository.CurrentProgressResult
 import com.dmitry.yume.domain.repository.MeRepository
 import com.dmitry.yume.domain.repository.OperationResult
 import com.dmitry.yume.domain.repository.ProgressResult
+import com.dmitry.yume.domain.repository.ProfileListsResult
+import com.dmitry.yume.domain.repository.ProfileStatisticsResult
 import com.dmitry.yume.domain.repository.StatusResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.CancellationException
@@ -59,6 +61,22 @@ class MeRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getProfileLists(): ProfileListsResult = try {
+        ProfileListsResult.Success(meApi.getProfileLists().toDomain())
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        ProfileListsResult.Error(e.safeMessage("Не удалось загрузить статистику профиля"))
+    }
+
+    override suspend fun getProfileStatistics(): ProfileStatisticsResult = try {
+        ProfileStatisticsResult.Success(meApi.getProfileStatistics().toDomain())
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        ProfileStatisticsResult.Error(e.safeMessage("Не удалось загрузить статистику профиля"))
+    }
+
     override suspend fun getProgressById(id: Int): CurrentProgressResult {
         try {
             val result = meApi.getProgressById(id)
@@ -73,6 +91,28 @@ class MeRepositoryImpl @Inject constructor(
             return CurrentProgressResult.Error(e.safeMessage("Не удалось загрузить прогресс"))
         }
     }
+
+    override suspend fun clearProgress(id: Int): OperationResult =
+        try {
+            meApi.deleteFromContinue(id)
+            OperationResult.Success
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            OperationResult.Error(e.safeMessage("Не удалось удалить тайтл из продолжения просмотра"))
+        }
+
+    override suspend fun clearAllProgress(): OperationResult =
+        try {
+            meApi.getProgress().items.forEach { item ->
+                meApi.deleteFromContinue(item.id)
+            }
+            OperationResult.Success
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            OperationResult.Error(e.safeMessage("Не удалось очистить продолжение просмотра"))
+        }
 
     override suspend fun getStatus(id: Int): StatusResult {
         try {

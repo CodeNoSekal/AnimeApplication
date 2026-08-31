@@ -7,5 +7,7 @@ data class User(
     val username: String,
     val displayName: String,
     val avatarUrl: String?,
-    val isAdmin: Boolean
+    val isAdmin: Boolean,
+    val isPremium: Boolean = false,
+    val premiumUntil: String? = null,
 )

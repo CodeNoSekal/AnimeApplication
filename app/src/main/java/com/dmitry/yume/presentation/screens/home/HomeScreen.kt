@@ -40,6 +40,7 @@ fun HomeScreen(
     val homeData by homeViewModel.homeState.collectAsStateWithLifecycle()
     val heroListState by homeViewModel.heroListState.collectAsStateWithLifecycle()
     val heroFavoriteState by homeViewModel.heroFavoriteState.collectAsStateWithLifecycle()
+    val progressActionState by homeViewModel.progressActionState.collectAsStateWithLifecycle()
 
     LifecycleEventEffect(Lifecycle.Event.ON_START) {
         homeViewModel.load()
@@ -49,11 +50,15 @@ fun HomeScreen(
         homeData, progressData, onItemClick, onSearchClicked, onPlayClick,
         heroListState = heroListState,
         heroFavoriteState = heroFavoriteState,
+        progressActionState = progressActionState,
         onHeroFavoriteClick = homeViewModel::toggleHeroFavorite,
         onFavoriteErrorDismiss = homeViewModel::dismissFavoriteError,
         onHeroListClick = homeViewModel::openHeroList,
         onHeroListDismiss = homeViewModel::dismissHeroList,
-        onHeroStatusChange = homeViewModel::setHeroStatus
+        onHeroStatusChange = homeViewModel::setHeroStatus,
+        onRemoveProgress = homeViewModel::clearProgress,
+        onClearAllProgress = homeViewModel::clearAllProgress,
+        onProgressErrorDismiss = homeViewModel::dismissProgressActionError,
     ) {
         homeViewModel.load(force = true)
     }
@@ -69,11 +74,15 @@ internal fun HomeScreenContent(
     onPlayClick: (Int) -> Unit,
     heroListState: HeroListState = HeroListState(),
     heroFavoriteState: HeroFavoriteState = HeroFavoriteState(),
+    progressActionState: ProgressActionState = ProgressActionState(),
     onHeroFavoriteClick: () -> Unit = {},
     onFavoriteErrorDismiss: () -> Unit = {},
     onHeroListClick: () -> Unit = {},
     onHeroListDismiss: () -> Unit = {},
     onHeroStatusChange: (String?) -> Unit = {},
+    onRemoveProgress: (Int) -> Unit = {},
+    onClearAllProgress: () -> Unit = {},
+    onProgressErrorDismiss: () -> Unit = {},
     onRetry: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -81,6 +90,12 @@ internal fun HomeScreenContent(
         heroFavoriteState.error?.let { message ->
             snackbarHostState.showSnackbar(message)
             onFavoriteErrorDismiss()
+        }
+    }
+    LaunchedEffect(progressActionState.error) {
+        progressActionState.error?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            onProgressErrorDismiss()
         }
     }
     Scaffold(
@@ -98,6 +113,9 @@ internal fun HomeScreenContent(
                 onHeroFavoriteClick = onHeroFavoriteClick,
                 personalActionsEnabled = !heroListState.isSaving && !heroFavoriteState.isSaving,
                 isFavoriteSaving = heroFavoriteState.isSaving,
+                progressActionState = progressActionState,
+                onRemoveProgress = onRemoveProgress,
+                onClearAllProgress = onClearAllProgress,
             )
             HomeViewState.Loading -> HomePlaceholder(innerPadding)
             is HomeViewState.Error -> Column(

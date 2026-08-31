@@ -6,16 +6,26 @@ import com.dmitry.yume.data.request.ReviewRequest
 import com.dmitry.yume.data.request.ScoreRequest
 import com.dmitry.yume.data.request.StatusRequest
 import com.dmitry.yume.data.response.AnimeResponse
+import com.dmitry.yume.data.response.EpisodeProgressResponse
 import com.dmitry.yume.data.response.ProgressItem
 import com.dmitry.yume.data.response.ProgressResponse
+import com.dmitry.yume.data.response.ProfileListsResponse
+import com.dmitry.yume.data.response.ProfileStatisticsResponse
 import com.dmitry.yume.data.response.StatusResponse
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MeApi {
+    @GET("me/lists")
+    suspend fun getProfileLists(): ProfileListsResponse
+
+    @GET("me/statistics")
+    suspend fun getProfileStatistics(): ProfileStatisticsResponse
+
     @PUT("me/progress")
     suspend fun putProgress(
         @Body progressRequest: ProgressRequest
@@ -28,6 +38,22 @@ interface MeApi {
     suspend fun getProgressById(
         @Path("id") id: Int
     ): ProgressItem
+
+    @DELETE("me/continue/{id}")
+    suspend fun deleteFromContinue(
+        @Path("id") id: Int
+    )
+
+    @GET("me/anime/{id}/progress")
+    suspend fun getEpisodeProgress(
+        @Path("id") id: Int
+    ): EpisodeProgressResponse
+
+    @DELETE("me/anime/{id}/progress/{episode}")
+    suspend fun deleteEpisodeProgress(
+        @Path("id") id: Int,
+        @Path("episode") episode: Int,
+    )
 
     @GET("me/anime/{id}")
     suspend fun getStatus(

@@ -45,6 +45,7 @@ import coil3.compose.AsyncImage
 import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.presentation.components.list.RatingBadge
 import com.dmitry.yume.presentation.screens.catalog.AnimeKind
+import com.dmitry.yume.presentation.screens.catalog.Status
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeType
 
@@ -65,7 +66,8 @@ fun Hero(
         ?: "Открыть тайтл"
     val meta = listOfNotNull(
         heroData.year?.toString(),
-        AnimeKind.entries.firstOrNull { it.raw == heroData.kind }?.title
+        AnimeKind.entries.firstOrNull { it.raw == heroData.kind }?.title,
+        Status.entries.firstOrNull { it.raw == heroData.status }?.title,
     ).joinToString(" · ")
     val personalStatus = heroData.myStatus?.takeIf { it.isNotBlank() }
     val statusGlow = when (personalStatus) {

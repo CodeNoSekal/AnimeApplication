@@ -26,6 +26,9 @@ fun HomeContent(
     onHeroFavoriteClick: () -> Unit,
     personalActionsEnabled: Boolean = true,
     isFavoriteSaving: Boolean = false,
+    progressActionState: ProgressActionState = ProgressActionState(),
+    onRemoveProgress: (Int) -> Unit = {},
+    onClearAllProgress: () -> Unit = {},
 ){
     val scrollState = rememberScrollState()
 
@@ -48,7 +51,10 @@ fun HomeContent(
         if (progressData is ProgressViewState.Success && progressData.progress.items.isNotEmpty()) {
             ContinueTab(
                 data = progressData.progress,
-                onPlayClick = onPlayClick
+                onPlayClick = onPlayClick,
+                actionState = progressActionState,
+                onRemove = onRemoveProgress,
+                onClearAll = onClearAllProgress,
             )
         } else if (progressData is ProgressViewState.Loading) {
             ContinuePlaceholder()

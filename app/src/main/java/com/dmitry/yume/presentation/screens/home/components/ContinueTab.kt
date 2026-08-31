@@ -16,6 +16,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,11 +37,20 @@ import com.dmitry.yume.domain.models.ProgressData
 import com.dmitry.yume.domain.models.ProgressItemData
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeType
+import com.dmitry.yume.presentation.screens.home.ProgressActionState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
 
 @Composable
 fun ContinueTab(
     data: ProgressData,
-    onPlayClick: (Int) -> Unit
+    onPlayClick: (Int) -> Unit,
+    actionState: ProgressActionState = ProgressActionState(),
+    onRemove: (Int) -> Unit = {},
+    onClearAll: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -43,10 +58,19 @@ fun ContinueTab(
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = "Продолжить просмотр",
-            style = YumeType.h2
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "Продолжить просмотр", style = YumeType.h2, modifier = Modifier.weight(1f))
+            TextButton(
+                onClick = { onClearAll() },
+                enabled = !actionState.isBusy
+            ) {
+                Text(
+                    text = "Очистить",
+                    style = YumeType.body,
+                    color = colors.textMuted
+                )
+            }
+        }
 
         LazyRow(
             modifier = Modifier
@@ -56,18 +80,19 @@ fun ContinueTab(
             items(data.items, key = { it.animeId }) { item ->
                 ProgressItemCard(
                     item,
-                    onPlayClick
+                    onPlayClick,
+                    onRemove = { onRemove(item.animeId) },
                 )
             }
         }
     }
-
 }
 
 @Composable
 fun ProgressItemCard(
     data: ProgressItemData,
-    onPlayClick: (Int) -> Unit
+    onPlayClick: (Int) -> Unit,
+    onRemove: () -> Unit = {},
 ) {
     val outerShape = RoundedCornerShape(8.dp)
 
@@ -85,6 +110,7 @@ fun ProgressItemCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Box(
                     Modifier
@@ -113,30 +139,42 @@ fun ProgressItemCard(
 
                 Column(
                     modifier = Modifier
+                        .padding(vertical = 4.dp)
                         .fillMaxSize()
-                        .padding(vertical = 4.dp, horizontal = 12.dp)
-
+                        .weight(1.0f)
                 ) {
-                    data.title?.let {
-                        Text(
-                            text = it,
-                            style = YumeType.bodyMedium,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .padding(top = 2.dp)
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        data.title?.let {
+                            Text(
+                                text = it,
+                                style = YumeType.mono,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .padding(top = 2.dp)
+                            )
+                        }
                     }
 
                     Text(
                         text = "${data.episodeNumber} серия",
-                        color = YumeTheme.colors.textMuted,
+                        color = colors.textMuted,
                         style = YumeType.xs,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .padding(top = 2.dp)
                     )
+                }
+
+                IconButton(
+                    onClick = onRemove,
+                ) {
+                    Icon(Icons.Outlined.Close, contentDescription = "Удалить из продолжения")
                 }
             }
 
@@ -147,12 +185,11 @@ fun ProgressItemCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .background(color = YumeTheme.colors.accent)
+                        .background(color = colors.accent)
                         .fillMaxWidth((data.positionMs.toDouble() / data.durationMs).toFloat())
-                        .height(3.dp),
+                        .height(4.dp),
                 )
             }
-
         }
     }
 }

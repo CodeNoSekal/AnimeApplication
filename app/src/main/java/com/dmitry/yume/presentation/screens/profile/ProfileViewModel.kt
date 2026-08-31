@@ -9,6 +9,8 @@ import com.dmitry.yume.domain.repository.OperationResult
 import com.dmitry.yume.domain.usecase.LogoutUseCase
 import com.dmitry.yume.domain.usecase.ObserveSessionStateUseCase
 import com.dmitry.yume.domain.usecase.RefreshCurrentUserUseCase
+import com.dmitry.yume.domain.usecase.GetProfileStatisticsUseCase
+import com.dmitry.yume.domain.repository.ProfileStatisticsResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +27,8 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val refreshUser: RefreshCurrentUserUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val observeSessionState: ObserveSessionStateUseCase
+    private val observeSessionState: ObserveSessionStateUseCase,
+    private val getProfileStatistics: GetProfileStatisticsUseCase,
 ) : ViewModel() {
 
     val user: StateFlow<User?> =
@@ -50,8 +53,10 @@ class ProfileViewModel @Inject constructor(
         refreshJob = viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             when (val result = refreshUser()) {
-                is SessionRefreshResult.Success ->
+                is SessionRefreshResult.Success -> {
                     _state.update { it.copy(isLoading = false, error = null) }
+                    loadStats()
+                }
                 is SessionRefreshResult.Error ->
                     _state.update { it.copy(isLoading = false, error = result.message) }
             }
@@ -67,6 +72,25 @@ class ProfileViewModel @Inject constructor(
                 is OperationResult.Success -> Unit
                 is OperationResult.Error -> _state.update {
                     it.copy(error = result.message)
+                }
+            }
+        }
+    }
+
+    fun dismissError() {
+        _state.update { it.copy(error = null) }
+    }
+
+    fun loadStats() {
+        if (_state.value.isStatsLoading) return
+        viewModelScope.launch {
+            _state.update { it.copy(isStatsLoading = true) }
+            when (val result = getProfileStatistics()) {
+                is ProfileStatisticsResult.Success -> _state.update {
+                    it.copy(isStatsLoading = false, statistics = result.statistics)
+                }
+                is ProfileStatisticsResult.Error -> _state.update {
+                    it.copy(isStatsLoading = false, error = result.message)
                 }
             }
         }

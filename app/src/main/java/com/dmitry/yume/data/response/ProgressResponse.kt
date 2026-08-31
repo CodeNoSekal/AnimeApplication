@@ -13,6 +13,19 @@ data class ProgressResponse(
 )
 
 @JsonClass(generateAdapter = true)
+data class EpisodeProgressResponse(
+    val items: List<EpisodeProgressItem> = emptyList()
+)
+
+@JsonClass(generateAdapter = true)
+data class EpisodeProgressItem(
+    @param:Json(name = "anime_id")
+    val animeId: Int,
+    @param:Json(name = "episode_number")
+    val episodeNumber: Int,
+)
+
+@JsonClass(generateAdapter = true)
 data class ProgressItem(
     @param:Json(name = "shikimori_id")
     val id: Int,

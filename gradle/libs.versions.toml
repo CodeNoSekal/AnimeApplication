@@ -25,6 +25,7 @@ converterMoshi = "3.0.0"
 loggingInterceptor = "5.4.0"
 kotlinMetadataJvm = "2.4.0"
 media3UiComposeMaterial3 = "1.10.1"
+androidImageCropper = "4.7.0"
 
 [libraries]
 androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
@@ -68,6 +69,7 @@ androidx-media3-ui-compose-material3 = { module = "androidx.media3:media3-ui-com
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesAndroid" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+android-image-cropper = { module = "com.vanniktech:android-image-cropper", version.ref = "androidImageCropper" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

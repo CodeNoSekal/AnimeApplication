@@ -14,6 +14,7 @@ import com.dmitry.yume.data.response.AnimeDetailResponse
 import com.dmitry.yume.data.response.AnimeResponse
 import com.dmitry.yume.data.response.ProgressItem
 import com.dmitry.yume.data.response.ProgressResponse
+import com.dmitry.yume.data.response.EpisodeProgressResponse
 import com.dmitry.yume.data.response.StatusResponse
 import com.dmitry.yume.domain.models.Progress
 import com.dmitry.yume.domain.repository.AnimeDetailResult
@@ -135,6 +136,34 @@ class RepositoryFailureTest {
         repository.putProgress(progress())
     }
 
+    @Test fun `clear progress removes continue card by anime id`() = runTest {
+        val api = FakeMeApi {}
+        val repository = MeRepositoryImpl(api)
+
+        val result = repository.clearProgress(59970)
+
+        assertEquals(OperationResult.Success, result)
+        assertEquals(listOf(59970), api.deletedContinueIds)
+    }
+
+    @Test fun `clear all removes continue cards without deleting episode progress`() = runTest {
+        val api = FakeMeApi {}
+        api.progressResponse = {
+            ProgressResponse(
+                items = listOf(
+                    ProgressItem(59970, "Слизь 4", null, 20, 1_000, 2_000, false),
+                    ProgressItem(42, "Другой тайтл", null, 3, 500, 2_000, false),
+                )
+            )
+        }
+        val repository = MeRepositoryImpl(api)
+
+        val result = repository.clearAllProgress()
+
+        assertEquals(OperationResult.Success, result)
+        assertEquals(listOf(59970, 42), api.deletedContinueIds)
+    }
+
     @Test fun `score success publishes complete personal state and deletion clears it`() = runTest {
         val api = FakeMeApi {}
         api.scoreResponse = { id, score -> StatusResponse(id, "в планах", true, score.score, "review") }
@@ -178,9 +207,18 @@ class RepositoryFailureTest {
         private val putProgressBlock: suspend () -> Unit
     ) : MeApi {
         var scoreResponse: suspend (Int, ScoreRequest) -> StatusResponse = { _, _ -> error("not used") }
+        var progressResponse: suspend () -> ProgressResponse = { error("not used") }
+        val deletedContinueIds = mutableListOf<Int>()
         override suspend fun putProgress(progressRequest: ProgressRequest) = putProgressBlock()
-        override suspend fun getProgress(): ProgressResponse = error("not used")
+        override suspend fun getProfileLists(): com.dmitry.yume.data.response.ProfileListsResponse = error("not used")
+        override suspend fun getProfileStatistics(): com.dmitry.yume.data.response.ProfileStatisticsResponse = error("not used")
+        override suspend fun getProgress(): ProgressResponse = progressResponse()
         override suspend fun getProgressById(id: Int): ProgressItem = error("not used")
+        override suspend fun deleteFromContinue(id: Int) {
+            deletedContinueIds += id
+        }
+        override suspend fun getEpisodeProgress(id: Int): EpisodeProgressResponse = error("not used")
+        override suspend fun deleteEpisodeProgress(id: Int, episode: Int) = error("not used")
         override suspend fun getStatus(id: Int): StatusResponse = error("not used")
         override suspend fun putStatus(id: Int, statusRequest: StatusRequest): StatusResponse = error("not used")
         override suspend fun putFavorite(id: Int, favoriteRequest: FavoriteRequest): StatusResponse = error("not used")

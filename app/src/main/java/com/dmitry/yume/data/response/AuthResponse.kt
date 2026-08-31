@@ -26,11 +26,15 @@ data class UserDTO(
     val emailVerified: Boolean,
     val username: String,
     @param:Json(name = "display_name")
-    val displayName: String,
+    val displayName: String? = null,
     @param:Json(name = "avatar_url")
     val avatarUrl: String? = null,
     @param:Json(name = "is_admin")
-    val isAdmin: Boolean
+    val isAdmin: Boolean,
+    @param:Json(name = "is_premium")
+    val isPremium: Boolean = false,
+    @param:Json(name = "premium_until")
+    val premiumUntil: String? = null,
 )
 
 fun UserDTO.toDomain(): User {
@@ -39,8 +43,10 @@ fun UserDTO.toDomain(): User {
         email,
         emailVerified,
         username,
-        displayName,
+        displayName ?: username,
         avatarUrl,
-        isAdmin
+        isAdmin,
+        isPremium,
+        premiumUntil,
     )
 }

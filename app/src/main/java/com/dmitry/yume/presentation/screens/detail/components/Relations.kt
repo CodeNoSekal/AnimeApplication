@@ -69,7 +69,7 @@ fun Relations(
                 style = YumeType.h3
             )
             TextButton(onClick = onShowAllClick) {
-                Text("Показать все", style = YumeType.sm, color = colors.accent)
+                Text("Показать все", style = YumeType.sm, color = colors.textMuted)
             }
         }
 

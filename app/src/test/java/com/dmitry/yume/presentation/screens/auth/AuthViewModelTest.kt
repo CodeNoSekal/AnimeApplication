@@ -83,7 +83,15 @@ class AuthViewModelTest {
         override suspend fun sendCode(): OperationResult = error("not used")
         override suspend fun verifyEmail(code: String): AuthResult = error("not used")
         override suspend fun logout(): OperationResult = error("not used")
+        override suspend fun logoutAll(): OperationResult = error("not used")
         override suspend fun validateSession() = Unit
         override suspend fun refreshCurrentUser(): SessionRefreshResult = error("not used")
+        override suspend fun updateProfile(username: String, displayName: String): OperationResult = error("not used")
+        override suspend fun checkUsername(username: String): com.dmitry.yume.domain.repository.ProfileDataResult<Boolean> = error("not used")
+        override suspend fun suggestUsername(displayName: String): com.dmitry.yume.domain.repository.ProfileDataResult<String> = error("not used")
+        override suspend fun changePassword(currentPassword: String, newPassword: String): OperationResult = error("not used")
+        override suspend fun changeEmail(newEmail: String, password: String): OperationResult = error("not used")
+        override suspend fun uploadAvatar(bytes: ByteArray, mimeType: String): OperationResult = error("not used")
+        override suspend fun removeAvatar(): OperationResult = error("not used")
     }
 }

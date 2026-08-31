@@ -3,10 +3,13 @@ package com.dmitry.yume.presentation.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitry.yume.domain.repository.HomeResult
+import com.dmitry.yume.domain.repository.OperationResult
 import com.dmitry.yume.domain.repository.ProgressResult
 import com.dmitry.yume.domain.repository.StatusResult
 import com.dmitry.yume.domain.usecase.GetHomeUseCase
 import com.dmitry.yume.domain.usecase.GetProgressUseCase
+import com.dmitry.yume.domain.usecase.ClearAllProgressUseCase
+import com.dmitry.yume.domain.usecase.ClearProgressUseCase
 import com.dmitry.yume.domain.usecase.ObserveLibraryUpdatesUseCase
 import com.dmitry.yume.domain.usecase.PutStatusUseCase
 import com.dmitry.yume.domain.usecase.PutFavoriteUseCase
@@ -28,7 +31,9 @@ class HomeViewModel internal constructor(
     private val putStatus: PutStatusUseCase,
     private val putFavorite: PutFavoriteUseCase,
     observeLibraryUpdates: ObserveLibraryUpdatesUseCase,
-    private val nowMillis: () -> Long
+    private val nowMillis: () -> Long,
+    private val clearProgress: ClearProgressUseCase? = null,
+    private val clearAllProgress: ClearAllProgressUseCase? = null,
 ) : ViewModel() {
 
     @Inject constructor(
@@ -36,11 +41,72 @@ class HomeViewModel internal constructor(
         getHome: GetHomeUseCase,
         putStatus: PutStatusUseCase,
         putFavorite: PutFavoriteUseCase,
-        observeLibraryUpdates: ObserveLibraryUpdatesUseCase
-    ) : this(getProgress, getHome, putStatus, putFavorite, observeLibraryUpdates, { System.nanoTime() / 1_000_000 })
+        observeLibraryUpdates: ObserveLibraryUpdatesUseCase,
+        clearProgress: ClearProgressUseCase,
+        clearAllProgress: ClearAllProgressUseCase,
+    ) : this(
+        getProgress, getHome, putStatus, putFavorite, observeLibraryUpdates,
+        { System.nanoTime() / 1_000_000 }, clearProgress, clearAllProgress
+    )
 
     private val _progressState = MutableStateFlow<ProgressViewState>(ProgressViewState.Loading)
     val progressState: StateFlow<ProgressViewState> = _progressState.asStateFlow()
+    private val _progressActionState = MutableStateFlow(ProgressActionState())
+    val progressActionState = _progressActionState.asStateFlow()
+
+    fun clearProgress(animeId: Int) {
+        val action = clearProgress ?: return
+        if (_progressActionState.value.isBusy) return
+
+        val previousProgress =
+            (_progressState.value as? ProgressViewState.Success)?.progress ?: return
+        if (previousProgress.items.none { it.animeId == animeId }) return
+
+        // Optimistic update: hide the card immediately and restore it if the request fails.
+        _progressState.value = ProgressViewState.Success(
+            previousProgress.copy(
+                items = previousProgress.items.filterNot { it.animeId == animeId }
+            )
+        )
+        _progressActionState.value = ProgressActionState(removingAnimeId = animeId)
+        viewModelScope.launch {
+            when (val result = action(animeId)) {
+                OperationResult.Success -> _progressActionState.value = ProgressActionState()
+                is OperationResult.Error -> {
+                    _progressState.value = ProgressViewState.Success(previousProgress)
+                    _progressActionState.value = ProgressActionState(error = result.message)
+                }
+            }
+        }
+    }
+
+    fun clearAllProgress() {
+        val action = clearAllProgress ?: return
+        if (_progressActionState.value.isBusy) return
+
+        val previousProgress =
+            (_progressState.value as? ProgressViewState.Success)?.progress ?: return
+        if (previousProgress.items.isEmpty()) return
+
+        // Optimistic update: hide the whole section while the request runs.
+        _progressState.value = ProgressViewState.Success(
+            previousProgress.copy(items = emptyList())
+        )
+        _progressActionState.value = ProgressActionState(isClearingAll = true)
+        viewModelScope.launch {
+            when (val result = action()) {
+                OperationResult.Success -> _progressActionState.value = ProgressActionState()
+                is OperationResult.Error -> {
+                    _progressState.value = ProgressViewState.Success(previousProgress)
+                    _progressActionState.value = ProgressActionState(error = result.message)
+                }
+            }
+        }
+    }
+
+    fun dismissProgressActionError() {
+        _progressActionState.value = _progressActionState.value.copy(error = null)
+    }
 
     private val _homeState = MutableStateFlow<HomeViewState>(HomeViewState.Loading)
     val homeState: StateFlow<HomeViewState> = combine(
@@ -52,7 +118,6 @@ class HomeViewModel internal constructor(
             if (personal == null) loaded else loaded.copy(
                 home = loaded.home.copy(hero = hero.copy(
                     myStatus = personal.status,
-                    status = personal.status,
                     favorite = personal.favorite,
                     myScore = personal.score
                 ))
@@ -170,3 +235,11 @@ data class HeroFavoriteState(
     val isSaving: Boolean = false,
     val error: String? = null
 )
+
+data class ProgressActionState(
+    val removingAnimeId: Int? = null,
+    val isClearingAll: Boolean = false,
+    val error: String? = null,
+) {
+    val isBusy: Boolean get() = removingAnimeId != null || isClearingAll
+}

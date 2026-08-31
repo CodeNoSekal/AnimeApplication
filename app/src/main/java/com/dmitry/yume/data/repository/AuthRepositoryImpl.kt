@@ -5,6 +5,9 @@ import com.dmitry.yume.data.api.VerificationApi
 import com.dmitry.yume.data.authorization.AuthSessionManager
 import com.dmitry.yume.data.authorization.StoredTokens
 import com.dmitry.yume.data.request.LoginRequest
+import com.dmitry.yume.data.request.ChangeEmailRequest
+import com.dmitry.yume.data.request.ChangePasswordRequest
+import com.dmitry.yume.data.request.ProfileRequest
 import com.dmitry.yume.data.request.RegisterRequest
 import com.dmitry.yume.data.request.VerifyRequest
 import com.dmitry.yume.data.response.AuthResponse
@@ -14,6 +17,7 @@ import com.dmitry.yume.domain.repository.AuthErrorReason
 import com.dmitry.yume.domain.repository.AuthRepository
 import com.dmitry.yume.domain.repository.AuthResult
 import com.dmitry.yume.domain.repository.OperationResult
+import com.dmitry.yume.domain.repository.ProfileDataResult
 import com.dmitry.yume.domain.repository.SessionRefreshResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
@@ -23,6 +27,9 @@ import org.json.JSONObject
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi,
@@ -124,6 +131,80 @@ class AuthRepositoryImpl @Inject constructor(
         return result
     }
 
+    override suspend fun logoutAll(): OperationResult {
+        return try {
+            authApi.logoutAll()
+            withContext(NonCancellable) { sessionManager.invalidate() }
+            OperationResult.Success
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            OperationResult.Error(e.operationMessage("Не удалось завершить все сеансы"))
+        }
+    }
+
+    override suspend fun updateProfile(
+        username: String,
+        displayName: String
+    ): OperationResult = profileMutation("Не удалось обновить профиль") { generation ->
+        val user = authApi.updateProfile(
+            ProfileRequest(username.trim(), displayName.trim())
+        ).toDomain()
+        sessionManager.setAuthenticatedIfCurrent(generation, user)
+    }
+
+    override suspend fun checkUsername(username: String): ProfileDataResult<Boolean> =
+        try {
+            ProfileDataResult.Success(authApi.usernameAvailable(username.trim()).available)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            ProfileDataResult.Error(e.operationMessage("Не удалось проверить логин"))
+        }
+
+    override suspend fun suggestUsername(displayName: String): ProfileDataResult<String> =
+        try {
+            ProfileDataResult.Success(authApi.suggestUsername(displayName.trim()).username)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            ProfileDataResult.Error(e.operationMessage("Не удалось предложить логин"))
+        }
+
+    override suspend fun changePassword(
+        currentPassword: String,
+        newPassword: String
+    ): OperationResult = operation("Не удалось изменить пароль") {
+        authApi.changePassword(ChangePasswordRequest(currentPassword, newPassword))
+    }
+
+    override suspend fun changeEmail(
+        newEmail: String,
+        password: String
+    ): OperationResult = profileMutation("Не удалось изменить почту") { generation ->
+        val response = authApi.changeEmail(ChangeEmailRequest(newEmail.trim(), password))
+        sessionManager.updateAuthenticatedUser(generation) { user ->
+            user.copy(email = response.email, emailVerified = response.emailVerified)
+        }
+    }
+
+    override suspend fun uploadAvatar(bytes: ByteArray, mimeType: String): OperationResult =
+        profileMutation("Не удалось загрузить аватар") { generation ->
+            val body = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+            val part = MultipartBody.Part.createFormData("file", "avatar", body)
+            val response = authApi.uploadAvatar(part)
+            sessionManager.updateAuthenticatedUser(generation) { user ->
+                user.copy(avatarUrl = response.avatarUrl)
+            }
+        }
+
+    override suspend fun removeAvatar(): OperationResult =
+        profileMutation("Не удалось удалить аватар") { generation ->
+            authApi.removeAvatar()
+            val user = authApi.getMe().toDomain()
+            sessionManager.setAuthenticatedIfCurrent(generation, user)
+        }
+
     override suspend fun validateSession() {
         val session = sessionManager.beginValidation() ?: return
 
@@ -157,6 +238,27 @@ class AuthRepositoryImpl @Inject constructor(
         if (user == null) {
             validateSession()
         }
+    }
+
+    private suspend inline fun profileMutation(
+        fallback: String,
+        block: (generation: Long) -> Unit
+    ): OperationResult {
+        val session = sessionManager.currentSession()
+            ?: return OperationResult.Error("Сессия истекла")
+        return operation(fallback) { block(session.generation) }
+    }
+
+    private suspend inline fun operation(
+        fallback: String,
+        block: () -> Unit
+    ): OperationResult = try {
+        block()
+        OperationResult.Success
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        OperationResult.Error(e.operationMessage(fallback))
     }
 
     private suspend inline fun safeAuthCall(

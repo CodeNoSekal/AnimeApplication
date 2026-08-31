@@ -5,11 +5,13 @@ import com.dmitry.yume.data.repository.AuthRepositoryImpl
 import com.dmitry.yume.data.repository.MeRepositoryImpl
 import com.dmitry.yume.data.repository.MetaRepositoryImpl
 import com.dmitry.yume.data.repository.PlaybackRepositoryImpl
+import com.dmitry.yume.data.repository.SearchHistoryRepositoryImpl
 import com.dmitry.yume.domain.repository.AnimeRepository
 import com.dmitry.yume.domain.repository.AuthRepository
 import com.dmitry.yume.domain.repository.MeRepository
 import com.dmitry.yume.domain.repository.MetaRepository
 import com.dmitry.yume.domain.repository.PlaybackRepository
+import com.dmitry.yume.domain.repository.SearchHistoryRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -50,4 +52,10 @@ abstract class RepositoryModule {
     abstract fun bindMetaRepository(
         impl: MetaRepositoryImpl
     ): MetaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSearchHistoryRepository(
+        impl: SearchHistoryRepositoryImpl
+    ): SearchHistoryRepository
 }

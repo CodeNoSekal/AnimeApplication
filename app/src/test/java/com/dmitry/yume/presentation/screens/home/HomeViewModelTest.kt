@@ -6,6 +6,8 @@ import com.dmitry.yume.domain.models.*
 import com.dmitry.yume.domain.repository.*
 import com.dmitry.yume.domain.usecase.GetHomeUseCase
 import com.dmitry.yume.domain.usecase.GetProgressUseCase
+import com.dmitry.yume.domain.usecase.ClearAllProgressUseCase
+import com.dmitry.yume.domain.usecase.ClearProgressUseCase
 import com.dmitry.yume.domain.usecase.PutStatusUseCase
 import com.dmitry.yume.domain.usecase.PutFavoriteUseCase
 import com.dmitry.yume.domain.usecase.ObserveLibraryUpdatesUseCase
@@ -148,6 +150,74 @@ class HomeViewModelTest {
         assertTrue((vm.progressState.value as ProgressViewState.Success).progress.items.isEmpty())
     }
 
+    @Test fun `clear progress removes card before server responds`() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.load()
+        runCurrent()
+        val response = CompletableDeferred<OperationResult>()
+        repository.clearProgressResponse = { response.await() }
+
+        vm.clearProgress(1)
+
+        assertTrue((vm.progressState.value as ProgressViewState.Success).progress.items.isEmpty())
+        runCurrent()
+        assertEquals(1, repository.clearProgressCalls)
+        assertTrue(vm.progressActionState.value.isBusy)
+
+        response.complete(OperationResult.Success)
+        runCurrent()
+        assertFalse(vm.progressActionState.value.isBusy)
+    }
+
+    @Test fun `failed clear progress restores removed card`() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.load()
+        runCurrent()
+        repository.clearProgressResponse = { OperationResult.Error("Нет соединения") }
+
+        vm.clearProgress(1)
+        assertTrue((vm.progressState.value as ProgressViewState.Success).progress.items.isEmpty())
+        runCurrent()
+
+        assertEquals(progress, (vm.progressState.value as ProgressViewState.Success).progress)
+        assertEquals("Нет соединения", vm.progressActionState.value.error)
+        assertFalse(vm.progressActionState.value.isBusy)
+    }
+
+    @Test fun `clear all progress hides section before server responds`() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.load()
+        runCurrent()
+        val response = CompletableDeferred<OperationResult>()
+        repository.clearAllProgressResponse = { response.await() }
+
+        vm.clearAllProgress()
+
+        assertTrue((vm.progressState.value as ProgressViewState.Success).progress.items.isEmpty())
+        runCurrent()
+        assertEquals(1, repository.clearAllProgressCalls)
+        assertTrue(vm.progressActionState.value.isBusy)
+
+        response.complete(OperationResult.Success)
+        runCurrent()
+        assertFalse(vm.progressActionState.value.isBusy)
+    }
+
+    @Test fun `failed clear all progress restores section`() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.load()
+        runCurrent()
+        repository.clearAllProgressResponse = { OperationResult.Error("Нет соединения") }
+
+        vm.clearAllProgress()
+        assertTrue((vm.progressState.value as ProgressViewState.Success).progress.items.isEmpty())
+        runCurrent()
+
+        assertEquals(progress, (vm.progressState.value as ProgressViewState.Success).progress)
+        assertEquals("Нет соединения", vm.progressActionState.value.error)
+        assertFalse(vm.progressActionState.value.isBusy)
+    }
+
     @Test fun `hero follows personal updates even when cached home is refreshed`() = runTest(dispatcher) {
         val vm = viewModel()
         vm.load()
@@ -257,7 +327,8 @@ class HomeViewModelTest {
 
     private fun viewModel() = HomeViewModel(
         GetProgressUseCase(repository), GetHomeUseCase(repository),
-        PutStatusUseCase(repository), PutFavoriteUseCase(repository), ObserveLibraryUpdatesUseCase(repository), { now }
+        PutStatusUseCase(repository), PutFavoriteUseCase(repository), ObserveLibraryUpdatesUseCase(repository), { now },
+        ClearProgressUseCase(repository), ClearAllProgressUseCase(repository)
     ).also(models::add)
 
     private inner class FakeRepository : MetaRepository, MeRepository {
@@ -271,6 +342,10 @@ class HomeViewModelTest {
         override val libraryUpdates = MutableStateFlow(emptyMap<Int, Status>())
         var statusCalls = 0
         var favoriteCalls = 0
+        var clearProgressCalls = 0
+        var clearProgressResponse: suspend (Int) -> OperationResult = { OperationResult.Success }
+        var clearAllProgressCalls = 0
+        var clearAllProgressResponse: suspend () -> OperationResult = { OperationResult.Success }
         var favoriteResponse: suspend (Int, Boolean) -> StatusResult = { id, favorite ->
             StatusResult.Success(Status(id, null, favorite, null, null))
         }
@@ -278,6 +353,14 @@ class HomeViewModelTest {
             StatusResult.Success(Status(id, status, false, null, null))
         }
         override suspend fun putProgress(progress: Progress): OperationResult = error("not used")
+        override suspend fun clearProgress(id: Int): OperationResult {
+            clearProgressCalls++
+            return clearProgressResponse(id)
+        }
+        override suspend fun clearAllProgress(): OperationResult {
+            clearAllProgressCalls++
+            return clearAllProgressResponse()
+        }
         override suspend fun getProgressById(id: Int): CurrentProgressResult = error("not used")
         override suspend fun getStatus(id: Int): StatusResult = error("not used")
         override suspend fun putStatus(id: Int, status: String?): StatusResult {
