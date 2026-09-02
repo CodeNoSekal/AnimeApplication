@@ -18,8 +18,7 @@ import com.dmitry.yume.presentation.screens.profile.ProfileViewModel
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 
 @Composable
-fun Glowing()
-{
+fun Glowing() {
     Box(
         Modifier
             .fillMaxWidth()
@@ -31,7 +30,7 @@ fun Glowing()
                         Color.Transparent,
                     ),
                     center = Offset(x = Float.POSITIVE_INFINITY * 0.7f, y = 0f),
-                    radius = 900f
+                    radius = 900f,
                 )
             )
     )

@@ -96,5 +96,4 @@ enum class AnimeKind(
     Ova("ova", "OVA"),
     Ona("ona", "ONA"),
     Special("special", "Спешл"),
-    Music("music", "Музыка"),
 }

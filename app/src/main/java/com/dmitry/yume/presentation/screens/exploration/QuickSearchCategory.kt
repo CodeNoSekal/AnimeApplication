@@ -19,7 +19,7 @@ enum class QuickSearchCategory(
         route = "tv",
         title = "Сериалы",
         label = "TV",
-        description = "Новые и обновлённые сериалы",
+        description = "Новые сериалы",
         options = typeOptions("tv"),
     ),
     Movie(
@@ -49,13 +49,6 @@ enum class QuickSearchCategory(
         label = "SPECIAL",
         description = "Специальные выпуски",
         options = typeOptions("special"),
-    ),
-    Music(
-        route = "music",
-        title = "Музыка",
-        label = "MUSIC",
-        description = "Музыкальные видео",
-        options = typeOptions("music"),
     ),
     Announcements(
         route = "announcements",

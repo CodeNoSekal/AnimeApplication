@@ -47,6 +47,10 @@ class ProfileViewModel @Inject constructor(
     private var refreshJob: Job? = null
     private var logoutJob: Job? = null
 
+    init {
+        refresh()
+    }
+
 
     fun refresh() {
         refreshJob?.cancel()

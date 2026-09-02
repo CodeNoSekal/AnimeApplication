@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -85,6 +86,7 @@ fun DetailScreen(
         return
     }
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = { DetailsTopBar(onBackClick, topBarAlpha) },
         snackbarHost = { SnackbarHost(snackbar) }
     ) { innerPadding ->
@@ -147,9 +149,12 @@ fun DetailScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailsTopBar(onBackClick: () -> Unit, topAppBarAlpha: Float, title: String = "") {
+fun DetailsTopBar(
+    onBackClick: () -> Unit,
+    topAppBarAlpha: Float,
+) {
     TopAppBar(
-        title = { if (title.isNotEmpty()) Text(title) },
+        title = { },
         modifier = Modifier.height(85.dp),
         navigationIcon = {
             IconButton(onClick = onBackClick) {

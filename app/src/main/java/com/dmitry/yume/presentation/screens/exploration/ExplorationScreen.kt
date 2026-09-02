@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +37,7 @@ fun ExplorationScreen(
     onQuickSearchClick: (QuickSearchCategory) -> Unit,
 ) {
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = { ExplorationTopBar(onSearchClicked) }
     ) { innerPadding ->
         LazyVerticalGrid(
@@ -50,26 +52,8 @@ fun ExplorationScreen(
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 QuickSearchHeading(
-                    title = "По типу",
-                    subtitle = "Свежие обновления в каждом формате",
-                )
-            }
-
-            items(
-                items = QuickSearchCategory.entries.filterNot {
-                    it == QuickSearchCategory.Announcements ||
-                        it == QuickSearchCategory.RecentReleases
-                },
-                key = { it.route },
-            ) { category ->
-                QuickSearchCard(category, onQuickSearchClick)
-            }
-
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                QuickSearchHeading(
                     title = "Подборки",
                     subtitle = "Будущие премьеры и недавние релизы",
-                    modifier = Modifier.padding(top = 12.dp),
                 )
             }
 
@@ -78,6 +62,24 @@ fun ExplorationScreen(
                     QuickSearchCategory.Announcements,
                     QuickSearchCategory.RecentReleases,
                 ),
+                key = { it.route },
+            ) { category ->
+                QuickSearchCard(category, onQuickSearchClick)
+            }
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                QuickSearchHeading(
+                    title = "По типу",
+                    subtitle = "Свежие обновления в каждом формате",
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+            }
+
+            items(
+                items = QuickSearchCategory.entries.filterNot {
+                    it == QuickSearchCategory.Announcements ||
+                        it == QuickSearchCategory.RecentReleases
+                },
                 key = { it.route },
             ) { category ->
                 QuickSearchCard(category, onQuickSearchClick)
@@ -125,7 +127,7 @@ private fun QuickSearchCard(
     ) {
         Box(modifier = Modifier.fillMaxSize().padding(12.dp)) {
             Text(
-                text = category.label,
+                text = category.title,
                 style = YumeType.overline,
                 color = colors.accent,
                 modifier = Modifier.align(Alignment.TopStart),
@@ -137,13 +139,6 @@ private fun QuickSearchCard(
                 modifier = Modifier.align(Alignment.TopEnd),
             )
             Column(modifier = Modifier.align(Alignment.BottomStart)) {
-                Text(
-                    text = category.title,
-                    style = YumeType.bodyMedium,
-                    color = colors.textPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
                 Text(
                     text = category.description,
                     style = YumeType.xs,
