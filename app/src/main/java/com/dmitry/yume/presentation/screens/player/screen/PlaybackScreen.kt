@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import com.dmitry.yume.domain.models.PlaybackCatalog
+import com.dmitry.yume.domain.models.AnimeDetailed
 import com.dmitry.yume.domain.models.Provider
 import com.dmitry.yume.presentation.screens.player.PlaybackContext
 import com.dmitry.yume.presentation.screens.player.PlaybackStage
@@ -41,6 +42,7 @@ import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
 @Composable
 fun PlaybackScreen(
     playbackCatalog: PlaybackCatalog,
+    animeDetails: AnimeDetailed?,
     playbackState: PlaybackUiState,
     saveProgress: (PlaybackContext, Long, Long) -> Unit,
     setEpisode: (Int) -> Unit,
@@ -51,6 +53,7 @@ fun PlaybackScreen(
     onRefreshStream: () -> Unit,
     onEpisodeClick: () -> Unit,
     onBackClick: () -> Unit,
+    onRelatedTitleClick: (Int) -> Unit,
 ) {
     val activity = LocalActivity.current ?: return
     val configuration = LocalConfiguration.current
@@ -125,6 +128,7 @@ fun PlaybackScreen(
         player = controller.player,
         playbackState = playbackState,
         playbackCatalog = playbackCatalog,
+        animeDetails = animeDetails,
         isLandscape = isLandscape,
         hasPreviousEpisode = navigation.previousEpisodeId != null,
         hasNextEpisode = navigation.nextEpisodeId != null,
@@ -145,6 +149,7 @@ fun PlaybackScreen(
         },
         modifier = contentModifier,
         onBackClick = onBackClick,
+        onRelatedTitleClick = onRelatedTitleClick,
     )
 
     val windowHeightPx = LocalWindowInfo.current.containerSize.height

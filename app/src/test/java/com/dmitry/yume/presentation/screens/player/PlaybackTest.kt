@@ -27,7 +27,7 @@ class PlaybackTest {
             playerData(episode(sources = emptyList()))
         )
 
-        assertError(result, "Для серии нет доступных источников")
+        assertError(result, "Нет доступных эпизодов")
     }
 
     @Test
@@ -43,11 +43,11 @@ class PlaybackTest {
             )
         )
 
-        assertError(result, "Для серии нет доступных озвучек")
+        assertError(result, "Нет доступных озвучек")
     }
 
     @Test
-    fun `falls back to another source when preferred source has no playable video`() {
+    fun `falls back to first source when preferred source is unavailable`() {
         val result = selectPlayback(
             playerData(
                 episode(
@@ -58,47 +58,35 @@ class PlaybackTest {
                         ),
                         PlaybackSource(
                             provider = Provider.Kodik,
-                            voiceovers = listOf(
-                                voiceover(
-                                    id = 2,
-                                    hls720 = "https://example.test/episode.m3u8"
-                                )
-                            )
+                            voiceovers = listOf(voiceover(id = 2))
                         )
                     )
                 )
             ),
             PlaybackPreference(
                 episodeNumber = 1,
-                sourceProvider = Provider.Libria,
-                voiceoverId = 1,
+                sourceProvider = Provider.Unknown("missing"),
+                voiceoverId = 2,
                 quality = VideoQuality.FHD,
                 positionMs = 12_000L
             )
         )
 
         val resolved = result as PlaybackResolution.Success
-        assertEquals(Provider.Kodik, resolved.sourceProvider)
-        assertEquals(2, resolved.voiceoverId)
-        assertEquals(VideoQuality.HD, resolved.quality)
-        assertEquals("https://example.test/episode.m3u8", resolved.url)
+        assertEquals(Provider.Libria, resolved.sourceProvider)
+        assertEquals(1, resolved.voiceoverId)
         assertEquals(12_000L, resolved.positionMs)
     }
 
     @Test
-    fun `falls back to lower quality and reports the actual selected quality`() {
+    fun `falls back to first voiceover when preferred voiceover is unavailable`() {
         val result = selectPlayback(
             playerData(
                 episode(
                     sources = listOf(
                         PlaybackSource(
                             provider = Provider.Libria,
-                            voiceovers = listOf(
-                                voiceover(
-                                    id = 1,
-                                    hls480 = "https://example.test/480.m3u8"
-                                )
-                            )
+                            voiceovers = listOf(voiceover(id = 1))
                         )
                     )
                 )
@@ -106,15 +94,15 @@ class PlaybackTest {
             PlaybackPreference(
                 episodeNumber = 1,
                 sourceProvider = Provider.Libria,
-                voiceoverId = 1,
+                voiceoverId = 99,
                 quality = VideoQuality.FHD,
                 positionMs = 0L
             )
         )
 
         val resolved = result as PlaybackResolution.Success
-        assertEquals(VideoQuality.SD, resolved.quality)
-        assertEquals("https://example.test/480.m3u8", resolved.url)
+        assertEquals(1, resolved.voiceoverId)
+        assertEquals("Voiceover 1", resolved.voiceover)
     }
 
     @Test
@@ -127,7 +115,7 @@ class PlaybackTest {
                     sources = listOf(
                         PlaybackSource(
                             Provider.Libria,
-                            listOf(voiceover(id = 2, url = "https://example.test/video"))
+                            listOf(voiceover(id = 2))
                         )
                     )
                 )
@@ -181,7 +169,7 @@ class PlaybackTest {
         sources: List<PlaybackSource> = listOf(
             PlaybackSource(
                 Provider.Libria,
-                listOf(voiceover(id = 1, url = "https://example.test/video"))
+                listOf(voiceover(id = 1))
             )
         )
     ) = PlaybackEpisode(
@@ -194,18 +182,10 @@ class PlaybackTest {
 
     private fun voiceover(
         id: Int,
-        url: String? = null,
-        hls480: String? = null,
-        hls720: String? = null,
-        hls1080: String? = null
     ) = Voiceover(
         id = id,
-        url = url,
-        type = "",
-        name = "",
+        name = "Voiceover $id",
         maxQuality = VideoQuality.Unknown,
-        hls480 = hls480,
-        hls720 = hls720,
-        hls1080 = hls1080
+        logoUrl = "",
     )
 }

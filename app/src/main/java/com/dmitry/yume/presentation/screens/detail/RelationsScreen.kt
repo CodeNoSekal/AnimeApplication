@@ -2,6 +2,7 @@ package com.dmitry.yume.presentation.screens.detail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,7 +36,11 @@ internal fun RelationsScreen(
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = (uniqueItems.indexOfFirst { it.id == currentTitleId } - 1).coerceAtLeast(0)
     )
-    Scaffold(topBar = { RelationTopBar(onBackClick, 1f) }) { padding ->
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar =
+            { RelationTopBar(onBackClick, 1f) }
+    ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
             state = listState,

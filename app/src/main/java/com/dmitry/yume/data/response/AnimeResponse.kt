@@ -36,6 +36,8 @@ data class AnimeShort(
     val rating: Double? = null,
     val status: String? = null,
     val kind: String? = null,
+    @param:Json(name = "is_available")
+    val isAvailable: Boolean = false,
 
     @param:Json(name = "my_status")
     val myStatus: String? = null,
@@ -114,6 +116,7 @@ fun AnimeShort.toDomain(): Anime {
         status = status,
         favorite = favorite,
         kind = kind,
+        isAvailable = isAvailable,
         myStatus = myStatus,
         myScore = myScore,
     )

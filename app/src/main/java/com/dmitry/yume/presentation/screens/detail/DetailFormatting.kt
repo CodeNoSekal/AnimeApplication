@@ -33,10 +33,16 @@ fun formatAnimeDate(value: String?, precision: String?): String? {
 
 fun formatNextEpisode(value: String?, nowMillis: Long = System.currentTimeMillis()): String? {
     if (value == null) return null
-    val date = parseDate(value, "yyyy-MM-dd'T'HH:mm:ssXXX")
-        ?: parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") ?: return null
+    val date = sequenceOf(
+        "yyyy-MM-dd HH:mm:ssXXX",
+        "yyyy-MM-dd HH:mm:ss.SSSXXX",
+        "yyyy-MM-dd'T'HH:mm:ssXXX",
+        "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+    ).firstNotNullOfOrNull { pattern -> parseDate(value, pattern) } ?: return null
     if (date.time <= nowMillis) return null
-    return SimpleDateFormat("d MMMM, HH:mm", russian).format(date)
+    return SimpleDateFormat("d MMMM, HH:mm", russian).apply {
+        timeZone = TimeZone.getDefault()
+    }.format(date)
 }
 
 fun detailPlaybackLabel(anime: AnimeDetailed): String {

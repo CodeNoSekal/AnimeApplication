@@ -87,6 +87,10 @@ fun EditProfileScreen(
             }
             if (state.isAvatarSaving) CircularProgressIndicator()
 
+            Text(
+                text = "Имя профиля"
+            )
+
             YumeTextField(
                 value = state.displayName,
                 onValueChange = viewModel::onDisplayNameChange,

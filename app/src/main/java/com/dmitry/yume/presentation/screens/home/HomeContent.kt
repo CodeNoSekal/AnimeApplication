@@ -17,7 +17,6 @@ import com.dmitry.yume.presentation.screens.home.components.Hero
 
 @Composable
 fun HomeContent(
-    innerPadding: PaddingValues,
     progressData: ProgressViewState,
     homeData: Home,
     onPlayClick: (Int) -> Unit,
@@ -34,7 +33,6 @@ fun HomeContent(
 
     Column(
         modifier = Modifier
-            .padding(innerPadding)
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
             .verticalScroll(scrollState),
@@ -46,8 +44,9 @@ fun HomeContent(
             onFavoriteClick = onHeroFavoriteClick,
             personalActionsEnabled = personalActionsEnabled,
             isFavoriteSaving = isFavoriteSaving,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp)
         )
+
+
         if (progressData is ProgressViewState.Success && progressData.progress.items.isNotEmpty()) {
             ContinueTab(
                 data = progressData.progress,

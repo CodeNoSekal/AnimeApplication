@@ -92,6 +92,7 @@ private data class PlayerFailure(
 
 private const val PLAYER_LOG_TAG = "YumePlayer"
 private const val BUFFERING_TIMEOUT_MS = 20_000L
+private val PortraitSeekTouchExtension = 16.dp
 
 @OptIn(UnstableApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -309,25 +310,6 @@ fun VideoPlayer(
         }
     }
 
-    LaunchedEffect(isSeeking, streamUrl) {
-        if (!isSeeking || streamUrl == null) return@LaunchedEffect
-
-        var lastRequestedPosition = Long.MIN_VALUE
-        while (true) {
-            val requestedPosition = scrubPositionMs
-            if (
-                requestedPosition != lastRequestedPosition &&
-                exoPlayer.playbackState == Player.STATE_READY
-            ) {
-                exoPlayer.seekTo(requestedPosition)
-                lastRequestedPosition = requestedPosition
-                delay(200.milliseconds)
-            } else {
-                delay(50.milliseconds)
-            }
-        }
-    }
-
     LaunchedEffect(isBuffering, streamUrl) {
         if (!isBuffering || streamUrl == null) return@LaunchedEffect
 
@@ -407,8 +389,54 @@ fun VideoPlayer(
         }
     }
 
+    val playerModifier = if (isLandscape) {
+        modifier
+    } else {
+        Modifier
+            .pointerInput(exoPlayer) {
+                val extensionTop = size.height - PortraitSeekTouchExtension.toPx()
+
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    if (down.position.y < extensionTop || size.width <= 0) {
+                        return@awaitEachGesture
+                    }
+
+                    fun positionFor(x: Float): Long {
+                        val duration = exoPlayer.duration.takeIf { it > 0L } ?: return 0L
+                        val fraction = (x / size.width.toFloat()).coerceIn(0f, 1f)
+                        return (duration * fraction).toLong()
+                    }
+
+                    var positionMs = positionFor(down.position.x)
+                    startScrubbing(positionMs)
+                    previewScrubbing(positionMs)
+                    down.consume()
+
+                    var completed = false
+                    try {
+                        var pressed = true
+                        while (pressed) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                            positionMs = positionFor(change.position.x)
+                            previewScrubbing(positionMs)
+                            pressed = change.pressed
+                            change.consume()
+                        }
+                        completed = true
+                        finishScrubbing(positionMs)
+                    } finally {
+                        if (!completed) finishScrubbing(positionMs)
+                    }
+                }
+            }
+            .padding(bottom = PortraitSeekTouchExtension)
+            .then(modifier)
+    }
+
     Surface(
-        modifier = modifier,
+        modifier = playerModifier,
     ) {
         val mainIconSize = if (isLandscape) 40.dp else 32.dp
         val sideIconSize = if (isLandscape) 26.dp else 20.dp
@@ -650,7 +678,9 @@ fun VideoPlayer(
                     val current = progressState.currentPositionMs
                     val duration = progressState.durationMs
 
-                    var progress = (current.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
+                    val displayedPosition = if (isSeeking) scrubPositionMs else current
+                    var progress =
+                        (displayedPosition.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
 
                     if (duration <= 0)
                         progress = 0f

@@ -11,6 +11,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.dmitry.yume.presentation.navigation.PlaybackDestination
+import com.dmitry.yume.presentation.navigation.Destinations
+import com.dmitry.yume.presentation.navigation.Details
 import com.dmitry.yume.presentation.screens.ErrorScreen
 import com.dmitry.yume.presentation.screens.player.PlaybackCatalogState
 import com.dmitry.yume.presentation.screens.player.PlaybackViewModel
@@ -30,6 +32,7 @@ fun NavGraphBuilder.playbackGraph(navController: NavController) {
             val viewModel: PlaybackViewModel = hiltViewModel(parentEntry)
             val catalogState by viewModel.catalogState.collectAsStateWithLifecycle()
             val playbackState by viewModel.playbackUiState.collectAsStateWithLifecycle()
+            val animeDetails by viewModel.animeDetails.collectAsStateWithLifecycle()
 
             when (catalogState) {
                 is PlaybackCatalogState.Loading -> {
@@ -39,6 +42,7 @@ fun NavGraphBuilder.playbackGraph(navController: NavController) {
                     PlaybackScreen(
                         playbackCatalog = (catalogState as PlaybackCatalogState.Success).playbackCatalog,
                         playbackState = playbackState,
+                        animeDetails = animeDetails,
                         saveProgress = viewModel::saveProgress,
                         setEpisode = viewModel::selectEpisode,
                         setVoiceover = viewModel::selectVoiceover,
@@ -47,7 +51,10 @@ fun NavGraphBuilder.playbackGraph(navController: NavController) {
                         onNextEpisodeClick = viewModel::nextEpisode,
                         onRefreshStream = viewModel::resolveSelectedPlayback,
                         onEpisodeClick = { navController.navigate(PlaybackDestination.EPISODE_PICKER)},
-                        onBackClick = { navController.popBackStack() }
+                        onBackClick = { navController.popBackStack() },
+                        onRelatedTitleClick = { animeId ->
+                            navController.navigate(Details.build(Destinations.HOME, animeId))
+                        },
                     )
                 }
                 is PlaybackCatalogState.Error -> {

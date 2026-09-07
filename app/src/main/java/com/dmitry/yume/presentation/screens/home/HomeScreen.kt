@@ -104,7 +104,6 @@ internal fun HomeScreenContent(
     ) { innerPadding ->
         when (homeData) {
             is HomeViewState.Success -> HomeContent(
-                innerPadding = innerPadding,
                 progressData = progressData,
                 homeData = homeData.home,
                 onPlayClick = onPlayClick,

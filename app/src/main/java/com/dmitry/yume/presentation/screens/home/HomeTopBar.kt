@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dmitry.yume.presentation.components.SearchButton
 
@@ -20,14 +21,17 @@ fun HomeTopBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color.Transparent)
             .statusBarsPadding()
     ) {
         Row(
             modifier = Modifier
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            SearchButton(onSearchClicked)
+            SearchButton(
+                onSearchClicked,
+                alpha = 0.7f
+            )
         }
     }
 }

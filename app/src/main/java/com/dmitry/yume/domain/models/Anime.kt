@@ -14,6 +14,7 @@ data class Anime(
     val favorite: Boolean,
 
     val kind: String? = null,
+    val isAvailable: Boolean = false,
 
     val myStatus: String? = null,
     val myScore: Int? = null,

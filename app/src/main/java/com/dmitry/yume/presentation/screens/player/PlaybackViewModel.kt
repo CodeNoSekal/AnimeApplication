@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import com.dmitry.yume.di.ApplicationScope
 import com.dmitry.yume.domain.models.PlaybackCatalog
+import com.dmitry.yume.domain.models.AnimeDetailed
 import com.dmitry.yume.domain.models.PlaybackSelection
 import com.dmitry.yume.domain.models.Provider
 import com.dmitry.yume.domain.models.VideoQuality
@@ -13,10 +14,12 @@ import com.dmitry.yume.domain.repository.CurrentProgressResult
 import com.dmitry.yume.domain.repository.PlaybackCatalogResult
 import com.dmitry.yume.domain.repository.ResolvedPlaybackResult
 import com.dmitry.yume.domain.usecase.GetPlaybackCatalogUseCase
+import com.dmitry.yume.domain.usecase.GetAnimeByIdUseCase
 import com.dmitry.yume.domain.usecase.ResolvePlaybackUseCase
 import com.dmitry.yume.domain.usecase.GetProgressByIdUseCase
 import com.dmitry.yume.domain.usecase.PutProgressUseCase
 import com.dmitry.yume.presentation.navigation.PlaybackDestination
+import com.dmitry.yume.domain.repository.AnimeDetailResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +33,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PlaybackViewModel @Inject constructor(
     private val getPlaybackCatalog: GetPlaybackCatalogUseCase,
+    private val getAnimeById: GetAnimeByIdUseCase,
     private val getProgressById: GetProgressByIdUseCase,
     private val resolvePlayback: ResolvePlaybackUseCase,
     putProgress: PutProgressUseCase,
@@ -41,16 +45,28 @@ class PlaybackViewModel @Inject constructor(
 
     private val _catalogState = MutableStateFlow<PlaybackCatalogState>(PlaybackCatalogState.Loading)
     private val _playbackUiState = MutableStateFlow(PlaybackUiState())
+    private val _animeDetails = MutableStateFlow<AnimeDetailed?>(null)
     private val progressSaveQueue = ProgressSaveQueue(applicationScope, putProgress::invoke)
     private var loadJob: Job? = null
     private var resolveJob: Job? = null
 
     val catalogState: StateFlow<PlaybackCatalogState> = _catalogState.asStateFlow()
     val playbackUiState: StateFlow<PlaybackUiState> = _playbackUiState.asStateFlow()
+    val animeDetails: StateFlow<AnimeDetailed?> = _animeDetails.asStateFlow()
 
 
     init {
         load()
+        loadAnimeDetails()
+    }
+
+    private fun loadAnimeDetails() {
+        viewModelScope.launch {
+            _animeDetails.value = when (val result = getAnimeById(currentAnimeId)) {
+                is AnimeDetailResult.Success -> result.anime
+                is AnimeDetailResult.Error -> null
+            }
+        }
     }
 
     fun load(){

@@ -10,10 +10,11 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.filled.Bookmark
@@ -28,12 +29,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.Hyphens
@@ -57,10 +58,8 @@ fun Hero(
     onFavoriteClick: () -> Unit,
     personalActionsEnabled: Boolean = true,
     isFavoriteSaving: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
     val colors = YumeTheme.colors
-    val shape = RoundedCornerShape(20.dp)
     val title = heroData.title?.takeIf { it.isNotBlank() }
         ?: heroData.titleEn?.takeIf { it.isNotBlank() }
         ?: "Открыть тайтл"
@@ -81,94 +80,75 @@ fun Hero(
     val favoriteColor = if (heroData.favorite) colors.accent else colors.textSecondary
 
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 280.dp)
-            .clip(shape)
-            .background(colors.surfaceCard)
-            .border(1.dp, colors.lineStrong, shape),
+            .aspectRatio(2f / 3f)
+            .heightIn(max = 560.dp)
+            .background(colors.surfaceBg)
     ) {
         AsyncImage(
             model = heroData.posterUrl,
             contentDescription = null,
-            modifier = Modifier.matchParentSize().blur(24.dp),
             contentScale = ContentScale.Crop,
-        )
-        // Keep text readable even on devices without blur support.
-        Box(
-            Modifier.matchParentSize().background(
-                Brush.horizontalGradient(
-                    listOf(Color(0xFF0A0B16).copy(alpha = 0.94f), Color(0xFF0A0B16).copy(alpha = 0.55f))
-                )
-            )
+            modifier = Modifier
+                .matchParentSize()
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                .drawWithContent {
+                    drawContent()
+                    drawRect(
+                        brush = Brush.verticalGradient(
+                            colorStops = arrayOf(
+                                0f to Color.Black,
+                                0.32f to Color.Black,
+                                0.92f to Color.Transparent
+                            )
+                        ),
+                        blendMode = BlendMode.DstIn
+                    )
+                }
         )
         Box(
             Modifier.matchParentSize().background(
                 Brush.verticalGradient(
-                    listOf(Color.Transparent, Color(0xFF0A0B16).copy(alpha = 0.85f))
+                    colorStops = arrayOf(
+                        0f to Color.Transparent,
+                        0.32f to Color.Transparent,
+                        0.92f to colors.surfaceBg.copy(alpha = 0.6f),
+                        1f to colors.surfaceBg.copy(alpha = 0.6f)
+                    )
                 )
             )
         )
-        // Above the dark scrims, below the content: the same falloff as catalog cards.
-        statusGlow?.let { (glowColor, peakAlpha) ->
-            Box(Modifier.matchParentSize().drawWithCache {
-                val glow = Brush.radialGradient(
-                    colorStops = arrayOf(
-                        0f to glowColor.copy(alpha = peakAlpha),
-                        0.30f to glowColor.copy(alpha = peakAlpha * 0.52f),
-                        0.66f to glowColor.copy(alpha = peakAlpha * 0.16f),
-                        1f to Color.Transparent
-                    ),
-                    center = Offset(size.width - 148.dp.toPx(), size.height * 0.36f),
-                    radius = size.width * 0.72f
-                )
-                onDrawBehind { drawRect(glow) }
-            })
-        }
         Column(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Bottom)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                Text("РЕКОМЕНДУЕМ", style = YumeType.overline, color = colors.violet)
+
+                Text(
+                    title,
+                    style = YumeType.displayLg.copy(hyphens = Hyphens.Auto),
+                    color = colors.textPrimary,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("В ФОКУСЕ", style = YumeType.overline, color = colors.textSecondary)
-                    if (meta.isNotBlank()) {
-                        Text(meta, style = YumeType.xs, color = colors.textSecondary)
-                    }
-                    Text(
-                        title,
-                        style = YumeType.h2.copy(hyphens = Hyphens.Auto),
-                        color = colors.textPrimary,
-                        maxLines = 4,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Box(
-                    Modifier.width(132.dp)
-                        .aspectRatio(2f / 3f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(colors.surfaceCard)
-                        .border(
-                            1.dp,
-                            if (personalStatus != null) statusColor else colors.lineStrong,
-                            RoundedCornerShape(10.dp)
-                        )
-                ) {
-                    AsyncImage(
-                        model = heroData.posterUrl,
-                        contentDescription = null,
-                        modifier = Modifier.matchParentSize(),
-                        contentScale = ContentScale.Crop
-                    )
+
                     heroData.rating?.let { rating ->
-                        RatingBadge(rating, Modifier.align(Alignment.TopEnd).padding(5.dp))
+                        RatingBadge(rating, contentPadding = 0.dp)
+                    }
+
+                    if (meta.isNotBlank()) {
+                        Text(meta, style = YumeType.sm, color = colors.textSecondary)
                     }
                 }
             }
@@ -193,7 +173,7 @@ fun Hero(
                     modifier = Modifier.size(48.dp).semantics {
                         stateDescription = personalStatus ?: "Не добавлен в список"
                     },
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    contentPadding = PaddingValues(0.dp),
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, statusColor.copy(alpha = 0.65f)),
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -213,7 +193,7 @@ fun Hero(
                     modifier = Modifier.size(48.dp).semantics {
                         stateDescription = if (heroData.favorite) "В избранном" else "Не в избранном"
                     },
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    contentPadding = PaddingValues(0.dp),
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, favoriteColor.copy(alpha = 0.65f)),
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -256,7 +236,6 @@ private fun HeroPreview() {
                 kind = "tv",
                 myStatus = "в планах"
             ),
-            modifier = Modifier.padding(12.dp)
         )
     }
 }

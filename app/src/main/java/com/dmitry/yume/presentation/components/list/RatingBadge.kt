@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DatePickerColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dmitry.yume.R
 import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
@@ -27,11 +29,12 @@ import com.dmitry.yume.presentation.ui.theme.YumeType
 @Composable
 fun RatingBadge(
     rating: Double,
-    modifier: Modifier
+    modifier: Modifier = Modifier,
+    contentPadding: Dp = 6.dp
 ) {
     Row(
         modifier = modifier
-            .padding(6.dp),
+            .padding(contentPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {

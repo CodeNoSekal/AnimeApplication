@@ -23,14 +23,15 @@ import com.dmitry.yume.presentation.ui.theme.YumeType
 
 @Composable
 fun SearchButton(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    alpha: Float = 1.0f
 ) {
     val colors = YumeTheme.colors
 
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = colors.surfaceCard,
+        color = colors.surfaceCard.copy(alpha),
         border = BorderStroke(1.dp, colors.lineStrong),
         modifier = Modifier.fillMaxWidth().height(46.dp)
     ) {

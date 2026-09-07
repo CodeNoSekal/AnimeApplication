@@ -3,6 +3,7 @@ package com.dmitry.yume.presentation.screens.detail
 import com.dmitry.yume.domain.models.AnimeDetailed
 import org.junit.Assert.*
 import org.junit.Test
+import java.util.TimeZone
 
 class DetailFormattingTest {
     private val anime = AnimeDetailed(
@@ -57,5 +58,18 @@ class DetailFormattingTest {
         assertNull(formatNextEpisode("2020-01-01T12:00:00Z", nowMillis = 2_000_000_000_000))
         assertNull(formatNextEpisode("not a date", nowMillis = 0))
         assertNotNull(formatNextEpisode("2027-10-01T12:00:00+03:00", nowMillis = 0))
+    }
+
+    @Test fun `next episode accepts server format and displays device local time`() {
+        val previousTimeZone = TimeZone.getDefault()
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("Asia/Yekaterinburg"))
+            assertEquals(
+                "6 сентября, 20:00",
+                formatNextEpisode("2026-09-06 18:00:00+03:00", nowMillis = 0),
+            )
+        } finally {
+            TimeZone.setDefault(previousTimeZone)
+        }
     }
 }

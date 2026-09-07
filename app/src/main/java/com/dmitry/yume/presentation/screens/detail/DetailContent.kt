@@ -70,9 +70,9 @@ fun DetailContent(
             TextButton(onClick = onRetryPersonal) { Text("Повторить загрузку личных данных") }
         }
         PlayButton(onPlayClick, animeData)
-        Description(animeData.description)
         AnimeInformation(animeData)
         if (!animeData.genres.isNullOrEmpty()) Genres(animeData.genres)
+        Description(animeData.description)
         Spacer(Modifier.height(4.dp))
         Rating(animeData.rating, personal?.score, actionsEnabled, onScoreClick)
         if (animeData.relations.distinctBy { it.id }.size > 1) {

@@ -36,7 +36,7 @@ fun AnimeInformation(anime: AnimeDetailed) {
         }
         if (studios.isNotEmpty()) InformationLine(if (studios.size == 1) "Студия" else "Студии", studios.joinToString(", "))
         premiere?.let { InformationLine("Премьера", it) }
-        next?.let { InformationLine("Следующая серия", "$it · местное время") }
+        next?.let { InformationLine("Следующая серия", it) }
     }
 }
 
