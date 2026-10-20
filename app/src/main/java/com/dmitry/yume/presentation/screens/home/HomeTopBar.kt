@@ -26,11 +26,12 @@ fun HomeTopBar(
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .padding(horizontal = 12.dp)
+                .padding(top = 8.dp, bottom = 16.dp)
         ) {
             SearchButton(
                 onSearchClicked,
-                alpha = 0.7f
+                alpha = 0.9f
             )
         }
     }

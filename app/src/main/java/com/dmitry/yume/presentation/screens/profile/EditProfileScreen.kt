@@ -65,6 +65,12 @@ fun EditProfileScreen(
         snackbarHost = { SnackbarHost(snackbar) },
         containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
     ) { padding ->
+        if (user == null) {
+            Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+                EditProfilePlaceholder()
+            }
+            return@Scaffold
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()

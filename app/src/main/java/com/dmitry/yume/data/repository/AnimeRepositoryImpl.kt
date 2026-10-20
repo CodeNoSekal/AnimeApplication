@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import com.dmitry.yume.data.api.AnimeApi
 import com.dmitry.yume.data.request.OptionsRequest
 import com.dmitry.yume.data.response.toDomain
+import com.dmitry.yume.data.toAppError
 import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.models.SearchOptions
 import com.dmitry.yume.domain.repository.AnimeDetailResult
@@ -67,7 +68,17 @@ class AnimeRepositoryImpl @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception){
-            return AnimeDetailResult.Error(e.message ?: "Не удалось загрузить данные аниме")
+            return AnimeDetailResult.Error(e.toAppError())
+        }
+    }
+
+    override suspend fun getAnimeCount(options: SearchOptions): Int? {
+        return try {
+            api.getAnimeList(page = 1, perPage = 1, options = OptionsRequest.from(options)).meta.total
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
         }
     }
 }

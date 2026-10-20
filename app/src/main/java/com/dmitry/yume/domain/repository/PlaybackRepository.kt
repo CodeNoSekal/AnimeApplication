@@ -1,5 +1,6 @@
 package com.dmitry.yume.domain.repository
 
+import com.dmitry.yume.domain.models.AppError
 import com.dmitry.yume.domain.models.ResolvedPlayback
 import com.dmitry.yume.domain.models.PlaybackCatalog
 import com.dmitry.yume.domain.models.PlaybackSelection
@@ -15,7 +16,7 @@ sealed interface PlaybackCatalogResult {
         val playbackCatalog: PlaybackCatalog
     ) : PlaybackCatalogResult
     data class Error(
-        val message: String?
+        val error: AppError
     ) : PlaybackCatalogResult
 }
 

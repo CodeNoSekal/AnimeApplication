@@ -75,7 +75,7 @@ class DetailViewModel @Inject constructor(
             when (val result = getAnimeById(currentId)) {
                 is AnimeDetailResult.Success -> _state.value = DetailViewState.Success(result.anime)
                 is AnimeDetailResult.Error ->
-                    if (_state.value !is DetailViewState.Success) _state.value = DetailViewState.Error(result.message)
+                    if (_state.value !is DetailViewState.Success) _state.value = DetailViewState.Error(result.error)
             }
             statusMutationMutex.withLock {
                 when (val result = getStatusById(currentId)) {

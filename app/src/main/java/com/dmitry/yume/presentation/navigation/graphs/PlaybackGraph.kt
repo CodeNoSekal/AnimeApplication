@@ -10,6 +10,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.dmitry.yume.domain.models.AppError
 import com.dmitry.yume.presentation.navigation.PlaybackDestination
 import com.dmitry.yume.presentation.navigation.Destinations
 import com.dmitry.yume.presentation.navigation.Details
@@ -34,7 +35,7 @@ fun NavGraphBuilder.playbackGraph(navController: NavController) {
             val playbackState by viewModel.playbackUiState.collectAsStateWithLifecycle()
             val animeDetails by viewModel.animeDetails.collectAsStateWithLifecycle()
 
-            when (catalogState) {
+            when (val state = catalogState) {
                 is PlaybackCatalogState.Loading -> {
 
                 }
@@ -57,10 +58,19 @@ fun NavGraphBuilder.playbackGraph(navController: NavController) {
                         },
                     )
                 }
+
                 is PlaybackCatalogState.Error -> {
+                    val (title, message) = when (state.error) {
+                        AppError.NoConnection -> "Нет подключения" to "Проверьте интернет и попробуйте ещё раз"
+                        AppError.NotFound     -> "Серии не найдены" to "Для этого тайтла пока нет доступных серий"
+                        AppError.Server       -> "Сервер недоступен" to "Попробуйте немного позже"
+                        AppError.Unknown      -> "Не удалось загрузить плеер" to null
+                    }
+
                     ErrorScreen(
-                        message = (catalogState as PlaybackCatalogState.Error).message
-                            ?: "Не удалось загрузить плеер"
+                        title = title,
+                        message = message,
+                        onRetry = if (state.error == AppError.NotFound) null else viewModel::load
                     )
                 }
             }

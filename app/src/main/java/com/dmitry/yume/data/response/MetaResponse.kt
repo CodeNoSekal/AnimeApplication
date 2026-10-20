@@ -1,45 +1,46 @@
 package com.dmitry.yume.data.response
 
-import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.models.Genre
 import com.dmitry.yume.domain.models.Meta
-import com.dmitry.yume.domain.models.Home
-import com.dmitry.yume.domain.models.Rail
+import com.dmitry.yume.domain.models.HomeData
+import com.dmitry.yume.domain.models.RankedAnime
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class HomeResponse(
-    val hero: HeroResponse,
-    val rails: List<RailResponse>
+    @param:Json(name = "updated_on")
+    val updated: String,
+    @param:Json(name = "hero")
+    val hero: List<AnimeShort>,
+    @param:Json(name = "top")
+    val ranking: List<RankedAnimeResponse>
 )
 
 @JsonClass(generateAdapter = true)
-data class HeroResponse(
+data class RankedAnimeResponse(
     @param:Json(name = "shikimori_id")
     val id: Int,
     val title: String? = null,
     @param:Json(name = "title_en")
     val titleEn: String? = null,
-    @param:Json(name = "poster_full")
+    @param:Json(name = "poster_url")
     val posterUrl: String? = null,
     val year: Int? = null,
     @param:Json(name = "shikimori_rating")
     val rating: Double? = null,
+    val status: String? = null,
     val kind: String? = null,
+    @param:Json(name = "is_available")
+    val isAvailable: Boolean = false,
 
     @param:Json(name = "my_status")
     val myStatus: String? = null,
     val favorite: Boolean = false,
     @param:Json(name = "my_score")
     val myScore: Int? = null,
-)
 
-@JsonClass(generateAdapter = true)
-data class RailResponse(
-    val key: String,
-    val title: String,
-    val items: List<AnimeShort>
+    val rank: Int,
 )
 
 @JsonClass(generateAdapter = true)
@@ -66,40 +67,27 @@ data class GenreResponse(
 
 fun GenreResponse.toDomain() = Genre(id, name)
 
-fun HeroResponse.toDomain(): Anime {
-    return Anime(
+fun RankedAnimeResponse.toDomain(): RankedAnime {
+    return RankedAnime(
         id = id,
         title = title,
         titleEn = titleEn,
         posterUrl = posterUrl,
         year = year,
         rating = rating,
-        status = myStatus,
+        status = status,
         favorite = favorite,
         kind = kind,
         myStatus = myStatus,
-        myScore = myScore
+        myScore = myScore,
+        rank = rank
     )
 }
 
-fun HomeResponse.toDomain(): Home{
-    return Home(
-        hero = hero.toDomain(),
-        rails = rails.toDomain()
+fun HomeResponse.toDomain(): HomeData{
+    return HomeData(
+        updated = updated,
+        hero = hero.map { it.toDomain() },
+        ranking = ranking.map { it.toDomain() }
     )
-}
-
-fun RailResponse.toDomain(): Rail{
-    return Rail(
-        key = key,
-        title = title,
-        items = items.toDomain()
-    )
-}
-
-@JvmName("railResponseToDomain")
-fun List<RailResponse>.toDomain(): List<Rail>{
-    return map {
-        it.toDomain()
-    }
 }

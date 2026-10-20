@@ -30,4 +30,12 @@
     <string name="auth_create_account">Создать аккаунт</string>
     <string name="action_logout">Выйти из аккаунта</string>
     <string name="search_placeholder">Название, студия, жанр…</string>
+
+    <plurals name="minutes_left">
+        <item quantity="one">Осталась %d минута</item>
+        <item quantity="few">Осталось %d минуты</item>
+        <item quantity="many">Осталось %d минут</item>
+        <item quantity="other">Осталось %d минуты</item>
+    </plurals>
 </resources>
+

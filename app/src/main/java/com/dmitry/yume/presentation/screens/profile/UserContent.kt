@@ -3,6 +3,7 @@ package com.dmitry.yume.presentation.screens.profile
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,7 +55,13 @@ fun UserContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            DisplayName(userData.displayName)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                DisplayName(userData.displayName)
+                if (userData.isPremium) ProBadge()
+            }
 
             val meta = listOfNotNull(userData.username, userData.email).joinToString(" · ")
             if (meta.isNotBlank()) {
@@ -84,24 +91,24 @@ fun UserContent(
                 )
             }
 
-
-            if (userData.isPremium) {
-                Surface(
-                    color = colors.accent.copy(alpha = 0.14f),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(999.dp),
-                ) {
-                    Text(
-                        text = "Premium",
-                        style = YumeType.sm,
-                        color = colors.accent,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-                    )
-                }
-            }
-
             ExitButton(
                 onExitClick = onExitClick
             )
         }
+    }
+}
+
+@Composable
+private fun ProBadge() {
+    Surface(
+        color = colors.accent.copy(alpha = 0.14f),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(999.dp),
+    ) {
+        Text(
+            text = "PRO",
+            style = YumeType.xs,
+            color = colors.accent,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+        )
     }
 }

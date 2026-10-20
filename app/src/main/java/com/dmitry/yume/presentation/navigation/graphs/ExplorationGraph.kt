@@ -8,12 +8,12 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.dmitry.yume.presentation.navigation.Destinations
 import com.dmitry.yume.presentation.navigation.Details
-import com.dmitry.yume.presentation.navigation.QuickSearch
+import com.dmitry.yume.presentation.navigation.ExplorationList
 import com.dmitry.yume.presentation.navigation.Search
 import com.dmitry.yume.presentation.navigation.screens.detailsComposable
-import com.dmitry.yume.presentation.screens.exploration.QuickSearchScreen
 import com.dmitry.yume.presentation.screens.exploration.ExplorationScreen
 import com.dmitry.yume.presentation.navigation.screens.searchComposable
+import com.dmitry.yume.presentation.screens.exploration.ExplorationListScreen
 
 fun NavGraphBuilder.explorationGraph(navController: NavController) {
     navigation(route = Destinations.EXPLORATION_GRAPH, startDestination = Destinations.EXPLORATION) {
@@ -22,24 +22,26 @@ fun NavGraphBuilder.explorationGraph(navController: NavController) {
                 onSearchClicked = {
                     navController.navigate(Search.route(Destinations.EXPLORATION))
                 },
-                onQuickSearchClick = { category ->
-                    navController.navigate(
-                        QuickSearch.build(Destinations.EXPLORATION, category.route)
-                    )
+                onSeasonClicked = { season ->
+                    navController.navigate(ExplorationList.build(season.endpoint, season.label))
                 },
+                onSectionClicked = { section ->
+                    navController.navigate(ExplorationList.build(section.endpoint, section.title))
+                }
             )
         }
-        composable(
-            route = QuickSearch.routePattern(Destinations.EXPLORATION),
+        composable (
+            route = ExplorationList.routePattern(),
             arguments = listOf(
-                navArgument(QuickSearch.CATEGORY) { type = NavType.StringType }
-            ),
+                navArgument(ExplorationList.ENDPOINT) { type = NavType.StringType },
+                navArgument(ExplorationList.TITLE) { type = NavType.StringType }
+            )
         ) {
-            QuickSearchScreen(
-                onBackClick = navController::popBackStack,
-                onItemClick = { animeId ->
-                    navController.navigate(Details.build(Destinations.EXPLORATION, animeId))
+            ExplorationListScreen(
+                onItemClicked = { id ->
+                    navController.navigate(Details.build(Destinations.EXPLORATION, id))
                 },
+                onBackClick = { navController.popBackStack() }
             )
         }
         detailsComposable(Destinations.EXPLORATION, navController)

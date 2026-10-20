@@ -8,6 +8,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.dmitry.yume.domain.models.AppError
 import com.dmitry.yume.presentation.navigation.Details
 import com.dmitry.yume.presentation.navigation.PlaybackDestination
 import com.dmitry.yume.presentation.screens.ErrorScreen
@@ -22,12 +23,12 @@ fun NavGraphBuilder.detailsComposable(parent: String, navController: NavControll
         arguments = listOf(navArgument(Details.ANIME_ID) { type = NavType.IntType })
     ) {
         val viewModel: DetailViewModel = hiltViewModel()
-        val state by viewModel.state.collectAsStateWithLifecycle()
+        val detailState by viewModel.state.collectAsStateWithLifecycle()
         val statusState by viewModel.statusState.collectAsStateWithLifecycle()
         val actionState by viewModel.actionState.collectAsStateWithLifecycle()
         val scoreEditor by viewModel.scoreEditor.collectAsStateWithLifecycle()
 
-        when (state) {
+        when (val state = detailState) {
             is DetailViewState.Loading -> {
                 DetailPlaceholder(onBackClick = { navController.popBackStack() })
             }
@@ -35,7 +36,7 @@ fun NavGraphBuilder.detailsComposable(parent: String, navController: NavControll
                 DetailScreen(
                     onBackClick = { navController.popBackStack() },
                     onPlayClick = { navController.navigate(PlaybackDestination.build(it)) },
-                    animeData = (state as DetailViewState.Success).animeDetailed,
+                    animeData = (detailState as DetailViewState.Success).animeDetailed,
                     statusState = statusState,
                     setStatus = { viewModel.putStatus(it) },
                     setFavorite = viewModel::putFavorite,
@@ -51,7 +52,18 @@ fun NavGraphBuilder.detailsComposable(parent: String, navController: NavControll
                 )
             }
             is DetailViewState.Error -> {
-                ErrorScreen()
+                val (title, message) = when (state.error) {
+                    AppError.NoConnection -> "Нет подключения" to "Проверьте интернет и попробуйте ещё раз"
+                    AppError.NotFound     -> "Тайтл не найден" to null
+                    AppError.Server       -> "Сервер недоступен" to "Попробуйте немного позже"
+                    AppError.Unknown      -> "Не удалось загрузить страницу" to null
+                }
+
+                ErrorScreen(
+                    title = title,
+                    message = message,
+                    onRetry = if (state.error == AppError.NotFound) null else viewModel::load
+                )
             }
         }
     }

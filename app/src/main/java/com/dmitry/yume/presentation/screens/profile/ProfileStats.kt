@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dmitry.yume.domain.models.ProfileStatistics
@@ -32,9 +33,6 @@ import com.dmitry.yume.presentation.components.SkeletonBlock
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeType
 import java.text.NumberFormat
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 private data class StatusSlice(val title: String, val count: Int, val color: Color)
 private data class Metric(val title: String, val value: String)
@@ -55,7 +53,7 @@ fun ProfileStats(
             ProfileStatsSkeleton()
         } else if (statistics != null) {
             LibraryCard(statistics)
-            ActivityCard(statistics)
+            WatchTimeCard(statistics)
         }
     }
 }
@@ -70,27 +68,49 @@ private fun ProfileStatsSkeleton() {
     ) {
         SkeletonStatsSurface {
             SkeletonBlock(Modifier.width(112.dp).height(22.dp))
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                SkeletonBlock(Modifier.size(132.dp), cornerRadius = 66.dp)
+            }
+            SkeletonGrid2x2()
+        }
+        SkeletonStatsSurface {
+            SkeletonBlock(Modifier.width(150.dp).height(18.dp), subdued = true)
+            SkeletonBlock(Modifier.width(200.dp).height(32.dp))
+            Divider()
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                SkeletonBlock(Modifier.size(132.dp), cornerRadius = 66.dp)
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    repeat(4) {
-                        SkeletonBlock(Modifier.fillMaxWidth().height(14.dp), subdued = true)
+                repeat(3) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        SkeletonBlock(Modifier.fillMaxWidth(0.6f).height(18.dp))
+                        SkeletonBlock(Modifier.fillMaxWidth(0.8f).height(11.dp), subdued = true)
                     }
                 }
             }
-            Divider()
-            SkeletonMetricGrid(rows = 2)
         }
-        SkeletonStatsSurface {
-            SkeletonBlock(Modifier.width(184.dp).height(22.dp))
-            SkeletonMetricGrid(rows = 4)
+    }
+}
+
+@Composable
+private fun SkeletonGrid2x2() {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        repeat(2) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                repeat(2) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        SkeletonBlock(Modifier.size(8.dp), cornerRadius = 4.dp)
+                        SkeletonBlock(Modifier.weight(1f).height(14.dp), subdued = true)
+                    }
+                }
+            }
         }
     }
 }
@@ -113,21 +133,29 @@ private fun SkeletonStatsSurface(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
-private fun SkeletonMetricGrid(rows: Int) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        repeat(rows) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                repeat(2) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(5.dp),
-                    ) {
-                        SkeletonBlock(Modifier.fillMaxWidth(0.5f).height(20.dp))
-                        SkeletonBlock(Modifier.fillMaxWidth(0.8f).height(12.dp), subdued = true)
-                    }
+private fun LibraryCard(statistics: ProfileStatistics) {
+    val colors = YumeTheme.colors
+    val library = statistics.library
+    val slices = listOf(
+        StatusSlice("В планах", library.planned, colors.statusPlanned),
+        StatusSlice("Просмотрено", library.completed, colors.statusCompleted),
+        StatusSlice("Смотрю", library.watching, colors.statusWatching),
+        StatusSlice("Брошено", library.dropped, colors.statusDropped),
+    )
+
+    StatsSurface {
+        Text("Мои списки", style = YumeType.h3, color = colors.textPrimary)
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            StaticDonut(slices, library.total, Modifier.size(132.dp))
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            slices.chunked(2).forEach { rowSlices ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    rowSlices.forEach { StatusRow(it, Modifier.weight(1f)) }
+                    if (rowSlices.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
         }
@@ -135,59 +163,21 @@ private fun SkeletonMetricGrid(rows: Int) {
 }
 
 @Composable
-private fun LibraryCard(statistics: ProfileStatistics) {
-    val colors = YumeTheme.colors
-    val library = statistics.library
-    val slices = listOf(
-        StatusSlice("Смотрю", library.watching, colors.statusWatching),
-        StatusSlice("В планах", library.planned, colors.statusPlanned),
-        StatusSlice("Просмотрено", library.completed, colors.statusCompleted),
-        StatusSlice("Брошено", library.dropped, colors.statusDropped),
-    )
-
-    StatsSurface {
-        Text("Мои списки", style = YumeType.h3, color = colors.textPrimary)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-            StaticDonut(slices, library.total, Modifier.size(132.dp))
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) { slices.forEach { StatusRow(it) } }
-        }
-        Divider()
-        MetricGrid(
-            listOf(
-                Metric("Избранное", formatNumber(statistics.favorites)),
-                Metric("Оценено", formatNumber(statistics.ratingsCount)),
-                Metric("Средняя оценка", statistics.averageRating?.let(::formatDecimal) ?: "—"),
-                Metric("Отзывов", formatNumber(statistics.reviewsCount)),
-            )
-        )
-    }
-}
-
-@Composable
-private fun ActivityCard(statistics: ProfileStatistics) {
+private fun WatchTimeCard(statistics: ProfileStatistics) {
     val colors = YumeTheme.colors
     val actual = statistics.actual
     StatsSurface {
-        Text("Фактический просмотр", style = YumeType.h3, color = colors.textPrimary)
-        MetricGrid(
-            listOf(
-                Metric("Начато тайтлов", formatNumber(actual.titlesStarted)),
-                Metric("Завершено тайтлов", formatNumber(actual.titlesCompleted)),
-                Metric("Смотрю сейчас", formatNumber(actual.titlesInProgress)),
-                Metric("Начато эпизодов", formatNumber(actual.episodesStarted)),
-                Metric("Просмотрено эпизодов", formatNumber(actual.episodesCompleted)),
-                Metric("Эпизодов в процессе", formatNumber(actual.episodesInProgress)),
-                Metric("Время просмотра", formatWatchTime(actual.watchedMinutesEstimate)),
-                Metric("Последний просмотр", formatLastWatched(actual.lastWatchedAt)),
+        Text("Время просмотра", style = YumeType.sm, color = colors.textMuted)
+        Text(formatWatchTime(actual.watchedMinutesEstimate), style = YumeType.h1, color = colors.textPrimary)
+        Divider()
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            MetricCell(Metric("эпизодов", formatNumber(actual.episodesCompleted)), Modifier.weight(1f))
+            MetricCell(
+                Metric("средняя оценка", statistics.averageRating?.let(::formatDecimal) ?: "—"),
+                Modifier.weight(1f),
             )
-        )
+            MetricCell(Metric("в избранном", formatNumber(statistics.favorites)), Modifier.weight(1f))
+        }
     }
 }
 
@@ -226,15 +216,20 @@ private fun StaticDonut(slices: List<StatusSlice>, total: Int, modifier: Modifie
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(formatNumber(total), style = YumeType.h1, color = colors.textPrimary)
-            Text("в списках", style = YumeType.xs, color = colors.textMuted)
+            Text(
+                "ТАЙТЛОВ\nВ СПИСКАХ",
+                style = YumeType.xs,
+                color = colors.textMuted,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }
 
 @Composable
-private fun StatusRow(slice: StatusSlice) {
+private fun StatusRow(slice: StatusSlice, modifier: Modifier = Modifier) {
     val colors = YumeTheme.colors
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(8.dp).background(slice.color, CircleShape))
         Spacer(Modifier.width(8.dp))
         Text(
@@ -250,26 +245,11 @@ private fun StatusRow(slice: StatusSlice) {
 }
 
 @Composable
-private fun MetricGrid(metrics: List<Metric>) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        metrics.chunked(2).forEach { rowMetrics ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                rowMetrics.forEach { MetricCell(it, Modifier.weight(1f)) }
-                if (rowMetrics.size == 1) Spacer(Modifier.weight(1f))
-            }
-        }
-    }
-}
-
-@Composable
 private fun MetricCell(metric: Metric, modifier: Modifier = Modifier) {
     val colors = YumeTheme.colors
     Column(modifier, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-        Text(metric.value, style = YumeType.h3, color = colors.textPrimary)
-        Text(metric.title, style = YumeType.xs, color = colors.textMuted)
+        Text(metric.value, style = YumeType.h3, color = colors.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(metric.title, style = YumeType.xs, color = colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -291,13 +271,4 @@ private fun formatWatchTime(minutes: Double): String {
         hours > 0 -> "$hours ч"
         else -> "$remainder мин"
     }
-}
-
-private fun formatLastWatched(value: String?): String {
-    if (value.isNullOrBlank()) return "—"
-    return runCatching {
-        OffsetDateTime.parse(value)
-            .atZoneSameInstant(ZoneId.systemDefault())
-            .format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm"))
-    }.getOrDefault(value)
 }

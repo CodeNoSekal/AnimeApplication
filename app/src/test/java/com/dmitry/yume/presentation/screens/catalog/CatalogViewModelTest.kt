@@ -9,6 +9,7 @@ import androidx.paging.PagingDataPresenter
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.dmitry.yume.domain.models.Anime
+import com.dmitry.yume.domain.models.AppError
 import com.dmitry.yume.domain.models.Progress
 import com.dmitry.yume.domain.models.SearchOptions
 import com.dmitry.yume.domain.models.Status as LibraryStatus
@@ -169,7 +170,7 @@ class CatalogViewModelTest {
         GetAnimeCatalogUseCase(repository),
         GetMetaUseCase(object : MetaRepository {
             override suspend fun getHome(): HomeResult = error("not used")
-            override suspend fun getGenres(): GenresResult = GenresResult.Error("not needed")
+            override suspend fun getGenres(): GenresResult = GenresResult.Error(AppError.Unknown)
         }),
         ObserveLibraryUpdatesUseCase(library)
     ).also(viewModels::add)
@@ -202,6 +203,7 @@ class CatalogViewModelTest {
         }
         override fun searchAnime(q: String, options: SearchOptions): Flow<PagingData<Anime>> = error("not used")
         override suspend fun getAnimeById(id: Int): AnimeDetailResult = error("not used")
+        override suspend fun getAnimeCount(options: SearchOptions): Int? = error("not used")
     }
 
     private class FakeMeRepository : MeRepository {

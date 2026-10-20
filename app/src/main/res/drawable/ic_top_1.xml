@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Цифра топа 1: Nunito Black 150, трекинг -0.07em, контур 2.5dp -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="81.62dp"
+    android:height="112.1dp"
+    android:viewportWidth="81.62"
+    android:viewportHeight="112.1">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#A6A9A8FF"
+        android:strokeWidth="2.5"
+        android:strokeLineJoin="round"
+        android:pathData="M14.77 109.6Q9.22 109.6 6.29 106.67Q3.37 103.75 3.37 98.35Q3.37 92.95 6.29 90.1Q9.22 87.25 14.77 87.25H28.27V33.63L19.12 39.25Q15.22 41.65 11.77 41.12Q8.32 40.6 5.92 38.2Q3.52 35.8 2.77 32.35Q2.02 28.9 3.37 25.45Q4.72 22 8.77 19.6L29.47 6.7Q32.77 4.6 36.29 3.55Q39.82 2.5 43.72 2.5Q49.42 2.5 52.57 5.43Q55.72 8.35 55.72 13.9V87.25H67.72Q73.27 87.25 76.19 90.1Q79.12 92.95 79.12 98.35Q79.12 103.75 76.19 106.67Q73.27 109.6 67.72 109.6Z" />
+</vector>

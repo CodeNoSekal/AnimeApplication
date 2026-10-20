@@ -1,7 +1,8 @@
 package com.dmitry.yume.domain.repository
 
+import com.dmitry.yume.domain.models.AppError
 import com.dmitry.yume.domain.models.Meta
-import com.dmitry.yume.domain.models.Home
+import com.dmitry.yume.domain.models.HomeData
 
 interface MetaRepository {
     suspend fun getHome() : HomeResult
@@ -10,10 +11,10 @@ interface MetaRepository {
 
 sealed interface HomeResult {
     data class Success(
-        val home: Home
+        val homeData: HomeData
     ) : HomeResult
     data class Error(
-        val message: String?
+        val error: AppError
     ) : HomeResult
 }
 
@@ -22,6 +23,6 @@ sealed interface GenresResult {
         val meta: Meta
     ) : GenresResult
     data class Error(
-        val message: String?
+        val error: AppError
     ) : GenresResult
 }

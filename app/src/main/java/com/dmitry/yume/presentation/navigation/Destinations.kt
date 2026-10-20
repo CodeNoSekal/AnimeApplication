@@ -1,8 +1,10 @@
 package com.dmitry.yume.presentation.navigation
 
+import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.dmitry.yume.R
+import com.dmitry.yume.presentation.navigation.Destinations.EXPLORATION
 
 object Destinations {
     const val ROOT = "root"
@@ -38,6 +40,16 @@ object Details {
     fun routePattern(parent: String) = "$parent/$DETAILS/{$ANIME_ID}"
 
     fun build(parent: String, animeId: Int) = "$parent/$DETAILS/$animeId"
+}
+
+object ExplorationList {
+    const val ENDPOINT = "endpoint"
+    const val TITLE = "title"
+
+    fun routePattern() = "$EXPLORATION/list/{$ENDPOINT}/{$TITLE}"
+
+    fun build(endpoint: String, title: String) =
+        "$EXPLORATION/list/${Uri.encode(endpoint)}/${Uri.encode(title)}"
 }
 
 object PlaybackDestination {

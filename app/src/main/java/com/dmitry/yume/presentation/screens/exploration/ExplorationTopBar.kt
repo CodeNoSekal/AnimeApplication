@@ -24,10 +24,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dmitry.yume.presentation.components.SearchButton
 import com.dmitry.yume.R
+import com.dmitry.yume.presentation.preview.PreviewData
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeType
 
@@ -43,7 +46,9 @@ fun ExplorationTopBar(
             .statusBarsPadding()
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(top = 8.dp, bottom = 12.dp)
         ) {
             SearchButton(onSearchClicked)
         }
@@ -85,5 +90,26 @@ fun ExplorationBackTopBar(
             }
             HorizontalDivider(thickness = 1.dp, color = YumeTheme.colors.line)
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF14131A)
+@Composable
+private fun ExplorationTopBarPreview() {
+    YumeTheme {
+        ExplorationTopBar(
+            onSearchClicked = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF14131A)
+@Composable
+private fun ExplorationBackTopBarPreview() {
+    YumeTheme {
+        ExplorationBackTopBar(
+            title = PreviewData.seasons[0].label,
+            onBackClick = {}
+        )
     }
 }

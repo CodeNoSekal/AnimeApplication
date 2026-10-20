@@ -157,8 +157,8 @@ fun ProfileHolder(
             ,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (userData != null) {
-                UserContent(
+            when {
+                userData != null -> UserContent(
                     userData = userData,
                     onVerificationClick = onVerificationClick,
                     onExitClick = viewModel::logout,
@@ -166,8 +166,8 @@ fun ProfileHolder(
                     isStatsLoading = viewModel.state.collectAsState().value.isStatsLoading,
                     scrollState = scrollState,
                 )
-            } else {
-                LoginContent(
+                isRefreshing -> ProfilePlaceholder(scrollState = scrollState)
+                else -> LoginContent(
                     onLoginClick = onLoginClick,
                     onRegistrationClick = onRegistrationClick
                 )

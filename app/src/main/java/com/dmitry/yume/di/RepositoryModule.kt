@@ -2,12 +2,14 @@ package com.dmitry.yume.di
 
 import com.dmitry.yume.data.repository.AnimeRepositoryImpl
 import com.dmitry.yume.data.repository.AuthRepositoryImpl
+import com.dmitry.yume.data.repository.ExploreRepositoryImpl
 import com.dmitry.yume.data.repository.MeRepositoryImpl
 import com.dmitry.yume.data.repository.MetaRepositoryImpl
 import com.dmitry.yume.data.repository.PlaybackRepositoryImpl
 import com.dmitry.yume.data.repository.SearchHistoryRepositoryImpl
 import com.dmitry.yume.domain.repository.AnimeRepository
 import com.dmitry.yume.domain.repository.AuthRepository
+import com.dmitry.yume.domain.repository.ExploreRepository
 import com.dmitry.yume.domain.repository.MeRepository
 import com.dmitry.yume.domain.repository.MetaRepository
 import com.dmitry.yume.domain.repository.PlaybackRepository
@@ -58,4 +60,10 @@ abstract class RepositoryModule {
     abstract fun bindSearchHistoryRepository(
         impl: SearchHistoryRepositoryImpl
     ): SearchHistoryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindExploreRepository(
+        impl: ExploreRepositoryImpl
+    ): ExploreRepository
 }

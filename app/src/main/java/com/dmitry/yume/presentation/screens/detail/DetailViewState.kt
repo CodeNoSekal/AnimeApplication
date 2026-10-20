@@ -1,6 +1,7 @@
 package com.dmitry.yume.presentation.screens.detail
 
 import com.dmitry.yume.domain.models.AnimeDetailed
+import com.dmitry.yume.domain.models.AppError
 import com.dmitry.yume.domain.models.Status
 
 sealed class DetailViewState {
@@ -8,7 +9,7 @@ sealed class DetailViewState {
 
     data class Success(val animeDetailed: AnimeDetailed) : DetailViewState()
 
-    data class Error(val message: String?) : DetailViewState()
+    data class Error(val error: AppError) : DetailViewState()
 }
 
 sealed class StatusViewState {

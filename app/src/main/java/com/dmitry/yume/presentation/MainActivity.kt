@@ -6,8 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,8 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
@@ -52,8 +56,13 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val rootViewModel: RootViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
+        splash.setKeepOnScreenCondition { rootViewModel.sessionState.value is SessionState.Loading }
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
@@ -61,7 +70,7 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             YumeTheme  {
-                AnimeApp()
+                AnimeApp(rootViewModel)
             }
         }
     }
@@ -74,7 +83,11 @@ fun AnimeApp(rootViewModel: RootViewModel = hiltViewModel()){
 
     when (sessionState) {
         SessionState.Loading -> SplashScreen()
-        SessionState.Unavailable -> ErrorScreen()
+        SessionState.Unavailable -> ErrorScreen(
+            title = "Невозможно авторизоваться",
+            message = "Проверьте подключение к интернету и попробуйте ещё раз",
+            onRetry = rootViewModel::retrySessionValidation,
+        )
         SessionState.Guest -> RootScreen(sessionState)
         is SessionState.Authenticated -> RootScreen(sessionState)
     }

@@ -55,7 +55,7 @@ class CatalogViewModel @Inject constructor(
                 is GenresResult.Success ->
                     _metaState.value = GenresViewState.Success(result.meta)
                 is GenresResult.Error ->
-                    _metaState.value = GenresViewState.Error(result.message)
+                    _metaState.value = GenresViewState.Error(result.error)
             }
         }
     }

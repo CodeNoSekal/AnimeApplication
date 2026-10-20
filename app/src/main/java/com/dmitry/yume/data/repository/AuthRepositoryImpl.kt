@@ -4,6 +4,7 @@ import com.dmitry.yume.data.api.AuthApi
 import com.dmitry.yume.data.api.VerificationApi
 import com.dmitry.yume.data.authorization.AuthSessionManager
 import com.dmitry.yume.data.authorization.StoredTokens
+import com.dmitry.yume.data.network.withNetworkRetry
 import com.dmitry.yume.data.request.LoginRequest
 import com.dmitry.yume.data.request.ChangeEmailRequest
 import com.dmitry.yume.data.request.ChangePasswordRequest
@@ -209,7 +210,7 @@ class AuthRepositoryImpl @Inject constructor(
         val session = sessionManager.beginValidation() ?: return
 
         try {
-            val user = authApi.getMe().toDomain()
+            val user = withNetworkRetry { authApi.getMe() }.toDomain()
             sessionManager.setAuthenticatedIfCurrent(session.generation, user)
         } catch (e: HttpException) {
             if (e.code() == 404) {

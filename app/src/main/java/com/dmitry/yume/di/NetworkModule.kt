@@ -3,6 +3,7 @@ package com.dmitry.yume.di
 import com.dmitry.yume.BuildConfig
 import com.dmitry.yume.data.api.AnimeApi
 import com.dmitry.yume.data.api.AuthApi
+import com.dmitry.yume.data.api.ExploreApi
 import com.dmitry.yume.data.api.MeApi
 import com.dmitry.yume.data.api.MetaApi
 import com.dmitry.yume.data.api.PlaybackApi
@@ -150,5 +151,13 @@ object NetworkModule {
         @MainClient retrofit: Retrofit
     ): MetaApi {
         return retrofit.create(MetaApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideExploreApi(
+        @MainClient retrofit: Retrofit
+    ): ExploreApi {
+        return retrofit.create(ExploreApi::class.java)
     }
 }

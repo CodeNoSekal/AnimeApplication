@@ -7,6 +7,7 @@ import androidx.media3.common.C
 import com.dmitry.yume.di.ApplicationScope
 import com.dmitry.yume.domain.models.PlaybackCatalog
 import com.dmitry.yume.domain.models.AnimeDetailed
+import com.dmitry.yume.domain.models.AppError
 import com.dmitry.yume.domain.models.PlaybackSelection
 import com.dmitry.yume.domain.models.Provider
 import com.dmitry.yume.domain.models.VideoQuality
@@ -92,7 +93,7 @@ class PlaybackViewModel @Inject constructor(
                     )
                 }
                 is PlaybackCatalogResult.Error ->
-                    _catalogState.value = PlaybackCatalogState.Error(playbackCatalogResult.message)
+                    _catalogState.value = PlaybackCatalogState.Error(playbackCatalogResult.error)
             }
         }
     }
@@ -252,7 +253,7 @@ class PlaybackViewModel @Inject constructor(
                 resolveSelectedPlayback()
             }
             is PlaybackResolution.Error -> {
-                _catalogState.value = PlaybackCatalogState.Error(playback.message)
+                _catalogState.value = PlaybackCatalogState.Error(AppError.NotFound)
             }
         }
     }

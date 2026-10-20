@@ -22,7 +22,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +45,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.dmitry.yume.R
 import com.dmitry.yume.presentation.components.list.AnimeList
 import com.dmitry.yume.presentation.components.list.ListItemCard
+import com.dmitry.yume.presentation.components.list.ListItemPlaceholder
 import androidx.compose.material3.TextButton
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
@@ -146,8 +146,13 @@ fun SearchScreen(
 
         if (state.text.isBlank()) {
             if (history.isLoading) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    userScrollEnabled = false,
+                ) {
+                    items(count = 6) { ListItemPlaceholder() }
                 }
             } else if (history.items.isNotEmpty()) {
                 Row(

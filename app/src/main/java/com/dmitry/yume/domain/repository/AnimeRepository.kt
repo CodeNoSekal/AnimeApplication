@@ -3,6 +3,7 @@ package com.dmitry.yume.domain.repository
 import androidx.paging.PagingData
 import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.models.AnimeDetailed
+import com.dmitry.yume.domain.models.AppError
 import com.dmitry.yume.domain.models.SearchOptions
 import kotlinx.coroutines.flow.Flow
 
@@ -15,6 +16,7 @@ interface AnimeRepository {
         options: SearchOptions = SearchOptions()
     ): Flow<PagingData<Anime>>
     suspend fun getAnimeById(id: Int): AnimeDetailResult
+    suspend fun getAnimeCount(options: SearchOptions = SearchOptions()): Int?
 }
 
 
@@ -24,6 +26,6 @@ sealed interface AnimeDetailResult {
         val anime: AnimeDetailed
     ) : AnimeDetailResult
     data class Error(
-        val message: String?
+        val error: AppError
     ) : AnimeDetailResult
 }

@@ -205,5 +205,6 @@ class DetailViewModelTest {
                 relations = listOf(Anime(id, "Title", null, null, 2026, 8.0, favorite = true))
             )
         )
+        override suspend fun getAnimeCount(options: SearchOptions): Int? = null
     }
 }

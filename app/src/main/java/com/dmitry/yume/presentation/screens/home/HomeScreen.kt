@@ -1,32 +1,25 @@
 package com.dmitry.yume.presentation.screens.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
+import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmitry.yume.domain.models.Status
-import com.dmitry.yume.presentation.screens.detail.components.StatusPickerContent
+import com.dmitry.yume.domain.models.AppError
+import com.dmitry.yume.presentation.preview.PreviewData
+import com.dmitry.yume.presentation.preview.PreviewImages
+import com.dmitry.yume.presentation.screens.ErrorScreen
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 
 @Composable
@@ -38,30 +31,20 @@ fun HomeScreen(
 ) {
     val progressData by homeViewModel.progressState.collectAsStateWithLifecycle()
     val homeData by homeViewModel.homeState.collectAsStateWithLifecycle()
-    val heroListState by homeViewModel.heroListState.collectAsStateWithLifecycle()
-    val heroFavoriteState by homeViewModel.heroFavoriteState.collectAsStateWithLifecycle()
     val progressActionState by homeViewModel.progressActionState.collectAsStateWithLifecycle()
 
     LifecycleEventEffect(Lifecycle.Event.ON_START) {
-        homeViewModel.load()
+        homeViewModel.updateProgress()
     }
 
     HomeScreenContent(
         homeData, progressData, onItemClick, onSearchClicked, onPlayClick,
-        heroListState = heroListState,
-        heroFavoriteState = heroFavoriteState,
         progressActionState = progressActionState,
-        onHeroFavoriteClick = homeViewModel::toggleHeroFavorite,
-        onFavoriteErrorDismiss = homeViewModel::dismissFavoriteError,
-        onHeroListClick = homeViewModel::openHeroList,
-        onHeroListDismiss = homeViewModel::dismissHeroList,
-        onHeroStatusChange = homeViewModel::setHeroStatus,
         onRemoveProgress = homeViewModel::clearProgress,
         onClearAllProgress = homeViewModel::clearAllProgress,
         onProgressErrorDismiss = homeViewModel::dismissProgressActionError,
-    ) {
-        homeViewModel.load(force = true)
-    }
+        onRetry = homeViewModel::load
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,86 +55,74 @@ internal fun HomeScreenContent(
     onItemClick: (Int) -> Unit,
     onSearchClicked: () -> Unit,
     onPlayClick: (Int) -> Unit,
-    heroListState: HeroListState = HeroListState(),
-    heroFavoriteState: HeroFavoriteState = HeroFavoriteState(),
     progressActionState: ProgressActionState = ProgressActionState(),
-    onHeroFavoriteClick: () -> Unit = {},
-    onFavoriteErrorDismiss: () -> Unit = {},
-    onHeroListClick: () -> Unit = {},
-    onHeroListDismiss: () -> Unit = {},
-    onHeroStatusChange: (String?) -> Unit = {},
     onRemoveProgress: (Int) -> Unit = {},
     onClearAllProgress: () -> Unit = {},
     onProgressErrorDismiss: () -> Unit = {},
     onRetry: () -> Unit
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
-    LaunchedEffect(heroFavoriteState.error) {
-        heroFavoriteState.error?.let { message ->
-            snackbarHostState.showSnackbar(message)
-            onFavoriteErrorDismiss()
-        }
-    }
-    LaunchedEffect(progressActionState.error) {
-        progressActionState.error?.let { message ->
-            snackbarHostState.showSnackbar(message)
-            onProgressErrorDismiss()
-        }
-    }
     Scaffold(
         topBar = { HomeTopBar(onSearchClicked) },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
-        when (homeData) {
-            is HomeViewState.Success -> HomeContent(
-                progressData = progressData,
-                homeData = homeData.home,
-                onPlayClick = onPlayClick,
-                onItemClick = onItemClick,
-                onHeroListClick = onHeroListClick,
-                onHeroFavoriteClick = onHeroFavoriteClick,
-                personalActionsEnabled = !heroListState.isSaving && !heroFavoriteState.isSaving,
-                isFavoriteSaving = heroFavoriteState.isSaving,
-                progressActionState = progressActionState,
-                onRemoveProgress = onRemoveProgress,
-                onClearAllProgress = onClearAllProgress,
-            )
-            HomeViewState.Loading -> HomePlaceholder(innerPadding)
-            is HomeViewState.Error -> Column(
-                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
-            ) {
-                Text("Не удалось загрузить домашний экран", textAlign = TextAlign.Center)
-                TextButton(onClick = onRetry) { Text("Повторить") }
+        AnimatedContent(
+            targetState = homeData,
+            contentKey = { it::class },
+            transitionSpec = { fadeIn() togetherWith fadeOut() using null  },
+            label = "home"
+        ) { state ->
+            when (state) {
+                is HomeViewState.Success -> HomeContent(
+                    contentPadding = innerPadding,
+                    homeData = state.homeData,
+                    onItemClick = onItemClick,
+                    progressData = progressData,
+                    onPlayClick = onPlayClick,
+                    progressActionState = progressActionState,
+                    onRemoveProgress = onRemoveProgress,
+                    onClearAllProgress = onClearAllProgress,
+                )
+
+                is HomeViewState.Loading -> HomePlaceholder(
+                    contentPadding = innerPadding
+                )
+
+                is HomeViewState.Error -> {
+                    val (title, message) = when (state.error) {
+                        AppError.NoConnection -> "Нет подключения" to "Проверьте интернет и попробуйте ещё раз"
+                        AppError.NotFound -> "Страница не найдена" to null
+                        AppError.Server -> "Сервер недоступен" to "Попробуйте немного позже"
+                        AppError.Unknown -> "Не удалось загрузить домашний экран" to null
+                    }
+
+                    ErrorScreen(
+                        title = title,
+                        message = message,
+                        onRetry = if (state.error == AppError.NotFound) null else onRetry,
+                        modifier = Modifier.systemBarsPadding()
+                    )
+                }
             }
         }
     }
-    if (heroListState.animeId != null && homeData is HomeViewState.Success) {
-        val hero = homeData.home.hero
-        ModalBottomSheet(
-            onDismissRequest = onHeroListDismiss,
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            sheetGesturesEnabled = !heroListState.isSaving,
-            containerColor = YumeTheme.colors.surfaceCard
-        ) {
-            StatusPickerContent(
-                status = Status(
-                    animeId = heroListState.animeId,
-                    status = hero.myStatus,
-                    favorite = hero.favorite,
-                    score = hero.myScore,
-                    review = null
-                ),
-                setStatus = onHeroStatusChange,
-                enabled = !heroListState.isSaving && !heroFavoriteState.isSaving
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF14131A)
+@Composable
+private fun HomeScreenPreview() {
+    YumeTheme {
+        PreviewImages {
+            HomeScreenContent(
+                onItemClick = {},
+                onSearchClicked = { },
+                onPlayClick = { },
+                homeData = HomeViewState.Success(PreviewData.homeData),
+                progressData = ProgressViewState.Success(PreviewData.progress),
+                progressActionState = ProgressActionState(),
+                onRemoveProgress = {},
+                onClearAllProgress = {},
+                onProgressErrorDismiss = {},
+                onRetry = {}
             )
-            if (heroListState.isSaving) {
-                CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally).padding(16.dp))
-            }
-            heroListState.error?.let { message ->
-                Text(message, color = YumeTheme.colors.statusDropped, modifier = Modifier.padding(20.dp))
-            }
         }
     }
 }

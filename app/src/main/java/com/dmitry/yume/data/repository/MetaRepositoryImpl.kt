@@ -2,6 +2,7 @@ package com.dmitry.yume.data.repository
 
 import com.dmitry.yume.data.api.MetaApi
 import com.dmitry.yume.data.response.toDomain
+import com.dmitry.yume.data.toAppError
 import com.dmitry.yume.domain.repository.GenresResult
 import com.dmitry.yume.domain.repository.HomeResult
 import com.dmitry.yume.domain.repository.MetaRepository
@@ -19,12 +20,10 @@ class MetaRepositoryImpl @Inject constructor(
 
             return HomeResult.Success(result.toDomain())
 
-        } catch (e: HttpException) {
-            return HomeResult.Error(e.safeMessage("Не удалось загрузить домашний экран"))
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            return HomeResult.Error(e.safeMessage("Не удалось загрузить домашний экран"))
+            return HomeResult.Error(e.toAppError())
         }
     }
 
@@ -34,18 +33,10 @@ class MetaRepositoryImpl @Inject constructor(
 
             return GenresResult.Success(result.toDomain())
 
-        } catch (e: HttpException) {
-            return GenresResult.Error(e.safeMessage("Не удалось загрузить жанры"))
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            return GenresResult.Error(e.safeMessage("Не удалось загрузить жанры"))
+            return GenresResult.Error(e.toAppError())
         }
     }
-
-    private fun Exception.safeMessage(fallback: String): String =
-        when (this) {
-            is HttpException -> "$fallback (HTTP ${code()})"
-            else -> message?.takeIf { it.isNotBlank() } ?: fallback
-        }
 }

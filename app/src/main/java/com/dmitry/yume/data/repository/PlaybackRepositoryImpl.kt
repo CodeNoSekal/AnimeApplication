@@ -3,6 +3,7 @@ package com.dmitry.yume.data.repository
 import com.dmitry.yume.data.api.PlaybackApi
 import com.dmitry.yume.data.request.ResolvePlaybackRequest
 import com.dmitry.yume.data.response.toDomain
+import com.dmitry.yume.data.toAppError
 import com.dmitry.yume.domain.models.PlaybackSelection
 import com.dmitry.yume.domain.repository.PlaybackRepository
 import com.dmitry.yume.domain.repository.PlaybackCatalogResult
@@ -20,7 +21,7 @@ class PlaybackRepositoryImpl @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception){
-            return PlaybackCatalogResult.Error(e.message ?: "Не удалось загрузить данные плеера")
+            return PlaybackCatalogResult.Error(e.toAppError())
         }
     }
 
