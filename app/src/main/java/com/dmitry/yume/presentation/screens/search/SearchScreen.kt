@@ -54,7 +54,7 @@ import com.dmitry.yume.presentation.ui.theme.YumeType
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
-    onItemClicked: (Int) -> Unit,
+    onItemClick: (Int) -> Unit,
     onBackClick: () -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
@@ -174,7 +174,7 @@ fun SearchScreen(
                     items(history.items, key = { it.id }) { anime ->
                         ListItemCard(
                             anime = anime,
-                            onItemClicked = onItemClicked,
+                            onItemClick = onItemClick,
                             action = {
                                 IconButton(onClick = { viewModel.removeFromHistory(anime.id) }) {
                                     Icon(
@@ -192,10 +192,10 @@ fun SearchScreen(
             AnimeList(
                 state = listState,
                 animeItems = result,
-                onItemClicked = { id ->
+                onItemClick = { id ->
                     restoreKeyboard = isKeyboardVisible
                     viewModel.addToHistory(id)
-                    onItemClicked(id)
+                    onItemClick(id)
                 },
                 contentPadding = PaddingValues(0.dp)
             )

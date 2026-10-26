@@ -23,8 +23,8 @@ class AuthViewModel @Inject constructor(
     private val register: RegisterUseCase,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(AuthUiState())
-    val state: StateFlow<AuthUiState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(AuthViewState())
+    val state: StateFlow<AuthViewState> = _state.asStateFlow()
 
     private val _events = Channel<AuthEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
@@ -63,7 +63,7 @@ class AuthViewModel @Inject constructor(
         if (state.isLoading) {
             state
         } else {
-            AuthUiState(
+            AuthViewState(
                 mode = if (state.mode == AuthMode.Login) {
                     AuthMode.Register
                 } else {
@@ -74,13 +74,13 @@ class AuthViewModel @Inject constructor(
     }
 
     fun submit() {
-        val s = _state.value
-        if (s.isLoading) return
+        val current = _state.value
+        if (current.isLoading) return
 
-        when (s.mode) {
+        when (current.mode) {
             AuthMode.Login -> {
-                val emailRes = AuthValidation.email(s.email)
-                val passRes = AuthValidation.password(s.password)
+                val emailRes = AuthValidation.email(current.email)
+                val passRes = AuthValidation.password(current.password)
                 if (emailRes is FieldResult.Invalid || passRes is FieldResult.Invalid) {
                     _state.update { it.copy(
                         emailError = (emailRes as? FieldResult.Invalid)?.message,
@@ -91,9 +91,9 @@ class AuthViewModel @Inject constructor(
             }
 
             AuthMode.Register -> {
-                val emailRes = AuthValidation.email(s.email)
-                val passRes = AuthValidation.password(s.password)
-                val userRes = AuthValidation.displayName(s.displayName)
+                val emailRes = AuthValidation.email(current.email)
+                val passRes = AuthValidation.password(current.password)
+                val userRes = AuthValidation.displayName(current.displayName)
                 if (emailRes is FieldResult.Invalid || passRes is FieldResult.Invalid || userRes is FieldResult.Invalid) {
                     _state.update { it.copy(
                         emailError = (emailRes as? FieldResult.Invalid)?.message,
@@ -105,12 +105,12 @@ class AuthViewModel @Inject constructor(
             }
         }
 
-        _state.value = s.copy(isLoading = true, formError = null)
+        _state.value = current.copy(isLoading = true, formError = null)
 
         viewModelScope.launch {
-            val result = when (s.mode) {
-                AuthMode.Login -> login(s.email, s.password)
-                AuthMode.Register -> register(s.email, s.password, s.displayName)
+            val result = when (current.mode) {
+                AuthMode.Login -> login(current.email, current.password)
+                AuthMode.Register -> register(current.email, current.password, current.displayName)
             }
 
             when (result) {

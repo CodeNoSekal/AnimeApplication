@@ -7,20 +7,13 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.isSpecified
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 
 @Composable
@@ -50,30 +43,4 @@ fun SkeletonBlock(
                 )
             )
     )
-}
-
-@Composable
-fun SkeletonText(
-    style: TextStyle,
-    widthFraction: Float,
-    modifier: Modifier = Modifier,
-    subdued: Boolean = false
-) {
-    val lineHeight = with(LocalDensity.current) {
-        val height = if (style.lineHeight.isSpecified) style.lineHeight else style.fontSize * 1.4f
-        height.toDp()
-    }
-
-    Box(
-        modifier = modifier
-            .height(lineHeight),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        SkeletonBlock(
-            modifier = Modifier
-                .fillMaxWidth(widthFraction)
-                .fillMaxHeight(0.65f),
-            subdued = subdued
-        )
-    }
 }

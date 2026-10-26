@@ -27,11 +27,11 @@ import com.dmitry.yume.R
 import com.dmitry.yume.presentation.screens.catalog.AnimeKind
 import com.dmitry.yume.presentation.screens.catalog.Collection
 import com.dmitry.yume.presentation.screens.catalog.FilterOptions
-import com.dmitry.yume.presentation.screens.catalog.Status
+import com.dmitry.yume.presentation.screens.catalog.ReleaseStatus
 import com.dmitry.yume.presentation.screens.catalog.filters.components.DoubleCheckState
 import com.dmitry.yume.presentation.screens.catalog.filters.components.DoubleCheckbox
 import com.dmitry.yume.presentation.screens.catalog.filters.components.TripleCheckState
-import com.dmitry.yume.presentation.screens.catalog.filters.parts.CheckboxFragment
+import com.dmitry.yume.presentation.screens.catalog.filters.parts.CheckboxPart
 import com.dmitry.yume.presentation.screens.catalog.filters.components.FiltersBottomBar
 import com.dmitry.yume.presentation.screens.catalog.filters.components.FiltersTopBar
 import com.dmitry.yume.presentation.screens.catalog.filters.components.TripleCheckbox
@@ -48,7 +48,7 @@ fun FiltersContent(
     onApplyClick: () -> Unit,
     filters: FilterOptions,
     onKindClick: (AnimeKind) -> Unit,
-    onStatusClick: (Status) -> Unit,
+    onStatusClick: (ReleaseStatus) -> Unit,
     onCollectionClick: (Collection) -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -110,7 +110,7 @@ fun FiltersContent(
 
             RatingPart()
 
-            CheckboxFragment(
+            CheckboxPart(
                 title = "Тип",
                 items = AnimeKind.entries,
                 labelOf = { parameter ->
@@ -131,9 +131,9 @@ fun FiltersContent(
                 }
             )
 
-            CheckboxFragment(
+            CheckboxPart(
                 title = "Статус",
-                items = Status.entries,
+                items = ReleaseStatus.entries,
                 labelOf = { parameter ->
                     parameter.title
                 },
@@ -151,7 +151,7 @@ fun FiltersContent(
                     )
                 }
             )
-            CheckboxFragment(
+            CheckboxPart(
                 title = "Списки",
                 items = Collection.entries,
                 labelOf = { parameter ->
@@ -182,7 +182,7 @@ fun FiltersContent(
     backgroundColor = 0xFF14131A,
 )
 @Composable
-private fun FilterScreenPreview() {
+private fun FiltersContentPreview() {
     YumeTheme {
         FiltersContent(
             onBackClick = {},

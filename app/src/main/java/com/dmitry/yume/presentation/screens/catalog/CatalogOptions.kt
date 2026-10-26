@@ -10,7 +10,7 @@ data class CatalogOptions(
 data class FilterOptions(
     var genres: Set<Int> = emptySet(),
     var excludeGenres: Set<Int> = emptySet(),
-    val statuses: Set<Status> = emptySet(),
+    val statuses: Set<ReleaseStatus> = emptySet(),
     val yearFrom: Int? = null,
     val yearTo: Int? = null,
     val kinds: Set<AnimeKind> = emptySet(),
@@ -37,7 +37,7 @@ fun CatalogOptions.toDomain() = SearchOptions(
     order = sorting.order.toRaw(),
 )
 
-enum class Status(
+enum class ReleaseStatus(
     val raw: String,
     val title: String,
 ){

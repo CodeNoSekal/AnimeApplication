@@ -1,6 +1,6 @@
 package com.dmitry.yume.domain.models
 
-import com.dmitry.yume.presentation.screens.catalog.Status
+import com.dmitry.yume.presentation.screens.catalog.ReleaseStatus
 import com.squareup.moshi.Json
 
 data class Anime(

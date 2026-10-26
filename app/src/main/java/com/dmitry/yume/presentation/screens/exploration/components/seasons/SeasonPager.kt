@@ -2,6 +2,7 @@ package com.dmitry.yume.presentation.screens.exploration.components.seasons
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -9,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.dmitry.yume.domain.models.SeasonModel
+import com.dmitry.yume.domain.models.Season
 import com.dmitry.yume.presentation.components.PagerIndicator
 import com.dmitry.yume.presentation.preview.PreviewData
 import com.dmitry.yume.presentation.preview.PreviewImages
@@ -17,8 +18,8 @@ import com.dmitry.yume.presentation.ui.theme.YumeTheme
 
 @Composable
 fun SeasonPager(
-    seasons: List<SeasonModel>,
-    onSeasonClicked: (SeasonModel) -> Unit
+    seasons: List<Season>,
+    onSeasonClick: (Season) -> Unit
 ){
     val defaultPage = seasons.indexOfFirst { it.isDefault }.coerceAtLeast(0)
     val pagerState = rememberPagerState(
@@ -32,12 +33,14 @@ fun SeasonPager(
     ) {
         HorizontalPager(
             state = pagerState,
-            key = { seasons[it].key }
+            key = { seasons[it].key },
+            contentPadding = PaddingValues(horizontal = 12.dp),
+            pageSpacing = 12.dp,
         ) {
             SeasonCard(
-                seasonData = seasons[it],
+                season = seasons[it],
                 onClick = {
-                    onSeasonClicked(seasons[it])
+                    onSeasonClick(seasons[it])
                 }
             )
         }
@@ -57,7 +60,7 @@ private fun SeasonPagerPreview() {
         PreviewImages {
             SeasonPager(
                 seasons = PreviewData.seasons,
-                onSeasonClicked = {},
+                onSeasonClick = {},
             )
         }
     }

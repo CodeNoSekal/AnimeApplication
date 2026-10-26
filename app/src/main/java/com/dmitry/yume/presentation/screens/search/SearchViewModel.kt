@@ -75,9 +75,9 @@ class SearchViewModel @Inject constructor(
                     }
                 }.awaitAll().filterNotNull()
             }
-            SearchHistoryUiState(items = items, isLoading = false)
+            SearchHistoryViewState(items = items, isLoading = false)
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchHistoryUiState())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchHistoryViewState())
 
     fun addToHistory(animeId: Int) {
         viewModelScope.launch { historyRepository.add(animeId) }

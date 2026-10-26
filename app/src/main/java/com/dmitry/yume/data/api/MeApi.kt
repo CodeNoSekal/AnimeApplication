@@ -7,10 +7,9 @@ import com.dmitry.yume.data.request.ScoreRequest
 import com.dmitry.yume.data.request.StatusRequest
 import com.dmitry.yume.data.response.AnimeResponse
 import com.dmitry.yume.data.response.EpisodeProgressResponse
-import com.dmitry.yume.data.response.ProgressItem
+import com.dmitry.yume.data.response.ProgressItemResponse
 import com.dmitry.yume.data.response.ProgressResponse
-import com.dmitry.yume.data.response.ProfileListsResponse
-import com.dmitry.yume.data.response.ProfileStatisticsResponse
+import com.dmitry.yume.data.response.ProfileResponse
 import com.dmitry.yume.data.response.StatusResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -20,11 +19,8 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MeApi {
-    @GET("me/lists")
-    suspend fun getProfileLists(): ProfileListsResponse
-
-    @GET("me/statistics")
-    suspend fun getProfileStatistics(): ProfileStatisticsResponse
+    @GET("me/profile")
+    suspend fun getProfile(): ProfileResponse
 
     @PUT("me/progress")
     suspend fun putProgress(
@@ -37,7 +33,7 @@ interface MeApi {
     @GET("me/continue/{id}")
     suspend fun getProgressById(
         @Path("id") id: Int
-    ): ProgressItem
+    ): ProgressItemResponse
 
     @DELETE("me/continue/{id}")
     suspend fun deleteFromContinue(
@@ -97,7 +93,7 @@ interface MeApi {
     ): AnimeResponse
 
     @GET("me/anime/favorite")
-    suspend fun getAnimeListByFavourite(
+    suspend fun getAnimeListByFavorite(
         @Query("page")
         page: Int,
         @Query("per_page")

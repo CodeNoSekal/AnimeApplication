@@ -21,10 +21,10 @@ val CatalogTopBarContentHeight = 118.dp
 
 @Composable
 fun CatalogTopBar(
-    onSearchClicked: () -> Unit,
+    onSearchClick: () -> Unit,
     modifier: Modifier,
-    onSortClicked: () -> Unit,
-    onFiltersClicked: () -> Unit
+    onSortClick: () -> Unit,
+    onFiltersClick: () -> Unit
 ) {
 
     Column(
@@ -38,13 +38,13 @@ fun CatalogTopBar(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            SearchButton(onSearchClicked)
+            SearchButton(onSearchClick)
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 BaseButton(
-                    onClick = onSortClicked,
+                    onClick = onSortClick,
                     modifier = Modifier
                         .weight(0.5f),
                     text = "Сортировка",
@@ -52,7 +52,7 @@ fun CatalogTopBar(
                 )
 
                 BaseButton(
-                    onClick = { onFiltersClicked() },
+                    onClick = { onFiltersClick() },
                     modifier = Modifier
                         .weight(0.5f),
                     text = "Фильтры",

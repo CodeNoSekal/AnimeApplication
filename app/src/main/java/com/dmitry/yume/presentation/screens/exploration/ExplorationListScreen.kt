@@ -10,7 +10,7 @@ import com.dmitry.yume.presentation.components.list.AnimeList
 
 @Composable
 fun ExplorationListScreen(
-    onItemClicked: (Int) -> Unit,
+    onItemClick: (Int) -> Unit,
     onBackClick: () -> Unit,
     viewModel: ExplorationListViewModel = hiltViewModel(),
 ) {
@@ -25,7 +25,7 @@ fun ExplorationListScreen(
         AnimeList(
             state = rememberLazyListState(),
             animeItems = animeItems,
-            onItemClicked = onItemClicked,
+            onItemClick = onItemClick,
             contentPadding = innerPadding,
         )
     }

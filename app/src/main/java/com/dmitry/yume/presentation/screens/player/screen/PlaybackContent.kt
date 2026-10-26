@@ -34,30 +34,30 @@ import com.dmitry.yume.R
 import com.dmitry.yume.domain.models.AnimeDetailed
 import com.dmitry.yume.domain.models.PlaybackCatalog
 import com.dmitry.yume.presentation.components.BaseButton
-import com.dmitry.yume.presentation.screens.player.PlaybackUiState
-import com.dmitry.yume.presentation.screens.player.screen.componens.VoiceoverButton
+import com.dmitry.yume.presentation.screens.player.PlaybackViewState
+import com.dmitry.yume.presentation.screens.player.screen.components.VoiceoverButton
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeType
 
 @Composable
 fun PlaybackContent(
     player: ExoPlayer,
-    playbackState: PlaybackUiState,
+    playbackState: PlaybackViewState,
     playbackCatalog: PlaybackCatalog,
     animeDetails: AnimeDetailed?,
     isLandscape: Boolean,
     hasPreviousEpisode: Boolean,
     hasNextEpisode: Boolean,
-    onPreviousEpisode: () -> Unit,
-    onNextEpisode: () -> Unit,
-    onEpisodePicker: () -> Unit,
+    onPreviousEpisodeClick: () -> Unit,
+    onNextEpisodeClick: () -> Unit,
+    onEpisodePickerClick: () -> Unit,
     onExpand: () -> Unit,
     onCompress: () -> Unit,
     onSaveProgress: () -> Unit,
     onRefreshStream: () -> Unit,
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
-    onVoiceoverPicker: () -> Unit,
+    onVoiceoverPickerClick: () -> Unit,
     onRelatedTitleClick: (Int) -> Unit,
 ) {
     val isMovie = animeDetails?.kind.equals("movie", ignoreCase = true)
@@ -106,13 +106,13 @@ fun PlaybackContent(
                 exoPlayer = player,
                 modifier = playerModifier,
                 isLandscape = true,
-                expand = onExpand,
-                compress = onCompress,
-                saveProgress = onSaveProgress,
-                refreshStream = onRefreshStream,
+                onExpand = onExpand,
+                onCompress = onCompress,
+                onSaveProgress = onSaveProgress,
+                onRefreshStream = onRefreshStream,
                 onBackClick = onBackClick,
-                onPreviousEpisode = onPreviousEpisode,
-                onNextEpisode = onNextEpisode,
+                onPreviousEpisodeClick = onPreviousEpisodeClick,
+                onNextEpisodeClick = onNextEpisodeClick,
             )
         }
     } else {
@@ -128,13 +128,13 @@ fun PlaybackContent(
                     .fillMaxWidth()
                     .aspectRatio(videoAspectRatio),
                 isLandscape = false,
-                expand = onExpand,
-                compress = onCompress,
-                saveProgress = onSaveProgress,
-                refreshStream = onRefreshStream,
+                onExpand = onExpand,
+                onCompress = onCompress,
+                onSaveProgress = onSaveProgress,
+                onRefreshStream = onRefreshStream,
                 onBackClick = onBackClick,
-                onPreviousEpisode = onPreviousEpisode,
-                onNextEpisode = onNextEpisode,
+                onPreviousEpisodeClick = onPreviousEpisodeClick,
+                onNextEpisodeClick = onNextEpisodeClick,
             )
 
             Column(
@@ -188,20 +188,20 @@ fun PlaybackContent(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         BaseButton(
-                            onClick = onPreviousEpisode,
+                            onClick = onPreviousEpisodeClick,
                             modifier = Modifier.weight(0.2f),
                             icon = R.drawable.angle_left_24,
                             disabled = !hasPreviousEpisode
                         )
 
                         BaseButton(
-                            onClick = onEpisodePicker,
+                            onClick = onEpisodePickerClick,
                             modifier = Modifier.weight(0.6f),
                             text = "Серия ${playbackState.selectedEpisodeNumber}"
                         )
 
                         BaseButton(
-                            onClick = onNextEpisode,
+                            onClick = onNextEpisodeClick,
                             modifier = Modifier.weight(0.2f),
                             icon = R.drawable.angle_right_24,
                             disabled = !hasNextEpisode
@@ -217,7 +217,7 @@ fun PlaybackContent(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     VoiceoverButton(
-                        onClick = onVoiceoverPicker,
+                        onClick = onVoiceoverPickerClick,
                         playbackState = playbackState
                     )
                 }

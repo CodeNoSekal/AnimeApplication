@@ -27,13 +27,13 @@ fun NavGraphBuilder.catalogGraph(navController: NavController) {
 
             CatalogScreen(
                 catalogViewModel = catalogViewModel,
-                onItemClicked = { id ->
+                onItemClick = { id ->
                     navController.navigate(Details.build(Destinations.CATALOG, id))
                 },
-                onSearchClicked = {
+                onSearchClick = {
                     navController.navigate(Search.route(Destinations.CATALOG))
                 },
-                onFiltersClicked = {
+                onFiltersClick = {
                     navController.navigate(Destinations.FILTERS)
                 }
             )

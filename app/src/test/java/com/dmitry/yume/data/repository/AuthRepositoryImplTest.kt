@@ -9,7 +9,7 @@ import com.dmitry.yume.data.request.LoginRequest
 import com.dmitry.yume.data.request.RegisterRequest
 import com.dmitry.yume.data.request.VerifyRequest
 import com.dmitry.yume.data.response.AuthResponse
-import com.dmitry.yume.data.response.UserDTO
+import com.dmitry.yume.data.response.UserResponse
 import com.dmitry.yume.data.response.VerificationResponse
 import com.dmitry.yume.domain.models.SessionState
 import com.dmitry.yume.domain.models.User
@@ -88,7 +88,7 @@ class AuthRepositoryImplTest {
     fun `profile update replaces user in current session`() = runTest {
         val api = FakeAuthApi()
         api.updateProfileResponse = {
-            UserDTO(1, "mail@example.com", true, "new_user", "Новое имя", null, false)
+            UserResponse(1, "mail@example.com", true, "new_user", "Новое имя", null, false)
         }
         val fixture = fixture(authApi = api)
         fixture.sessionManager.establishSession(TOKENS, USER)
@@ -148,14 +148,14 @@ class AuthRepositoryImplTest {
     private class FakeAuthApi(
         private val logout: suspend () -> Unit = {}
     ) : AuthApi {
-        var updateProfileResponse: suspend (com.dmitry.yume.data.request.ProfileRequest) -> UserDTO = { error("not used") }
+        var updateProfileResponse: suspend (com.dmitry.yume.data.request.ProfileRequest) -> UserResponse = { error("not used") }
         var changeEmailResponse: suspend (com.dmitry.yume.data.request.ChangeEmailRequest) -> com.dmitry.yume.data.response.EmailChangeResponse = { error("not used") }
         override suspend fun login(loginRequest: LoginRequest): AuthResponse = error("not used")
         override suspend fun register(registerRequest: RegisterRequest): AuthResponse = error("not used")
         override suspend fun logout() = logout.invoke()
         override suspend fun logoutAll() = error("not used")
-        override suspend fun getMe(): UserDTO = error("not used")
-        override suspend fun updateProfile(request: com.dmitry.yume.data.request.ProfileRequest): UserDTO = updateProfileResponse(request)
+        override suspend fun getMe(): UserResponse = error("not used")
+        override suspend fun updateProfile(request: com.dmitry.yume.data.request.ProfileRequest): UserResponse = updateProfileResponse(request)
         override suspend fun usernameAvailable(username: String): com.dmitry.yume.data.response.UsernameAvailabilityResponse = error("not used")
         override suspend fun suggestUsername(displayName: String): com.dmitry.yume.data.response.UsernameSuggestionResponse = error("not used")
         override suspend fun changePassword(request: com.dmitry.yume.data.request.ChangePasswordRequest) = error("not used")

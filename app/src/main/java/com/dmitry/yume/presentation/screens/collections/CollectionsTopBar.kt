@@ -26,7 +26,7 @@ fun CollectionsTopBar(
     searchOffset: Dp,
     tabs: List<CollectionTab>,
     selectedIndex: Int,
-    onSearchClicked: () -> Unit,
+    onSearchClick: () -> Unit,
     onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -51,7 +51,7 @@ fun CollectionsTopBar(
                 .height(CollectionSearchHeight)
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            SearchButton(onSearchClicked)
+            SearchButton(onSearchClick)
         }
 
         CollectionsTabRow(

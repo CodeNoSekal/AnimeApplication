@@ -10,7 +10,7 @@ import com.dmitry.yume.data.response.AvatarResponse
 import com.dmitry.yume.data.response.EmailChangeResponse
 import com.dmitry.yume.data.response.UsernameAvailabilityResponse
 import com.dmitry.yume.data.response.UsernameSuggestionResponse
-import com.dmitry.yume.data.response.UserDTO
+import com.dmitry.yume.data.response.UserResponse
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -41,10 +41,10 @@ interface AuthApi {
     suspend fun logoutAll()
 
     @GET("auth/me")
-    suspend fun getMe(): UserDTO
+    suspend fun getMe(): UserResponse
 
     @PATCH("auth/me")
-    suspend fun updateProfile(@Body request: ProfileRequest): UserDTO
+    suspend fun updateProfile(@Body request: ProfileRequest): UserResponse
 
     @NoAuth
     @GET("auth/username-available")

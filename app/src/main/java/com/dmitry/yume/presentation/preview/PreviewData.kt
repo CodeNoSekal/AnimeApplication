@@ -11,14 +11,14 @@ import coil3.compose.AsyncImagePreviewHandler
 import coil3.compose.LocalAsyncImagePreviewHandler
 import com.dmitry.yume.R
 import com.dmitry.yume.domain.models.Anime
-import com.dmitry.yume.domain.models.ExploreModel
+import com.dmitry.yume.domain.models.ExploreData
 import com.dmitry.yume.domain.models.HomeData
 import com.dmitry.yume.domain.models.ProgressData
 import com.dmitry.yume.domain.models.ProgressItemData
 import com.dmitry.yume.domain.models.Provider
 import com.dmitry.yume.domain.models.RankedAnime
-import com.dmitry.yume.domain.models.SeasonModel
-import com.dmitry.yume.domain.models.SectionModel
+import com.dmitry.yume.domain.models.Season
+import com.dmitry.yume.domain.models.Section
 
 // Fake addresses: they are not real links, PreviewImages maps them to local drawables.
 private const val DANDADAN = "preview://dandadan"
@@ -69,47 +69,64 @@ object PreviewData {
         )
     )
 
+    // Same shape as the real /explore response: 4 seasons, the current one is default, 3 posters each.
     val seasons = listOf(
-        SeasonModel(
+        Season(
+            key = "summer_2026", label = "Лето 2026", position = "past", isDefault = false,
+            total = 77, posters = listOf(JJK, FRIEREN, DANDADAN), endpoint = "/explore/seasons/summer_2026",
+        ),
+        Season(
             key = "fall_2026", label = "Осень 2026", position = "current", isDefault = true,
-            total = 48, posters = listOf(DANDADAN, JJK, FRIEREN, DANDADAN), endpoint = "/anime?season=fall_2026",
+            total = 82, posters = listOf(DANDADAN, JJK, FRIEREN), endpoint = "/explore/seasons/fall_2026",
         ),
-        SeasonModel(
-            key = "summer_2026", label = "Лето 2026", position = "previous", isDefault = false,
-            total = 61, posters = listOf(JJK, FRIEREN, DANDADAN), endpoint = "/anime?season=summer_2026",
+        Season(
+            key = "winter_2027", label = "Зима 2027", position = "upcoming", isDefault = false,
+            total = 55, posters = listOf(FRIEREN, DANDADAN, JJK), endpoint = "/explore/seasons/winter_2027",
         ),
-        // Worst case: next season is announced, but nothing has posters yet.
-        SeasonModel(
-            key = "winter_2027", label = "Зима 2027", position = "next", isDefault = false,
-            total = 3, posters = emptyList(), endpoint = "/anime?season=winter_2027",
+        Season(
+            key = "spring_2027", label = "Весна 2027", position = "upcoming", isDefault = false,
+            total = 19, posters = listOf(JJK, DANDADAN, FRIEREN), endpoint = "/explore/seasons/spring_2027",
         ),
     )
 
+    // Same shape as the real /explore response: 4 sections, 3 posters each.
     val sections = listOf(
-        SectionModel(
+        Section(
+            key = "anons", title = "Анонсы", subtitle = "Скоро выйдут",
+            total = 301, posters = listOf(DANDADAN, JJK, FRIEREN), endpoint = "/explore/anons",
+        ),
+        Section(
             key = "ongoing", title = "Онгоинги", subtitle = "Выходят прямо сейчас",
-            total = 112, posters = listOf(JJK, DANDADAN, FRIEREN), endpoint = "/anime?status=ongoing",
+            total = 89, posters = listOf(JJK, FRIEREN, DANDADAN), endpoint = "/explore/ongoing",
         ),
-        SectionModel(
-            key = "movies", title = "Полнометражные фильмы", subtitle = "Чтобы посмотреть за один вечер",
-            total = 540, posters = listOf(FRIEREN, JJK, DANDADAN), endpoint = "/anime?kind=movie",
+        Section(
+            key = "recently_finished", title = "Недавно завершённые", subtitle = "Можно смотреть целиком",
+            total = 72, posters = listOf(FRIEREN, DANDADAN, JJK), endpoint = "/explore/recently-finished",
         ),
-        SectionModel(
-            key = "top_rated", title = "Лучшие по оценкам", subtitle = "Рейтинг 8.5 и выше",
-            total = 87, posters = listOf(DANDADAN, FRIEREN), endpoint = "/anime?rating_from=8.5",
-        ),
-        // Worst case: long texts and a single poster.
-        SectionModel(
-            key = "long", title = "Очень длинное название подборки, чтобы проверить перенос строк",
-            subtitle = "И такое же длинное описание под ним, которое тоже может не поместиться в одну строку",
-            total = 1, posters = listOf(JJK), endpoint = "/anime?collection=long",
+        Section(
+            key = "top_past", title = "Проверено временем", subtitle = "100 тайтлов, которые стоит посмотреть",
+            total = 100, posters = listOf(DANDADAN, FRIEREN, JJK), endpoint = "/explore/top",
         ),
     )
 
-    val explore = ExploreModel(
-        updated = "2026-10-14T12:00:00Z",
+    val explore = ExploreData(
+        updated = "2026-10-21",
         seasons = seasons,
         sections = sections,
+    )
+
+    // Worst cases for separate previews, not part of the realistic lists above.
+    // Season is announced, but nothing has posters yet.
+    val emptySeason = Season(
+        key = "summer_2027", label = "Лето 2027", position = "upcoming", isDefault = false,
+        total = 3, posters = emptyList(), endpoint = "/explore/seasons/summer_2027",
+    )
+
+    // Long texts and a single poster.
+    val longSection = Section(
+        key = "long", title = "Очень длинное название подборки, чтобы проверить перенос строк",
+        subtitle = "И такое же длинное описание под ним, которое тоже может не поместиться в одну строку",
+        total = 1, posters = listOf(JJK), endpoint = "/explore/long",
     )
 }
 

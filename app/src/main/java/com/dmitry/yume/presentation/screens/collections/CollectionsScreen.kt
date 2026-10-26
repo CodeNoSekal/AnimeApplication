@@ -34,8 +34,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun CollectionsScreen(
-    onItemClicked: (Int) -> Unit,
-    onSearchClicked: () -> Unit,
+    onItemClick: (Int) -> Unit,
+    onSearchClick: () -> Unit,
     collectionsViewModel: CollectionsViewModel = hiltViewModel()
 ) {
     val tabs = CollectionTab.entries
@@ -85,7 +85,7 @@ fun CollectionsScreen(
             searchOffset = with(density) { searchOffsetPx.toDp() },
             tabs = tabs,
             selectedIndex = pagerState.currentPage,
-            onSearchClicked = { onSearchClicked() },
+            onSearchClick = { onSearchClick() },
             onTabSelected = { index ->
                 scope.launch {
                     pagerState.animateScrollToPage(index)
@@ -109,7 +109,7 @@ fun CollectionsScreen(
             AnimeList(
                 state = listState,
                 animeItems = animeItems,
-                onItemClicked = onItemClicked,
+                onItemClick = onItemClick,
                 contentPadding = PaddingValues(0.dp)
             )
         }

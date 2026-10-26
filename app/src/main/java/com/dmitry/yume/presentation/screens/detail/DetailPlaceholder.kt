@@ -22,7 +22,7 @@ import com.dmitry.yume.presentation.components.SkeletonBlock
 
 @Composable
 fun DetailPlaceholder(onBackClick: () -> Unit) {
-    Scaffold(topBar = { DetailsTopBar(onBackClick, 0f) }) { padding ->
+    Scaffold(topBar = { DetailTopBar(onBackClick, 0f) }) { padding ->
         Column(
             Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding())
                 .verticalScroll(rememberScrollState())

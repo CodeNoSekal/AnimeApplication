@@ -46,7 +46,7 @@ fun VerificationScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                VerifyEvent.NavigateToHome -> onVerified()
+                VerificationEvent.NavigateToHome -> onVerified()
             }
         }
     }

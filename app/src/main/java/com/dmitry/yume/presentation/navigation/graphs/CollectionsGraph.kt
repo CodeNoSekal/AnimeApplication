@@ -15,10 +15,10 @@ fun NavGraphBuilder.collectionsGraph(navController: NavController) {
     navigation(route = Destinations.COLLECTIONS_GRAPH, startDestination = Destinations.COLLECTIONS) {
         composable(Destinations.COLLECTIONS) {
             CollectionsScreen(
-                onItemClicked = { id ->
+                onItemClick = { id ->
                     navController.navigate(Details.build(Destinations.COLLECTIONS, id))
                 },
-                onSearchClicked = {
+                onSearchClick = {
                     navController.navigate(Search.route(Destinations.COLLECTIONS))
                 }
             )

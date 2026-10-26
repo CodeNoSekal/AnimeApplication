@@ -5,11 +5,11 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.dmitry.yume.presentation.navigation.Destinations
-import com.dmitry.yume.presentation.screens.profile.ProfileScreen
-import com.dmitry.yume.presentation.screens.profile.EditProfileScreen
-import com.dmitry.yume.presentation.screens.profile.ProfileSettingsScreen
-import com.dmitry.yume.presentation.screens.profile.ChangeEmailScreen
-import com.dmitry.yume.presentation.screens.profile.ChangePasswordScreen
+import com.dmitry.yume.presentation.screens.profile.main.ProfileScreen
+import com.dmitry.yume.presentation.screens.profile.edit.EditProfileScreen
+import com.dmitry.yume.presentation.screens.profile.settings.ProfileSettingsScreen
+import com.dmitry.yume.presentation.screens.profile.settings.ChangeEmailScreen
+import com.dmitry.yume.presentation.screens.profile.settings.ChangePasswordScreen
 
 fun NavGraphBuilder.profileGraph(navController: NavController) {
     navigation(route = Destinations.PROFILE_GRAPH, startDestination = Destinations.PROFILE) {

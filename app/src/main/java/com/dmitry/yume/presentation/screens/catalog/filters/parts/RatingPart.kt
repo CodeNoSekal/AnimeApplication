@@ -61,7 +61,7 @@ fun RatingPart(
     showBackground = true,
 )
 @Composable
-private fun FilterScreenPreview() {
+private fun RatingPartPreview() {
     YumeTheme {
         RatingPart()
     }

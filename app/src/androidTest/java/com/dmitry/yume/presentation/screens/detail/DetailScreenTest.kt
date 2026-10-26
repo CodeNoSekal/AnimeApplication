@@ -36,7 +36,7 @@ class DetailScreenTest {
             YumeTheme {
                 DetailScreen(
                     onBackClick = {}, onPlayClick = {}, animeData = displayedAnime.value, statusState = personal.value,
-                    setStatus = {}, setFavorite = {}, onRelationClick = { openedRelation = it }, actionState = action.value,
+                    onStatusSelected = {}, onFavoriteClick = {}, onRelationClick = { openedRelation = it }, actionState = action.value,
                     scoreEditor = editor.value,
                     onScoreClick = { editor.value = ScoreEditorState(true, (personal.value as StatusViewState.Success).status.score) },
                     onScoreDismiss = { editor.value = ScoreEditorState() },

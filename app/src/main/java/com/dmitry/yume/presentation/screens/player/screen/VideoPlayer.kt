@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +34,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,11 +43,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -63,7 +59,7 @@ import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import com.dmitry.yume.R
 import com.dmitry.yume.domain.format.formatTime
 import com.dmitry.yume.presentation.screens.player.PlaybackStage
-import com.dmitry.yume.presentation.screens.player.PlaybackUiState
+import com.dmitry.yume.presentation.screens.player.PlaybackViewState
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeType
 import kotlinx.coroutines.Job
@@ -97,17 +93,17 @@ private val PortraitSeekTouchExtension = 16.dp
 @OptIn(UnstableApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun VideoPlayer(
-    playbackState: PlaybackUiState,
+    playbackState: PlaybackViewState,
     exoPlayer: ExoPlayer,
     modifier: Modifier,
     isLandscape: Boolean,
-    expand: () -> Unit,
-    compress: () -> Unit,
-    saveProgress: () -> Unit,
-    refreshStream: () -> Unit,
+    onExpand: () -> Unit,
+    onCompress: () -> Unit,
+    onSaveProgress: () -> Unit,
+    onRefreshStream: () -> Unit,
     onBackClick: () -> Unit,
-    onPreviousEpisode: () -> Unit,
-    onNextEpisode: () -> Unit,
+    onPreviousEpisodeClick: () -> Unit,
+    onNextEpisodeClick: () -> Unit,
 ) {
     var controlsVisible by remember { mutableStateOf(true) }
     var interactionVersion by remember { mutableIntStateOf(0) }
@@ -204,7 +200,7 @@ fun VideoPlayer(
         exoPlayer.setSeekParameters(SeekParameters.DEFAULT)
         exoPlayer.seekTo(positionMs)
         isSeeking = false
-        saveProgress()
+        onSaveProgress()
 
         if (wasPlayingBeforeSeek) {
             exoPlayer.play()
@@ -276,7 +272,7 @@ fun VideoPlayer(
             delay(350.milliseconds)
 
             if (seekSteps > 0) {
-                saveProgress()
+                onSaveProgress()
             }
 
             armedSeekSide = null
@@ -336,7 +332,7 @@ fun VideoPlayer(
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(value: Boolean) {
                 if (!value) {
-                    saveProgress()
+                    onSaveProgress()
                 }
                 isPlaying = value
             }
@@ -524,10 +520,10 @@ fun VideoPlayer(
                             IconButton(
                                 interactionSource = backInteractionSource,
                                 onClick = {
-                                    saveProgress()
+                                    onSaveProgress()
                                     if (isLandscape) {
                                         showControls()
-                                        compress()
+                                        onCompress()
                                     } else {
                                         showControls()
                                         onBackClick()
@@ -565,7 +561,7 @@ fun VideoPlayer(
                                     interactionSource = previousInteractionSource,
                                     onClick = {
                                         showControls()
-                                        onPreviousEpisode()
+                                        onPreviousEpisodeClick()
                                     }
                                 ) {
                                     Icon(
@@ -594,8 +590,8 @@ fun VideoPlayer(
                                             onClick = {
                                                 if (failure.requiresFreshStream) {
                                                     playerFailure = null
-                                                    saveProgress()
-                                                    refreshStream()
+                                                    onSaveProgress()
+                                                    onRefreshStream()
                                                 } else {
                                                     retryCurrentMedia()
                                                 }
@@ -659,7 +655,7 @@ fun VideoPlayer(
                                     interactionSource = nextInteractionSource,
                                     onClick = {
                                         showControls()
-                                        onNextEpisode()
+                                        onNextEpisodeClick()
                                     }
                                 ) {
                                     Icon(
@@ -712,7 +708,7 @@ fun VideoPlayer(
                                                 .clickable(
                                                     interactionSource = orientationInteractionSource,
                                                     indication = null,
-                                                    onClick = compress
+                                                    onClick = onCompress
                                                 )
                                                 .padding(
                                                     top = 15.dp,
@@ -763,7 +759,7 @@ fun VideoPlayer(
                                                 .clickable(
                                                     interactionSource = orientationInteractionSource,
                                                     indication = null,
-                                                    onClick = expand
+                                                    onClick = onExpand
                                                 )
                                                 .padding(
                                                     top = 6.dp,
@@ -820,7 +816,7 @@ fun VideoPlayer(
                                 style = YumeType.bodyMedium,
                                 textAlign = TextAlign.Center,
                             )
-                            Button(onClick = refreshStream) {
+                            Button(onClick = onRefreshStream) {
                                 Text("Повторить")
                             }
                         }
@@ -851,115 +847,3 @@ private fun PlaybackException.findHttpResponseCode(): Int? {
 
 private fun String.toSafeHost(): String? =
     runCatching { this.toUri().host }.getOrNull()
-
-@Composable
-fun PlaybackProgressBar(
-    progress: Float,
-    onSeekStart: (Float) -> Unit,
-    onSeekPreview: (Float) -> Unit,
-    onSeekEnd: (Float) -> Unit,
-    onSeekCancel: (Float) -> Unit,
-    modifier: Modifier,
-    isLandscape: Boolean,
-) {
-    var widthPx by remember { mutableIntStateOf(0) }
-    var isDragging by remember { mutableStateOf(false) }
-
-    var displayedProgress by remember {
-        mutableFloatStateOf(progress.coerceIn(0f,1f))
-    }
-
-    LaunchedEffect(progress, isDragging) {
-        if (!isDragging) {
-            displayedProgress = progress.coerceIn(0f, 1f)
-        }
-    }
-
-    val height = if (isLandscape) 30.dp else 10.dp
-
-    val alignment =
-        if (isLandscape) Alignment.CenterStart
-        else Alignment.BottomStart
-
-    val thickness = if (isLandscape) 4.dp else 3.dp
-
-    Box(
-        contentAlignment = alignment,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height)
-            .onSizeChanged {
-                widthPx = it.width
-            }
-            .pointerInput(widthPx) {
-                awaitEachGesture {
-                    val down = awaitFirstDown(requireUnconsumed = false)
-
-                    if (widthPx <= 0){
-                        return@awaitEachGesture
-                    }
-
-                    fun updateProgress(x: Float) {
-                        displayedProgress =
-                            (x / widthPx.toFloat()).coerceIn(0f, 1f)
-                    }
-
-                    isDragging = true
-                    var completed = false
-
-                    try {
-                        updateProgress(down.position.x)
-                        onSeekStart(displayedProgress)
-                        onSeekPreview(displayedProgress)
-                        down.consume()
-
-                        var pressed = true
-
-                        while (pressed) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes
-                                .firstOrNull { it.id == down.id }
-                                ?: break
-
-                            updateProgress(change.position.x)
-                            onSeekPreview(displayedProgress)
-                            pressed = change.pressed
-                            change.consume()
-                        }
-
-                        completed = true
-                        onSeekEnd(displayedProgress)
-                    } finally {
-                        if (!completed) {
-                            onSeekCancel(displayedProgress)
-                        }
-                        isDragging = false
-                    }
-                }
-            }
-    ) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(thickness)
-                .clip(
-                    RoundedCornerShape(
-                        if (isLandscape) thickness else 0.dp
-                    )
-                )
-                .background(YumeTheme.colors.line)
-        )
-
-        Box(
-            Modifier
-                .fillMaxWidth(displayedProgress)
-                .height(thickness)
-                .clip(
-                    RoundedCornerShape(
-                        if (isLandscape) thickness else 0.dp
-                    )
-                )
-                .background(YumeTheme.colors.accent)
-        )
-    }
-}

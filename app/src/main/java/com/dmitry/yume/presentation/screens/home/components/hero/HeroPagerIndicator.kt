@@ -71,7 +71,7 @@ fun pageCloseness(position: Float, page: Int): Float =
 
 @Preview(showBackground = true, backgroundColor = 0xFF14131A)
 @Composable
-private fun HomeScreenPreview() {
+private fun HeroPagerIndicatorPreview() {
     YumeTheme {
         HeroPagerIndicator(
             pageCount = 5,

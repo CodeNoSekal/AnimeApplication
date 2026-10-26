@@ -19,13 +19,13 @@ fun NavGraphBuilder.explorationGraph(navController: NavController) {
     navigation(route = Destinations.EXPLORATION_GRAPH, startDestination = Destinations.EXPLORATION) {
         composable(Destinations.EXPLORATION) {
             ExplorationScreen(
-                onSearchClicked = {
+                onSearchClick = {
                     navController.navigate(Search.route(Destinations.EXPLORATION))
                 },
-                onSeasonClicked = { season ->
+                onSeasonClick = { season ->
                     navController.navigate(ExplorationList.build(season.endpoint, season.label))
                 },
-                onSectionClicked = { section ->
+                onSectionClick = { section ->
                     navController.navigate(ExplorationList.build(section.endpoint, section.title))
                 }
             )
@@ -38,7 +38,7 @@ fun NavGraphBuilder.explorationGraph(navController: NavController) {
             )
         ) {
             ExplorationListScreen(
-                onItemClicked = { id ->
+                onItemClick = { id ->
                     navController.navigate(Details.build(Destinations.EXPLORATION, id))
                 },
                 onBackClick = { navController.popBackStack() }

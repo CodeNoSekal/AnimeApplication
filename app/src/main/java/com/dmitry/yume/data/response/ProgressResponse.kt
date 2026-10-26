@@ -9,16 +9,16 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class ProgressResponse(
-    val items: List<ProgressItem> = emptyList()
+    val items: List<ProgressItemResponse> = emptyList()
 )
 
 @JsonClass(generateAdapter = true)
 data class EpisodeProgressResponse(
-    val items: List<EpisodeProgressItem> = emptyList()
+    val items: List<EpisodeProgressItemResponse> = emptyList()
 )
 
 @JsonClass(generateAdapter = true)
-data class EpisodeProgressItem(
+data class EpisodeProgressItemResponse(
     @param:Json(name = "anime_id")
     val animeId: Int,
     @param:Json(name = "episode_number")
@@ -26,7 +26,7 @@ data class EpisodeProgressItem(
 )
 
 @JsonClass(generateAdapter = true)
-data class ProgressItem(
+data class ProgressItemResponse(
     @param:Json(name = "shikimori_id")
     val id: Int,
     val title: String? = null,
@@ -51,7 +51,7 @@ fun ProgressResponse.toDomain(): ProgressData =
         items.toDomain()
     )
 @JvmName("progressToDomain")
-fun List<ProgressItem>.toDomain(): List<ProgressItemData> {
+fun List<ProgressItemResponse>.toDomain(): List<ProgressItemData> {
     val result = mutableListOf<ProgressItemData>()
 
     this.forEach {
@@ -63,7 +63,7 @@ fun List<ProgressItem>.toDomain(): List<ProgressItemData> {
     return result
 }
 
-fun ProgressItem.toDomain(): ProgressItemData =
+fun ProgressItemResponse.toDomain(): ProgressItemData =
     ProgressItemData(
         id,
         title,

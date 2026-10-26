@@ -1,0 +1,96 @@
+package com.dmitry.yume.presentation.screens.exploration.components.sections
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.dmitry.yume.domain.models.Section
+import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
+import com.dmitry.yume.presentation.ui.theme.YumeType
+
+@Composable
+fun SmallSectionCard(
+    section: Section,
+    modifier: Modifier = Modifier,
+    onSectionClick: (Section) -> Unit
+) {
+    Surface(
+        modifier = modifier
+            .clickable(
+                onClick = {
+                    onSectionClick(section)
+                }
+            ),
+        color = colors.surfaceCard,
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, colors.line)
+    ) {
+        Box{
+            Box(
+                Modifier.fillMaxSize()
+            ) {
+
+                val width = 60.dp
+
+                SectionPoster(
+                    url = section.posters[0],
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(x = (0).dp, y = (5).dp)
+                        .rotate(8f),
+                    width = width
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = section.title,
+                    style = YumeType.h3.copy(
+                        fontWeight = FontWeight.ExtraBold
+                    ),
+                    color = colors.textPrimary,
+                    modifier = Modifier,
+                    minLines = 2,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                Row{
+                    for (digit in section.total.toString()){
+                        Icon(
+                            painter = painterResource(digitIcons[digit.digitToInt()]),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .height(50.dp),
+                            tint = colors.accent
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

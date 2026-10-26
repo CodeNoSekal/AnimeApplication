@@ -8,12 +8,12 @@ import kotlin.String
 
 @JsonClass(generateAdapter = true)
 data class AnimeResponse(
-    val meta: Meta,
-    val items: List<AnimeShort>
+    val meta: PageMetaResponse,
+    val items: List<AnimeShortResponse>
 )
 
 @JsonClass(generateAdapter = true)
-data class Meta(
+data class PageMetaResponse(
     val page: Int,
     @param:Json(name = "per_page")
     val perPage: Int,
@@ -23,7 +23,7 @@ data class Meta(
 )
 
 @JsonClass(generateAdapter = true)
-data class AnimeShort(
+data class AnimeShortResponse(
     @param:Json(name = "shikimori_id")
     val id: Int,
     val title: String? = null,
@@ -79,7 +79,7 @@ data class AnimeDetailResponse(
     @param:Json(name = "my_score")
     val myScore: Int? = null,
 
-    val relations: List<AnimeShort> = emptyList(),
+    val relations: List<AnimeShortResponse> = emptyList(),
     @param:Json(name = "rating")
     val displayRating: Double? = null,
     @param:Json(name = "rating_source")
@@ -105,7 +105,7 @@ data class AnimeDetailResponse(
     val lastEpisodeNumber: Int? = null
 )
 
-fun AnimeShort.toDomain(): Anime {
+fun AnimeShortResponse.toDomain(): Anime {
     return Anime(
         id = id,
         title = title,
@@ -157,7 +157,7 @@ fun AnimeDetailResponse.toDomain(): AnimeDetailed{
 }
 
 @JvmName("animeShortToDomain")
-fun List<AnimeShort>.toDomain(): List<Anime> {
+fun List<AnimeShortResponse>.toDomain(): List<Anime> {
     return map {
         it.toDomain()
     }

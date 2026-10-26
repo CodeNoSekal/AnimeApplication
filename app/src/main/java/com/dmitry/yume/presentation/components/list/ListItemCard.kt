@@ -30,12 +30,12 @@ import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeType
 import com.dmitry.yume.presentation.screens.catalog.AnimeKind
-import com.dmitry.yume.presentation.screens.catalog.Status
+import com.dmitry.yume.presentation.screens.catalog.ReleaseStatus
 
 @Composable
 fun ListItemCard(
     anime: Anime,
-    onItemClicked: (Int) -> Unit,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
     action: (@Composable () -> Unit)? = null,
 ) {
@@ -81,7 +81,7 @@ fun ListItemCard(
             .fillMaxWidth()
             .clip(cardShape)
             .then(statusGlowModifier)
-            .clickable { onItemClicked(anime.id) }
+            .clickable { onItemClick(anime.id) }
             .padding(vertical = 8.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.Top,
     ) {
@@ -154,7 +154,7 @@ fun ListItemCard(
 
             val kind = AnimeKind.entries.firstOrNull { it.raw == anime.kind }?.title
                 ?: anime.kind?.uppercase()
-            val releaseStatus = Status.entries.firstOrNull { it.raw == anime.status }?.title
+            val releaseStatus = ReleaseStatus.entries.firstOrNull { it.raw == anime.status }?.title
                 ?: anime.status
             val meta = listOfNotNull(anime.year?.toString(), kind, releaseStatus).joinToString(" · ")
             if (meta.isNotBlank()) {

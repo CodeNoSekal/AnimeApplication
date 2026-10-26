@@ -116,13 +116,13 @@ class TokenAuthenticator @Inject constructor(
             .header("Authorization", authorization)
             .build()
 
-    private fun responseCount(r: Response): Int {
-        var n = 1
-        var p = r.priorResponse
-        while (p != null) {
-            n++
-            p = p.priorResponse
+    private fun responseCount(response: Response): Int {
+        var count = 1
+        var prior = response.priorResponse
+        while (prior != null) {
+            count++
+            prior = prior.priorResponse
         }
-        return n
+        return count
     }
 }

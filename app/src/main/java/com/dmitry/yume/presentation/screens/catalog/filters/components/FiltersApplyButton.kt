@@ -46,7 +46,7 @@ fun FiltersApplyButton(
 
 @Preview(showBackground = true, backgroundColor = 0xFF14131A)
 @Composable
-private fun FilterCheckboxPreview() {
+private fun FiltersApplyButtonPreview() {
     YumeTheme {
         FiltersApplyButton({})
     }

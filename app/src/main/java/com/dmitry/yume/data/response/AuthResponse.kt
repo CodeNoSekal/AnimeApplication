@@ -10,7 +10,7 @@ data class AuthResponse(
     val accessToken: String,
     @param:Json(name = "refresh_token")
     val refreshToken: String,
-    val user: UserDTO? = null
+    val user: UserResponse? = null
 )
 
 @JsonClass(generateAdapter = true)
@@ -19,7 +19,7 @@ data class VerificationResponse(
 )
 
 @JsonClass(generateAdapter = true)
-data class UserDTO(
+data class UserResponse(
     val id: Int,
     val email: String,
     @param:Json(name = "email_verified")
@@ -37,7 +37,7 @@ data class UserDTO(
     val premiumUntil: String? = null,
 )
 
-fun UserDTO.toDomain(): User {
+fun UserResponse.toDomain(): User {
     return User(
         id,
         email,

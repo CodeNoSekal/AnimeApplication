@@ -12,7 +12,7 @@ fun NavGraphBuilder.searchComposable(parent: String, navController: NavControlle
         route = Search.route(parent)
     ) {
         SearchScreen(
-            onItemClicked = { id ->
+            onItemClick = { id ->
                 navController.navigate(Details.build(parent, id))
             },
             onBackClick = {

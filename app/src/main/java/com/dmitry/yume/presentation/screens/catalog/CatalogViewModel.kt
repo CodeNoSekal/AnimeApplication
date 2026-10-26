@@ -2,10 +2,8 @@ package com.dmitry.yume.presentation.screens.catalog
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.repository.GenresResult
 import com.dmitry.yume.domain.usecase.GetAnimeCatalogUseCase
 import com.dmitry.yume.domain.usecase.GetMetaUseCase
@@ -14,7 +12,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +27,7 @@ class CatalogViewModel @Inject constructor(
     observeLibraryUpdates: ObserveLibraryUpdatesUseCase
 ) : ViewModel() {
 
-    private val _metaState = MutableStateFlow<GenresViewState>(GenresViewState.Loading)
+    private val _genresState = MutableStateFlow<GenresViewState>(GenresViewState.Loading)
     private val _draftFilters = MutableStateFlow(FilterOptions())
     private val libraryUpdates = observeLibraryUpdates()
     private var pagingJob: Job? = null
@@ -38,7 +35,7 @@ class CatalogViewModel @Inject constructor(
     val catalog: StateFlow<CatalogSession> = _catalog.asStateFlow()
 
     val draftFilters: StateFlow<FilterOptions> = _draftFilters.asStateFlow()
-    val metaState: StateFlow<GenresViewState> = _metaState.asStateFlow()
+    val genresState: StateFlow<GenresViewState> = _genresState.asStateFlow()
 
     private var loadJob: Job? = null
 
@@ -49,13 +46,13 @@ class CatalogViewModel @Inject constructor(
     private fun load() {
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
-            _metaState.value = GenresViewState.Loading
+            _genresState.value = GenresViewState.Loading
 
             when (val result = getMeta()) {
                 is GenresResult.Success ->
-                    _metaState.value = GenresViewState.Success(result.meta)
+                    _genresState.value = GenresViewState.Success(result.meta)
                 is GenresResult.Error ->
-                    _metaState.value = GenresViewState.Error(result.error)
+                    _genresState.value = GenresViewState.Error(result.error)
             }
         }
     }
@@ -127,7 +124,7 @@ class CatalogViewModel @Inject constructor(
         }
     }
 
-    fun assignStatus(status: Status) {
+    fun assignStatus(status: ReleaseStatus) {
         _draftFilters.update { options ->
             when(status) {
                 in options.statuses -> options.copy(
@@ -177,9 +174,3 @@ class CatalogViewModel @Inject constructor(
         }
     }
 }
-
-data class CatalogSession(
-    val generation: Int,
-    val options: CatalogOptions,
-    val anime: Flow<PagingData<Anime>>
-)

@@ -28,7 +28,7 @@ import com.dmitry.yume.domain.models.Anime
 fun AnimeList(
     state: LazyListState,
     animeItems: LazyPagingItems<Anime>,
-    onItemClicked: (Int) -> Unit,
+    onItemClick: (Int) -> Unit,
     contentPadding: PaddingValues
 ) {
 
@@ -73,7 +73,7 @@ fun AnimeList(
 
                 val anime = animeItems[index]
 
-                if (anime != null) ListItemCard(anime, onItemClicked)
+                if (anime != null) ListItemCard(anime, onItemClick)
                 else ListItemPlaceholder()
             }
             when (animeItems.loadState.append) {

@@ -15,7 +15,7 @@ import com.dmitry.yume.presentation.components.SearchButton
 
 @Composable
 fun HomeTopBar(
-    onSearchClicked: () -> Unit,
+    onSearchClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -30,7 +30,7 @@ fun HomeTopBar(
                 .padding(top = 8.dp, bottom = 16.dp)
         ) {
             SearchButton(
-                onSearchClicked,
+                onSearchClick,
                 alpha = 0.9f
             )
         }

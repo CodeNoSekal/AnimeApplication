@@ -47,7 +47,7 @@ fun FiltersClearButton(
 
 @Preview(showBackground = true, backgroundColor = 0xFF14131A)
 @Composable
-private fun FilterCheckboxPreview() {
+private fun FiltersClearButtonPreview() {
     YumeTheme {
         FiltersClearButton({})
     }

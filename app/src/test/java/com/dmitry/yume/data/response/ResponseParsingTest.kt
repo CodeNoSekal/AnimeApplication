@@ -57,7 +57,7 @@ class ResponseParsingTest {
             }
         """.trimIndent()
 
-        val response = moshi.adapter(AnimeShort::class.java).fromJson(json)!!
+        val response = moshi.adapter(AnimeShortResponse::class.java).fromJson(json)!!
 
         assertFalse(response.favorite)
         assertNull(response.myStatus)
@@ -66,7 +66,7 @@ class ResponseParsingTest {
 
     @Test
     fun `nullable anime fields are optional rather than required`() {
-        val response = moshi.adapter(AnimeShort::class.java)
+        val response = moshi.adapter(AnimeShortResponse::class.java)
             .fromJson("""{"shikimori_id":1}""")!!
 
         assertNull(response.title)
@@ -123,7 +123,7 @@ class ResponseParsingTest {
             }
         """.trimIndent()
 
-        val domain = moshi.adapter(ProgressItem::class.java)
+        val domain = moshi.adapter(ProgressItemResponse::class.java)
             .fromJson(json)!!
             .toDomain()
 
@@ -143,7 +143,7 @@ class ResponseParsingTest {
             }
         """.trimIndent()
 
-        val response = moshi.adapter(ProgressItem::class.java).fromJson(json)!!
+        val response = moshi.adapter(ProgressItemResponse::class.java).fromJson(json)!!
 
         assertNull(response.title)
         assertNull(response.posterUrl)
@@ -151,7 +151,7 @@ class ResponseParsingTest {
 
     @Test
     fun `unknown progress provider maps to undefined`() {
-        val item = ProgressItem(
+        val item = ProgressItemResponse(
             id = 1,
             title = null,
             posterUrl = null,

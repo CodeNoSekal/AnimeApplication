@@ -30,11 +30,11 @@ import com.dmitry.yume.domain.models.AnimeDetailed
 import com.dmitry.yume.domain.models.Provider
 import com.dmitry.yume.presentation.screens.player.PlaybackContext
 import com.dmitry.yume.presentation.screens.player.PlaybackStage
-import com.dmitry.yume.presentation.screens.player.PlaybackUiState
+import com.dmitry.yume.presentation.screens.player.PlaybackViewState
 import com.dmitry.yume.presentation.screens.player.navigationFor
 import com.dmitry.yume.presentation.screens.player.rememberPlaybackController
-import com.dmitry.yume.presentation.screens.player.screen.componens.EpisodePickerContent
-import com.dmitry.yume.presentation.screens.player.screen.componens.VoiceoverPickerContent
+import com.dmitry.yume.presentation.screens.player.screen.components.EpisodePickerContent
+import com.dmitry.yume.presentation.screens.player.screen.components.VoiceoverPickerContent
 import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,12 +43,12 @@ import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
 fun PlaybackScreen(
     playbackCatalog: PlaybackCatalog,
     animeDetails: AnimeDetailed?,
-    playbackState: PlaybackUiState,
-    saveProgress: (PlaybackContext, Long, Long) -> Unit,
-    setEpisode: (Int) -> Unit,
-    setVoiceover: (Int) -> Unit,
-    setProvider: (Provider) -> Unit,
-    onPrevEpisodeClick: () -> Unit,
+    playbackState: PlaybackViewState,
+    onSaveProgress: (PlaybackContext, Long, Long) -> Unit,
+    onEpisodeSelected: (Int) -> Unit,
+    onVoiceoverSelected: (Int) -> Unit,
+    onProviderSelected: (Provider) -> Unit,
+    onPreviousEpisodeClick: () -> Unit,
     onNextEpisodeClick: () -> Unit,
     onRefreshStream: () -> Unit,
     onEpisodeClick: () -> Unit,
@@ -63,7 +63,7 @@ fun PlaybackScreen(
     val ready = playbackState.stage as? PlaybackStage.Ready
 
     val controller = rememberPlaybackController(
-        onSaveProgress = saveProgress
+        onSaveProgress = onSaveProgress
     )
 
     val playbackContext = remember(
@@ -132,12 +132,12 @@ fun PlaybackScreen(
         isLandscape = isLandscape,
         hasPreviousEpisode = navigation.previousEpisodeId != null,
         hasNextEpisode = navigation.nextEpisodeId != null,
-        onPreviousEpisode = onPrevEpisodeClick,
-        onNextEpisode = onNextEpisodeClick,
-        onEpisodePicker = {
+        onPreviousEpisodeClick = onPreviousEpisodeClick,
+        onNextEpisodeClick = onNextEpisodeClick,
+        onEpisodePickerClick = {
             showEpisodesSheet = true
         },
-        onVoiceoverPicker = {
+        onVoiceoverPickerClick = {
             showVoiceoversSheet = true
         },
         onExpand = orientationController::requestLandscape,
@@ -171,10 +171,10 @@ fun PlaybackScreen(
             ) {
                 EpisodePickerContent(
                     playbackCatalog,
-                    setEpisode = { episodeId ->
+                    onEpisodeSelected = { episodeId ->
                         controller.saveCurrentProgress()
                         controller.player.pause()
-                        setEpisode(episodeId)
+                        onEpisodeSelected(episodeId)
                     },
                     playbackState = playbackState,
                 )
@@ -204,15 +204,15 @@ fun PlaybackScreen(
                 VoiceoverPickerContent(
                     sources = currentProviders,
                     selected = playbackState,
-                    setVoiceover = { voiceoverId ->
+                    onVoiceoverSelected = { voiceoverId ->
                         controller.saveCurrentProgress()
                         controller.player.pause()
-                        setVoiceover(voiceoverId)
+                        onVoiceoverSelected(voiceoverId)
                     },
-                    setProvider = { provider ->
+                    onProviderSelected = { provider ->
                         controller.saveCurrentProgress()
                         controller.player.pause()
-                        setProvider(provider)
+                        onProviderSelected(provider)
                     }
                 )
             }

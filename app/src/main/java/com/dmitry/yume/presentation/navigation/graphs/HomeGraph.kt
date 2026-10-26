@@ -19,7 +19,7 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
                 onItemClick = { id ->
                     navController.navigate(Details.build(Destinations.HOME, id))
                 },
-                onSearchClicked = {
+                onSearchClick = {
                     navController.navigate(Search.route(Destinations.HOME))
                 },
                 onPlayClick = { navController.navigate(PlaybackDestination.build(it)) },

@@ -31,7 +31,7 @@ import com.dmitry.yume.presentation.screens.detail.components.StatusButton
 fun DetailContent(
     animeData: AnimeDetailed,
     statusState: StatusViewState,
-    setFavorite: () -> Unit,
+    onFavoriteClick: () -> Unit,
     onStatusClick: () -> Unit,
     onScoreClick: () -> Unit,
     onPlayClick: (Int) -> Unit,
@@ -61,7 +61,7 @@ fun DetailContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            FavoriteButton(setFavorite, statusState, enabled = actionsEnabled)
+            FavoriteButton(onFavoriteClick, statusState, enabled = actionsEnabled)
             Box(Modifier.weight(1f)) {
                 StatusButton(onStatusClick, statusState, enabled = actionsEnabled)
             }
@@ -81,7 +81,7 @@ fun DetailContent(
                 items = animeData.relations,
                 modifier = Modifier.padding(horizontal = 14.dp),
                 currentTitleId = animeData.id,
-                onItemClicked = onRelationClick,
+                onItemClick = onRelationClick,
                 onShowAllClick = onAllRelationsClick
             )
         }

@@ -32,7 +32,7 @@ fun NavGraphBuilder.playbackGraph(navController: NavController) {
 
             val viewModel: PlaybackViewModel = hiltViewModel(parentEntry)
             val catalogState by viewModel.catalogState.collectAsStateWithLifecycle()
-            val playbackState by viewModel.playbackUiState.collectAsStateWithLifecycle()
+            val playbackState by viewModel.playbackState.collectAsStateWithLifecycle()
             val animeDetails by viewModel.animeDetails.collectAsStateWithLifecycle()
 
             when (val state = catalogState) {
@@ -44,11 +44,11 @@ fun NavGraphBuilder.playbackGraph(navController: NavController) {
                         playbackCatalog = (catalogState as PlaybackCatalogState.Success).playbackCatalog,
                         playbackState = playbackState,
                         animeDetails = animeDetails,
-                        saveProgress = viewModel::saveProgress,
-                        setEpisode = viewModel::selectEpisode,
-                        setVoiceover = viewModel::selectVoiceover,
-                        setProvider = viewModel::selectSource,
-                        onPrevEpisodeClick = viewModel::prevEpisode,
+                        onSaveProgress = viewModel::saveProgress,
+                        onEpisodeSelected = viewModel::selectEpisode,
+                        onVoiceoverSelected = viewModel::selectVoiceover,
+                        onProviderSelected = viewModel::selectSource,
+                        onPreviousEpisodeClick = viewModel::previousEpisode,
                         onNextEpisodeClick = viewModel::nextEpisode,
                         onRefreshStream = viewModel::resolveSelectedPlayback,
                         onEpisodeClick = { navController.navigate(PlaybackDestination.EPISODE_PICKER)},

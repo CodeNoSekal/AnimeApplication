@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Цифра 1: Nunito Black 150, контур 2.5dp без самопересечений. Высота общая для всех цифр, базовая линия совпадает -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="81.62dp"
+    android:height="114.05dp"
+    android:viewportWidth="81.62"
+    android:viewportHeight="114.05">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineJoin="round"
+        android:pathData="M14.77 109.9Q9.22 109.9 6.29 106.97Q3.37 104.05 3.37 98.65Q3.37 93.25 6.29 90.4Q9.22 87.55 14.77 87.55H28.27V33.93L19.12 39.55Q15.22 41.95 11.77 41.42Q8.32 40.9 5.92 38.5Q3.52 36.1 2.77 32.65Q2.02 29.2 3.37 25.75Q4.72 22.3 8.77 19.9L29.47 7Q32.77 4.9 36.29 3.85Q39.82 2.8 43.72 2.8Q49.42 2.8 52.57 5.73Q55.72 8.65 55.72 14.2V87.55H67.72Q73.27 87.55 76.19 90.4Q79.12 93.25 79.12 98.65Q79.12 104.05 76.19 106.97Q73.27 109.9 67.72 109.9H14.77Z" />
+</vector>

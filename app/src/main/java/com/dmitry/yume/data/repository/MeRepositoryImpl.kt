@@ -9,6 +9,7 @@ import com.dmitry.yume.data.request.ProgressRequest
 import com.dmitry.yume.data.request.StatusRequest
 import com.dmitry.yume.data.request.ScoreRequest
 import com.dmitry.yume.data.response.toDomain
+import com.dmitry.yume.data.toAppError
 import com.dmitry.yume.domain.models.Anime
 import com.dmitry.yume.domain.models.Progress
 import com.dmitry.yume.domain.models.Status
@@ -16,8 +17,7 @@ import com.dmitry.yume.domain.repository.CurrentProgressResult
 import com.dmitry.yume.domain.repository.MeRepository
 import com.dmitry.yume.domain.repository.OperationResult
 import com.dmitry.yume.domain.repository.ProgressResult
-import com.dmitry.yume.domain.repository.ProfileListsResult
-import com.dmitry.yume.domain.repository.ProfileStatisticsResult
+import com.dmitry.yume.domain.repository.ProfileResult
 import com.dmitry.yume.domain.repository.StatusResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.CancellationException
@@ -61,20 +61,12 @@ class MeRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getProfileLists(): ProfileListsResult = try {
-        ProfileListsResult.Success(meApi.getProfileLists().toDomain())
+    override suspend fun getProfile(): ProfileResult = try {
+        ProfileResult.Success(meApi.getProfile().toDomain())
     } catch (e: CancellationException) {
         throw e
-    } catch (e: Exception) {
-        ProfileListsResult.Error(e.safeMessage("Не удалось загрузить статистику профиля"))
-    }
-
-    override suspend fun getProfileStatistics(): ProfileStatisticsResult = try {
-        ProfileStatisticsResult.Success(meApi.getProfileStatistics().toDomain())
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Exception) {
-        ProfileStatisticsResult.Error(e.safeMessage("Не удалось загрузить статистику профиля"))
+    } catch (e: Exception){
+        return ProfileResult.Error(e.toAppError())
     }
 
     override suspend fun getProgressById(id: Int): CurrentProgressResult {
@@ -215,7 +207,7 @@ class MeRepositoryImpl @Inject constructor(
             ),
             pagingSourceFactory = {
                 track(AnimePagingSource(loadPage = { page ->
-                    meApi.getAnimeListByFavourite(
+                    meApi.getAnimeListByFavorite(
                         page = page,
                         q = q
                     )

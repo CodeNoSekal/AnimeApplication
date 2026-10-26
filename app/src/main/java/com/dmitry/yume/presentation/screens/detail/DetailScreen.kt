@@ -7,21 +7,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,9 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.dmitry.yume.R
 import com.dmitry.yume.domain.models.AnimeDetailed
 import com.dmitry.yume.presentation.screens.detail.components.Background
 import com.dmitry.yume.presentation.screens.detail.components.ScorePickerContent
@@ -49,8 +42,8 @@ fun DetailScreen(
     onPlayClick: (Int) -> Unit,
     animeData: AnimeDetailed,
     statusState: StatusViewState,
-    setStatus: (String?) -> Unit,
-    setFavorite: () -> Unit,
+    onStatusSelected: (String?) -> Unit,
+    onFavoriteClick: () -> Unit,
     onRelationClick: (Int) -> Unit,
     actionState: DetailActionState,
     scoreEditor: ScoreEditorState,
@@ -87,7 +80,7 @@ fun DetailScreen(
     }
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = { DetailsTopBar(onBackClick, topBarAlpha) },
+        topBar = { DetailTopBar(onBackClick, topBarAlpha) },
         snackbarHost = { SnackbarHost(snackbar) }
     ) { innerPadding ->
         Column(
@@ -101,7 +94,7 @@ fun DetailScreen(
                 DetailContent(
                     animeData = animeData,
                     statusState = statusState,
-                    setFavorite = setFavorite,
+                    onFavoriteClick = onFavoriteClick,
                     onStatusClick = { showStatusSheet = true },
                     onScoreClick = onScoreClick,
                     onPlayClick = onPlayClick,
@@ -121,9 +114,9 @@ fun DetailScreen(
         ) {
             StatusPickerContent(
                 statusState.status,
-                setStatus = {
+                onStatusSelected = {
                     showStatusSheet = false
-                    setStatus(it)
+                    onStatusSelected(it)
                 },
                 enabled = !actionState.isSaving
             )
@@ -145,28 +138,4 @@ fun DetailScreen(
             )
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DetailsTopBar(
-    onBackClick: () -> Unit,
-    topAppBarAlpha: Float,
-) {
-    TopAppBar(
-        title = { },
-        modifier = Modifier.height(85.dp),
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    painter = painterResource(R.drawable.angle_small_left),
-                    contentDescription = "Назад",
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background.copy(alpha = topAppBarAlpha)
-        )
-    )
 }

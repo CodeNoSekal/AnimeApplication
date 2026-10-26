@@ -71,7 +71,7 @@ fun Hero(
 
 @Preview(showBackground = true, backgroundColor = 0xFF14131A)
 @Composable
-private fun HomeScreenPreview() {
+private fun HeroPreview() {
     YumeTheme {
         PreviewImages {
             Hero(

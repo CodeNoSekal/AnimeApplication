@@ -1,8 +1,8 @@
 package com.dmitry.yume.data.response
 
-import com.dmitry.yume.domain.models.ExploreModel
-import com.dmitry.yume.domain.models.SeasonModel
-import com.dmitry.yume.domain.models.SectionModel
+import com.dmitry.yume.domain.models.ExploreData
+import com.dmitry.yume.domain.models.Season
+import com.dmitry.yume.domain.models.Section
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -15,7 +15,7 @@ data class ExploreResponse(
     val sections: List<SectionResponse>,
 )
 
-fun ExploreResponse.toDomain() = ExploreModel(
+fun ExploreResponse.toDomain() = ExploreData(
     updated = updated,
     seasons = seasons.map { it.toDomain() },
     sections = sections.map { it.toDomain() }
@@ -33,7 +33,7 @@ data class SeasonResponse(
     val endpoint: String,
 )
 
-fun SeasonResponse.toDomain() = SeasonModel(
+fun SeasonResponse.toDomain() = Season(
     key = key,
     label = label,
     position = position,
@@ -53,7 +53,7 @@ data class SectionResponse(
     val endpoint: String,
 )
 
-fun SectionResponse.toDomain() = SectionModel(
+fun SectionResponse.toDomain() = Section(
     key = key,
     title = title,
     subtitle = subtitle,

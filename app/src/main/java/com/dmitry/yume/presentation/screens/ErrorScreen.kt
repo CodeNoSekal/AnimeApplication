@@ -74,7 +74,7 @@ fun ErrorScreen(
 
 @Preview(showBackground = true, backgroundColor = 0xFF14131A)
 @Composable
-private fun HomeScreenPreview() {
+private fun ErrorScreenPreview() {
     YumeTheme {
         ErrorScreen(
             title = "Ошибка №1",

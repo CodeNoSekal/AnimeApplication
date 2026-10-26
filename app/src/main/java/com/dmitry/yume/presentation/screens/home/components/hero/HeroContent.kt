@@ -28,7 +28,7 @@ fun HeroContent(
             poster = pageData.posterUrl
         )
 
-        HeroData(
+        HeroInformation(
             data = pageData,
         )
     }

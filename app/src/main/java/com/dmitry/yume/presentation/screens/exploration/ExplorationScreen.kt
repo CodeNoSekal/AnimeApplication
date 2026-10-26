@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmitry.yume.domain.models.SeasonModel
-import com.dmitry.yume.domain.models.SectionModel
+import com.dmitry.yume.domain.models.Season
+import com.dmitry.yume.domain.models.Section
 import com.dmitry.yume.presentation.preview.PreviewData
 import com.dmitry.yume.presentation.preview.PreviewImages
 import com.dmitry.yume.presentation.screens.ErrorScreen
@@ -18,32 +18,32 @@ import com.dmitry.yume.presentation.ui.theme.YumeTheme
 
 @Composable
 fun ExplorationScreen(
-    onSearchClicked: () -> Unit,
+    onSearchClick: () -> Unit,
     viewModel: ExplorationViewModel = hiltViewModel(),
-    onSeasonClicked: (SeasonModel) -> Unit,
-    onSectionClicked: (SectionModel) -> Unit,
+    onSeasonClick: (Season) -> Unit,
+    onSectionClick: (Section) -> Unit,
 ) {
     val exploreState by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = { ExplorationTopBar(onSearchClicked) }
+        topBar = { ExplorationTopBar(onSearchClick) }
     ) { innerPadding ->
         when (val state = exploreState) {
-            is ExplorationUiState.Loading -> {
+            is ExplorationViewState.Loading -> {
 
             }
 
-            is ExplorationUiState.Success -> {
+            is ExplorationViewState.Success -> {
                 ExplorationContent(
                     modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
                     exploreData = state.exploreData,
-                    onSeasonClicked = onSeasonClicked,
-                    onSectionClicked = onSectionClicked,
+                    onSeasonClick = onSeasonClick,
+                    onSectionClick = onSectionClick,
                 )
             }
 
-            is ExplorationUiState.Error -> {
+            is ExplorationViewState.Error -> {
                 ErrorScreen(
                     title = "Ошибка",
                     onRetry = viewModel::load
@@ -56,14 +56,20 @@ fun ExplorationScreen(
 
 @Preview(showBackground = true, backgroundColor = 0xFF14131A)
 @Composable
-private fun SeasonCardPreview() {
+private fun ExplorationScreenPreview() {
     YumeTheme {
         PreviewImages {
-            ExplorationContent(
-                exploreData = PreviewData.explore,
-                onSeasonClicked = {},
-                onSectionClicked = {},
-            )
+            Scaffold(
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                topBar = { ExplorationTopBar({ }) }
+            ) { innerPadding ->
+                ExplorationContent(
+                    modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
+                    exploreData = PreviewData.explore,
+                    onSeasonClick = {},
+                    onSectionClick = {},
+                )
+            }
         }
     }
 }

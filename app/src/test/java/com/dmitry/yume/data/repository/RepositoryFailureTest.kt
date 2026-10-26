@@ -12,7 +12,7 @@ import com.dmitry.yume.domain.repository.StatusResult
 import com.dmitry.yume.data.request.StatusRequest
 import com.dmitry.yume.data.response.AnimeDetailResponse
 import com.dmitry.yume.data.response.AnimeResponse
-import com.dmitry.yume.data.response.ProgressItem
+import com.dmitry.yume.data.response.ProgressItemResponse
 import com.dmitry.yume.data.response.ProgressResponse
 import com.dmitry.yume.data.response.EpisodeProgressResponse
 import com.dmitry.yume.data.response.StatusResponse
@@ -35,7 +35,7 @@ class RepositoryFailureTest {
     fun `paging source creates keys for first page`() = runTest {
         val source = AnimePagingSource {
             AnimeResponse(
-                meta = com.dmitry.yume.data.response.Meta(1, 50, 100, 2),
+                meta = com.dmitry.yume.data.response.PageMetaResponse(1, 50, 100, 2),
                 items = emptyList()
             )
         }
@@ -50,7 +50,7 @@ class RepositoryFailureTest {
     fun `paging source stops at last page`() = runTest {
         val source = AnimePagingSource {
             AnimeResponse(
-                meta = com.dmitry.yume.data.response.Meta(2, 50, 100, 2),
+                meta = com.dmitry.yume.data.response.PageMetaResponse(2, 50, 100, 2),
                 items = emptyList()
             )
         }
@@ -151,8 +151,8 @@ class RepositoryFailureTest {
         api.progressResponse = {
             ProgressResponse(
                 items = listOf(
-                    ProgressItem(59970, "Слизь 4", null, 20, 1_000, 2_000, false),
-                    ProgressItem(42, "Другой тайтл", null, 3, 500, 2_000, false),
+                    ProgressItemResponse(59970, "Слизь 4", null, 20, 1_000, 2_000, false),
+                    ProgressItemResponse(42, "Другой тайтл", null, 3, 500, 2_000, false),
                 )
             )
         }
@@ -211,9 +211,9 @@ class RepositoryFailureTest {
         val deletedContinueIds = mutableListOf<Int>()
         override suspend fun putProgress(progressRequest: ProgressRequest) = putProgressBlock()
         override suspend fun getProfileLists(): com.dmitry.yume.data.response.ProfileListsResponse = error("not used")
-        override suspend fun getProfileStatistics(): com.dmitry.yume.data.response.ProfileStatisticsResponse = error("not used")
+        override suspend fun getProfile(): com.dmitry.yume.data.response.ProfileResponse = error("not used")
         override suspend fun getProgress(): ProgressResponse = progressResponse()
-        override suspend fun getProgressById(id: Int): ProgressItem = error("not used")
+        override suspend fun getProgressById(id: Int): ProgressItemResponse = error("not used")
         override suspend fun deleteFromContinue(id: Int) {
             deletedContinueIds += id
         }
@@ -225,6 +225,6 @@ class RepositoryFailureTest {
         override suspend fun putScore(id: Int, scoreRequest: ScoreRequest): StatusResponse = scoreResponse(id, scoreRequest)
         override suspend fun putReview(id: Int, reviewRequest: ReviewRequest): StatusResponse = error("not used")
         override suspend fun getAnimeListByStatus(page: Int, perPage: Int, status: String, q: String?): AnimeResponse = error("not used")
-        override suspend fun getAnimeListByFavourite(page: Int, perPage: Int, q: String?): AnimeResponse = error("not used")
+        override suspend fun getAnimeListByFavorite(page: Int, perPage: Int, q: String?): AnimeResponse = error("not used")
     }
 }

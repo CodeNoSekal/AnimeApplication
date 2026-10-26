@@ -24,10 +24,10 @@ class VerificationViewModel @Inject constructor(
     private val sendCode: SendCodeUseCase,
     private val verifyCode: VerifyCodeUseCase
 ) : ViewModel() {
-    private val _state = MutableStateFlow(VerificationUiState())
-    val state: StateFlow<VerificationUiState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(VerificationViewState())
+    val state: StateFlow<VerificationViewState> = _state.asStateFlow()
 
-    private val _events = Channel<VerifyEvent>(Channel.BUFFERED)
+    private val _events = Channel<VerificationEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
     private var codeRequestJob: Job? = null
 
@@ -54,10 +54,10 @@ class VerificationViewModel @Inject constructor(
     }
 
     fun submit() {
-        val s = _state.value
-        if (s.isLoading) return
+        val current = _state.value
+        if (current.isLoading) return
 
-        val codeRes = AuthValidation.code(s.code)
+        val codeRes = AuthValidation.code(current.code)
         if (codeRes is FieldResult.Invalid) {
             _state.update { it.copy(
                 codeError = codeRes.message
@@ -65,13 +65,13 @@ class VerificationViewModel @Inject constructor(
             return
         }
 
-        _state.value = s.copy(isLoading = true, formError = null)
+        _state.value = current.copy(isLoading = true, formError = null)
 
         viewModelScope.launch {
-            when (val result = verifyCode(s.code)) {
+            when (val result = verifyCode(current.code)) {
                 is AuthResult.Success -> {
                     _state.update { it.copy(isLoading = false) }
-                    _events.send(VerifyEvent.NavigateToHome)
+                    _events.send(VerificationEvent.NavigateToHome)
                 }
                 is AuthResult.Error -> _state.update {
                     it.copy(isLoading = false, formError = result.message)

@@ -71,12 +71,12 @@ fun HomeContent(
 
 @Preview(showBackground = true, backgroundColor = 0xFF14131A)
 @Composable
-private fun HomeScreenPreview() {
+private fun HomeContentPreview() {
     YumeTheme {
         PreviewImages {
             HomeScreenContent(
                 onItemClick = {},
-                onSearchClicked = { },
+                onSearchClick = { },
                 onPlayClick = { },
                 homeData = HomeViewState.Success(PreviewData.homeData),
                 progressData = ProgressViewState.Success(PreviewData.progress),
