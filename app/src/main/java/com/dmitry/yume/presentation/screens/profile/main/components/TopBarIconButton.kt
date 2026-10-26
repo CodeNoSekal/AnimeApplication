@@ -1,7 +1,6 @@
-package com.dmitry.yume.presentation.screens.profile.components
+package com.dmitry.yume.presentation.screens.profile.main.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -15,9 +14,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dmitry.yume.R
-import com.dmitry.yume.presentation.preview.PreviewImages
-import com.dmitry.yume.presentation.screens.profile.ProfilePreviewData
-import com.dmitry.yume.presentation.screens.profile.main.ProfileContent
 import com.dmitry.yume.presentation.ui.theme.YumeTheme
 import com.dmitry.yume.presentation.ui.theme.YumeTheme.colors
 

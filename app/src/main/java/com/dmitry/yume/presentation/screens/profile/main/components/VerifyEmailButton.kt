@@ -1,4 +1,4 @@
-package com.dmitry.yume.presentation.screens.profile.components
+package com.dmitry.yume.presentation.screens.profile.main.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

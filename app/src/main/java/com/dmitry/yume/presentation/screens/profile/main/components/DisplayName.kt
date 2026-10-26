@@ -1,4 +1,4 @@
-package com.dmitry.yume.presentation.screens.profile.components
+package com.dmitry.yume.presentation.screens.profile.main.components
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
